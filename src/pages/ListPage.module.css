@@ -1,0 +1,107 @@
+.page { width: 100%; }
+
+.heroBanner {
+  position: relative;
+  height: 280px;
+  background: linear-gradient(135deg, #0d1f3c 0%, #1a3560 100%);
+  overflow: hidden;
+  display: flex;
+  align-items: flex-end;
+}
+
+.heroBannerOverlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(10,22,40,0.9), transparent);
+}
+
+.heroBannerContent {
+  position: relative;
+  max-width: 1200px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 24px 40px;
+}
+
+.heroBannerContent h1 {
+  font-size: 40px;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+
+.heroBannerContent p {
+  color: var(--text-secondary);
+  font-size: 15px;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px 24px;
+}
+
+.pageTitle {
+  font-size: 32px;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-bottom: 32px;
+}
+
+.filterBar {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 32px;
+  flex-wrap: wrap;
+}
+
+.filterBtn {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  padding: 8px 18px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.filterBtn:hover {
+  border-color: var(--border-light);
+  color: var(--text-primary);
+}
+
+.filterBtn.filterActive {
+  background: var(--accent-blue);
+  border-color: var(--accent-blue);
+  color: #fff;
+}
+
+.grid3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.loading, .empty {
+  text-align: center;
+  padding: 80px 0;
+  color: var(--text-secondary);
+  font-size: 15px;
+}
+
+@media (max-width: 900px) {
+  .grid3 { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 600px) {
+  .grid3 { grid-template-columns: 1fr; }
+  .heroBanner { height: 200px; }
+  .heroBannerContent h1 { font-size: 24px; }
+  .heroBannerContent p { font-size: 13px; }
+  .heroBannerContent { padding: 0 16px 24px; }
+  .container { padding: 24px 16px; }
+
+  .filterBar { gap: 6px; }
+  .filterBtn { padding: 7px 14px; font-size: 12px; }
+}

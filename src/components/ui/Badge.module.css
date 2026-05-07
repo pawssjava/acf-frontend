@@ -1,0 +1,15 @@
+.badge {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.blue  { background: rgba(26,159,216,0.15); color: var(--accent-blue); }
+.teal  { background: rgba(0,201,167,0.15); color: var(--accent-teal); }
+.yellow{ background: rgba(243,156,18,0.15); color: var(--warning); }
+.red   { background: rgba(231,76,60,0.15); color: var(--danger); }
+.gray  { background: rgba(139,155,180,0.15); color: var(--text-secondary); }

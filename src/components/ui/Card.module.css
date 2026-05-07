@@ -1,0 +1,16 @@
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.hoverable {
+  transition: border-color 0.2s, transform 0.2s, background 0.2s;
+}
+
+.hoverable:hover {
+  border-color: var(--border-light);
+  background: var(--bg-card-hover);
+  transform: translateY(-2px);
+}
