@@ -35,12 +35,11 @@ export default function AuthCallback() {
       .then(async (data) => {
         if (!data.access_token) throw new Error('No token');
         const token: string = data.access_token;
+        const refresh: string = data.refresh_token ?? '';
 
-        // Decode JWT to get sub (Keycloak user ID), then fetch user from our API
         const payload = JSON.parse(atob(token.split('.')[1]));
         const username: string = payload.preferred_username ?? '';
 
-        // Find user by listing and matching username (or use a dedicated endpoint)
         localStorage.setItem('access_token', token);
         const usersRes = await publicClient.get('/api/users', {
           headers: { Authorization: `Bearer ${token}` },
@@ -48,7 +47,7 @@ export default function AuthCallback() {
         const users = usersRes.data as Array<{ id: number; username: string; firstName: string; lastName: string; isAdmin: boolean; photo: string | null }>;
         const match = users.find(u => u.username === username);
         if (match) {
-          login(token, { id: match.id, username: match.username, firstName: match.firstName, lastName: match.lastName, isAdmin: match.isAdmin, photo: match.photo });
+          login(token, refresh, { id: match.id, username: match.username, firstName: match.firstName, lastName: match.lastName, isAdmin: match.isAdmin, photo: match.photo });
         }
         navigate('/');
       })

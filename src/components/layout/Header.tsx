@@ -9,14 +9,13 @@ export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
 
   const handleLogout = () => {
-    logout();
-    navigate('/');
+    logout().then(() => navigate('/'));
   };
 
   return (
     <header className={styles.header}>
       <div className={styles.inner}>
-        <Link to="/" className={styles.logo}>ACF<span>.</span></Link>
+        <Link to="/news" className={styles.logo}>ACF<span>.</span></Link>
 
         <nav className={`${styles.nav} ${menuOpen ? styles.open : ''}`}>
           <NavLink to="/tournaments" className={({ isActive }) => isActive ? styles.active : ''} onClick={() => setMenuOpen(false)}>Турниры</NavLink>

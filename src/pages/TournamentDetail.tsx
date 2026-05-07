@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { getTournamentById, getParticipants, getResults, registerParticipant } from '../api/tournaments';
 import type { Tournament, Participant, TournamentResult } from '../types';
 import { useAuth } from '../context/AuthContext';
@@ -17,6 +17,7 @@ function statusVariant(name: string): 'teal' | 'blue' | 'gray' {
 
 export default function TournamentDetail() {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const { isAuthenticated, user } = useAuth();
   const [tab, setTab] = useState<Tab>('info');
   const [tournament, setTournament] = useState<Tournament | null>(null);
@@ -77,6 +78,14 @@ export default function TournamentDetail() {
               {tournament.tournamentStatusName}
             </Badge>
             <Badge variant="gray">{tournament.tournamentTypeName}</Badge>
+            {user?.isAdmin && (
+              <button
+                onClick={() => navigate(`/admin/tournaments/${id}/edit`)}
+                style={{ background: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.3)', color: '#fff', padding: '3px 12px', borderRadius: '20px', fontSize: '12px', cursor: 'pointer' }}
+              >
+                Редактировать
+              </button>
+            )}
           </div>
           <h1 className={styles.heroTitle}>{tournament.name}</h1>
         </div>

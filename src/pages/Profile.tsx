@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getUserById, updateUser } from '../api/users';
+import { getUserById, updateUser, uploadUserPhoto } from '../api/users';
 import type { User } from '../types';
 import { useAuth } from '../context/AuthContext';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
+import ImageUpload from '../components/ui/ImageUpload';
+import Toast from '../components/ui/Toast';
 import styles from './Profile.module.css';
 
 export default function Profile() {
@@ -15,7 +17,8 @@ export default function Profile() {
   const [saving, setSaving] = useState(false);
   const [saveMsg, setSaveMsg] = useState('');
   const [editing, setEditing] = useState(false);
-  const [form, setForm] = useState({ firstName: '', lastName: '', birthDate: '', photo: '' });
+  const [form, setForm] = useState({ firstName: '', lastName: '', birthDate: '' });
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
   useEffect(() => {
     if (!isAuthenticated) { navigate('/login'); return; }
@@ -23,12 +26,7 @@ export default function Profile() {
     getUserById(authUser.id)
       .then(r => {
         setUser(r.data);
-        setForm({
-          firstName: r.data.firstName,
-          lastName: r.data.lastName,
-          birthDate: r.data.birthDate,
-          photo: r.data.photo ?? '',
-        });
+        setForm({ firstName: r.data.firstName, lastName: r.data.lastName, birthDate: r.data.birthDate });
       })
       .catch(() => {})
       .finally(() => setLoading(false));
@@ -36,6 +34,16 @@ export default function Profile() {
 
   const set = (key: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement>) =>
     setForm(f => ({ ...f, [key]: e.target.value }));
+
+  const handlePhotoUpload = async (file: File) => {
+    if (!authUser) return;
+    try {
+      const { data } = await uploadUserPhoto(authUser.id, file);
+      setUser(data);
+    } catch {
+      setToast({ message: 'Не удалось загрузить фото. Попробуйте снова.', type: 'error' });
+    }
+  };
 
   const handleSave = async () => {
     if (!authUser) return;
@@ -46,7 +54,6 @@ export default function Profile() {
         firstName: form.firstName,
         lastName: form.lastName,
         birthDate: form.birthDate,
-        photo: form.photo || undefined,
       });
       setUser(updated.data);
       setSaveMsg('Данные сохранены');
@@ -63,13 +70,17 @@ export default function Profile() {
 
   return (
     <div className={styles.page}>
+      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
+
       <div className={styles.container}>
         <div className={styles.profileHeader}>
           <div className={styles.avatarWrap}>
-            {user.photo
-              ? <img src={user.photo} alt="" className={styles.avatar} />
-              : <div className={styles.avatarPlaceholder}>{user.firstName[0]}{user.lastName[0]}</div>
-            }
+            <ImageUpload
+              currentUrl={user.photo}
+              onUpload={handlePhotoUpload}
+              shape="circle"
+              initials={`${user.firstName[0]}${user.lastName[0]}`}
+            />
           </div>
           <div className={styles.profileInfo}>
             <h1 className={styles.name}>{user.firstName} {user.lastName}</h1>
@@ -80,7 +91,7 @@ export default function Profile() {
             <Button variant="outline" onClick={() => setEditing(e => !e)}>
               {editing ? 'Отмена' : 'Редактировать'}
             </Button>
-            <Button variant="danger" onClick={() => { logout(); navigate('/'); }}>
+            <Button variant="danger" onClick={() => logout().then(() => navigate('/'))}>
               Выйти
             </Button>
           </div>
@@ -97,7 +108,6 @@ export default function Profile() {
                   <Input label="Фамилия" value={form.lastName} onChange={set('lastName')} />
                 </div>
                 <Input label="Дата рождения" type="date" value={form.birthDate} onChange={set('birthDate')} />
-                <Input label="Фото (URL)" type="url" placeholder="https://..." value={form.photo} onChange={set('photo')} />
                 <div className={styles.editActions}>
                   <Button onClick={handleSave} loading={saving}>Сохранить</Button>
                   {saveMsg && (

@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
+import { logoutUser } from '../api/auth';
 
 interface AuthUser {
   id: number;
@@ -13,8 +14,8 @@ interface AuthContextValue {
   user: AuthUser | null;
   token: string | null;
   isAuthenticated: boolean;
-  login: (token: string, user: AuthUser) => void;
-  logout: () => void;
+  login: (accessToken: string, refreshToken: string, user: AuthUser) => void;
+  logout: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -36,12 +37,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     else localStorage.removeItem('auth_user');
   }, [user]);
 
-  const login = (newToken: string, newUser: AuthUser) => {
-    setToken(newToken);
+  const login = (accessToken: string, refreshTokenValue: string, newUser: AuthUser) => {
+    localStorage.setItem('refresh_token', refreshTokenValue);
+    setToken(accessToken);
     setUser(newUser);
   };
 
-  const logout = () => {
+  const logout = async () => {
+    const storedRefresh = localStorage.getItem('refresh_token');
+    if (storedRefresh) {
+      try {
+        await logoutUser(storedRefresh);
+      } catch {
+        // best-effort; clear local state regardless
+      }
+    }
+    localStorage.removeItem('refresh_token');
     setToken(null);
     setUser(null);
   };

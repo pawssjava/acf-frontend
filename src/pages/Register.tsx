@@ -11,6 +11,7 @@ interface FormData {
   phone: string;
   code: string;
   username: string;
+  password: string;
   firstName: string;
   lastName: string;
   birthDate: string;
@@ -25,7 +26,7 @@ export default function Register() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [form, setForm] = useState<FormData>({
-    phone: '', code: '', username: '', firstName: '', lastName: '', birthDate: '',
+    phone: '', code: '', username: '', password: '', firstName: '', lastName: '', birthDate: '',
   });
 
   const set = (key: keyof FormData) => (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -58,9 +59,13 @@ export default function Register() {
   };
 
   const handleRegister = async () => {
-    const { code, username, firstName, lastName, birthDate } = form;
-    if (!code || !username || !firstName || !lastName || !birthDate) {
+    const { code, username, password, firstName, lastName, birthDate } = form;
+    if (!code || !username || !password || !firstName || !lastName || !birthDate) {
       setError('Заполните все поля');
+      return;
+    }
+    if (password.length < 6) {
+      setError('Пароль должен содержать минимум 6 символов');
       return;
     }
     setLoading(true);
@@ -69,6 +74,7 @@ export default function Register() {
         phone: `7${form.phone.replace(/\D/g, '')}`,
         code,
         username,
+        password,
         firstName,
         lastName,
         birthDate,
@@ -152,7 +158,8 @@ export default function Register() {
 
           {step === 'details' && (
             <div className={styles.fields}>
-              <Input label="Имя пользователя" type="text" placeholder="john_doe" value={form.username} onChange={set('username')} />
+              <Input label="Имя пользователя" type="text" placeholder="john_doe" value={form.username} onChange={set('username')} autoComplete="username" />
+              <Input label="Пароль" type="password" placeholder="Минимум 6 символов" value={form.password} onChange={set('password')} autoComplete="new-password" />
               <Input label="Имя" type="text" placeholder="Иван" value={form.firstName} onChange={set('firstName')} />
               <Input label="Фамилия" type="text" placeholder="Иванов" value={form.lastName} onChange={set('lastName')} />
               <Input label="Дата рождения" type="date" value={form.birthDate} onChange={set('birthDate')} />

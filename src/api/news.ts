@@ -15,3 +15,9 @@ export const updateNews = (id: number, data: { title: string; description: strin
 
 export const deleteNews = (id: number) =>
   apiClient.delete(`/api/news/${id}`);
+
+export const uploadNewsImage = (id: number, file: File) => {
+  const fd = new FormData();
+  fd.append('file', file);
+  return apiClient.post<News>(`/api/news/${id}/image`, fd);
+};

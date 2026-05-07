@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { getNewsList } from '../api/news';
 import { getTournaments } from '../api/tournaments';
 import type { News, Tournament } from '../types';
+import { useAuth } from '../context/AuthContext';
 import TournamentCard from '../components/tournament/TournamentCard';
 import NewsCard from '../components/news/NewsCard';
 import styles from './Home.module.css';
@@ -17,6 +18,7 @@ const FAQ_ITEMS = [
 ];
 
 export default function Home() {
+  const { isAuthenticated } = useAuth();
   const [news, setNews] = useState<News[]>([]);
   const [tournaments, setTournaments] = useState<Tournament[]>([]);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
@@ -38,7 +40,10 @@ export default function Home() {
             <p>Участвуй в турнирах, прокачивай навыки, побеждай</p>
             <div className={styles.heroActions}>
               <Link to="/tournaments" className={styles.heroBtnPrimary}>Турниры</Link>
-              <Link to="/register" className={styles.heroBtnOutline}>Регистрация</Link>
+              {isAuthenticated
+                ? <Link to="/profile" className={styles.heroBtnOutline}>Мой профиль</Link>
+                : <Link to="/register" className={styles.heroBtnOutline}>Регистрация</Link>
+              }
             </div>
           </div>
         </div>

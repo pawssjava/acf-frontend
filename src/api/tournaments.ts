@@ -9,7 +9,6 @@ export const getTournamentById = (id: number) =>
 
 export interface TournamentPayload {
   name: string;
-  logo?: string;
   startDate: string;
   capacity: number;
   prizeMoney: number;
@@ -25,6 +24,12 @@ export const updateTournament = (id: number, data: TournamentPayload) =>
 
 export const deleteTournament = (id: number) =>
   apiClient.delete(`/api/tournaments/${id}`);
+
+export const uploadTournamentLogo = (id: number, file: File) => {
+  const fd = new FormData();
+  fd.append('file', file);
+  return apiClient.post<Tournament>(`/api/tournaments/${id}/logo`, fd);
+};
 
 // Participants
 export const getParticipants = (tournamentId: number) =>

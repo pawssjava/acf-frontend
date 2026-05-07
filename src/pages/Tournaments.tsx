@@ -1,12 +1,16 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { getTournaments } from '../api/tournaments';
 import type { Tournament } from '../types';
+import { useAuth } from '../context/AuthContext';
 import TournamentCard from '../components/tournament/TournamentCard';
+import Button from '../components/ui/Button';
 import styles from './ListPage.module.css';
 
 const STATUS_FILTERS = ['Все', 'Активные', 'Будущие', 'Завершенные'];
 
 export default function TournamentsPage() {
+  const { user } = useAuth();
   const [tournaments, setTournaments] = useState<Tournament[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('Все');
@@ -33,16 +37,23 @@ export default function TournamentsPage() {
       </div>
 
       <div className={styles.container}>
-        <div className={styles.filterBar}>
-          {STATUS_FILTERS.map(f => (
-            <button
-              key={f}
-              className={[styles.filterBtn, filter === f ? styles.filterActive : ''].join(' ')}
-              onClick={() => setFilter(f)}
-            >
-              {f}
-            </button>
-          ))}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '32px' }}>
+          <div className={styles.filterBar} style={{ margin: 0 }}>
+            {STATUS_FILTERS.map(f => (
+              <button
+                key={f}
+                className={[styles.filterBtn, filter === f ? styles.filterActive : ''].join(' ')}
+                onClick={() => setFilter(f)}
+              >
+                {f}
+              </button>
+            ))}
+          </div>
+          {user?.isAdmin && (
+            <Link to="/admin/tournaments/new">
+              <Button size="sm">+ Новый турнир</Button>
+            </Link>
+          )}
         </div>
 
         {loading ? (

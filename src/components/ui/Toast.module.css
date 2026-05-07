@@ -1,0 +1,52 @@
+.toast {
+  position: fixed;
+  bottom: 32px;
+  right: 32px;
+  z-index: 9999;
+  padding: 13px 18px;
+  border-radius: var(--radius-md);
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  box-shadow: var(--shadow);
+  min-width: 240px;
+  max-width: 420px;
+  animation: slideUp 0.2s ease;
+}
+
+.success {
+  background: rgba(0, 201, 167, 0.12);
+  border: 1px solid rgba(0, 201, 167, 0.35);
+  color: var(--accent-teal);
+}
+
+.error {
+  background: rgba(231, 76, 60, 0.12);
+  border: 1px solid rgba(231, 76, 60, 0.35);
+  color: var(--danger);
+}
+
+.msg { flex: 1; line-height: 1.4; }
+
+.close {
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  color: inherit;
+  line-height: 1;
+  opacity: 0.65;
+  flex-shrink: 0;
+  padding: 0 2px;
+}
+.close:hover { opacity: 1; }
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 500px) {
+  .toast { left: 16px; right: 16px; bottom: 20px; min-width: 0; }
+}

@@ -2,10 +2,12 @@ import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { getNewsById } from '../api/news';
 import type { News } from '../types';
+import { useAuth } from '../context/AuthContext';
 import styles from './DetailPage.module.css';
 
 export default function NewsDetail() {
   const { id } = useParams<{ id: string }>();
+  const { user } = useAuth();
   const [news, setNews] = useState<News | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -23,7 +25,12 @@ export default function NewsDetail() {
   return (
     <div className={styles.page}>
       <div className={styles.container}>
-        <Link to="/news" className={styles.back}>← Назад к блогу</Link>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <Link to="/news" className={styles.back}>← Назад к блогу</Link>
+          {user?.isAdmin && (
+            <Link to={`/admin/news/${id}/edit`} className={styles.back}>Редактировать</Link>
+          )}
+        </div>
 
         {news.image && (
           <div className={styles.cover}>
