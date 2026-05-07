@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { getTournamentById, getParticipants, getResults, registerParticipant } from '../api/tournaments';
+import { getTournamentById, getParticipants, getResults, registerParticipant, unregisterParticipant } from '../api/tournaments';
 import type { Tournament, Participant, TournamentResult } from '../types';
 import { useAuth } from '../context/AuthContext';
 import Badge from '../components/ui/Badge';
@@ -26,6 +26,8 @@ export default function TournamentDetail() {
   const [loading, setLoading] = useState(true);
   const [joining, setJoining] = useState(false);
   const [joinMsg, setJoinMsg] = useState('');
+  const [unregistering, setUnregistering] = useState(false);
+  const [unregisterMsg, setUnregisterMsg] = useState('');
 
   const numId = Number(id);
 
@@ -43,6 +45,22 @@ export default function TournamentDetail() {
   }, [numId]);
 
   const isParticipant = user ? participants.some(p => p.userId === user.id) : false;
+
+  const handleUnregister = async () => {
+    if (!user) return;
+    setUnregistering(true);
+    setUnregisterMsg('');
+    try {
+      await unregisterParticipant(numId, user.id);
+      setParticipants(prev => prev.filter(p => p.userId !== user.id));
+      setJoinMsg('');
+    } catch (err: unknown) {
+      const status = (err as { response?: { status?: number } })?.response?.status;
+      setUnregisterMsg(status === 404 ? 'Регистрация не найдена' : 'Ошибка при отмене регистрации');
+    } finally {
+      setUnregistering(false);
+    }
+  };
 
   const handleJoin = async () => {
     if (!user || !tournament) return;
@@ -120,7 +138,13 @@ export default function TournamentDetail() {
             {isAuthenticated ? (
               <div className={styles.joinCard}>
                 {isParticipant ? (
-                  <p className={styles.alreadyJoined}>Вы уже участвуете в этом турнире</p>
+                  <>
+                    <p className={styles.alreadyJoined}>Вы уже участвуете в этом турнире</p>
+                    <Button variant="danger" onClick={handleUnregister} loading={unregistering} fullWidth>
+                      Отменить регистрацию
+                    </Button>
+                    {unregisterMsg && <p className={styles.errorMsg}>{unregisterMsg}</p>}
+                  </>
                 ) : (
                   <>
                     <h3>Участвовать</h3>
@@ -150,19 +174,42 @@ export default function TournamentDetail() {
             ) : (
               <table className={styles.table}>
                 <thead>
-                  <tr><th>#</th><th>Игрок</th><th>Дата регистрации</th></tr>
+                  <tr><th>#</th><th>Игрок</th><th>Дата регистрации</th><th /></tr>
                 </thead>
                 <tbody>
-                  {participants.map((p, i) => (
-                    <tr key={p.id}>
-                      <td>{i + 1}</td>
-                      <td>
-                        <span className={styles.playerName}>{p.firstName} {p.lastName}</span>
-                        <span className={styles.username}>@{p.username}</span>
-                      </td>
-                      <td>{new Date(p.registeredDate).toLocaleDateString('ru-RU')}</td>
-                    </tr>
-                  ))}
+                  {participants.map((p, i) => {
+                    const isOwn = user?.id === p.userId;
+                    const canRemove = isOwn || user?.isAdmin;
+                    return (
+                      <tr key={p.id}>
+                        <td>{i + 1}</td>
+                        <td>
+                          <span className={styles.playerName}>{p.firstName} {p.lastName}</span>
+                          <span className={styles.username}>@{p.username}</span>
+                        </td>
+                        <td>{new Date(p.registeredDate).toLocaleDateString('ru-RU')}</td>
+                        <td>
+                          {canRemove && (
+                            <UnregisterBtn
+                              disabled={isOwn && unregistering}
+                              onClick={async () => {
+                                if (isOwn) {
+                                  await handleUnregister();
+                                } else {
+                                  try {
+                                    await unregisterParticipant(numId, p.userId);
+                                    setParticipants(prev => prev.filter(x => x.userId !== p.userId));
+                                  } catch {
+                                    setUnregisterMsg('Ошибка при отмене регистрации');
+                                  }
+                                }
+                              }}
+                            />
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             )}
@@ -210,5 +257,30 @@ function InfoRow({ label, value }: { label: string; value: string }) {
       <span className={styles.infoLabel}>{label}</span>
       <span className={styles.infoValue}>{value}</span>
     </div>
+  );
+}
+
+function UnregisterBtn({ onClick, disabled }: { onClick: () => void; disabled: boolean }) {
+  return (
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      style={{
+        background: 'transparent',
+        border: '1px solid rgba(231,76,60,0.4)',
+        color: 'var(--danger)',
+        fontSize: '12px',
+        padding: '4px 10px',
+        borderRadius: 'var(--radius-sm)',
+        cursor: disabled ? 'not-allowed' : 'pointer',
+        opacity: disabled ? 0.5 : 1,
+        whiteSpace: 'nowrap',
+        transition: 'background 0.15s',
+      }}
+      onMouseOver={e => { if (!disabled) (e.currentTarget as HTMLButtonElement).style.background = 'rgba(231,76,60,0.1)'; }}
+      onMouseOut={e => { (e.currentTarget as HTMLButtonElement).style.background = 'transparent'; }}
+    >
+      Отменить
+    </button>
   );
 }

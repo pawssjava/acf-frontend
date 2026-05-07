@@ -1,7 +1,8 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { publicClient } from '../api/client';
+import { apiClient } from '../api/client';
+import type { User } from '../types';
 
 export default function AuthCallback() {
   const navigate = useNavigate();
@@ -37,18 +38,16 @@ export default function AuthCallback() {
         const token: string = data.access_token;
         const refresh: string = data.refresh_token ?? '';
 
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        const username: string = payload.preferred_username ?? '';
-
         localStorage.setItem('access_token', token);
-        const usersRes = await publicClient.get('/api/users', {
-          headers: { Authorization: `Bearer ${token}` },
+        const { data: me } = await apiClient.get<User>('/api/users/me');
+        login(token, refresh, {
+          id: me.id,
+          username: me.username,
+          firstName: me.firstName,
+          lastName: me.lastName,
+          isAdmin: me.isAdmin,
+          photo: me.photo,
         });
-        const users = usersRes.data as Array<{ id: number; username: string; firstName: string; lastName: string; isAdmin: boolean; photo: string | null }>;
-        const match = users.find(u => u.username === username);
-        if (match) {
-          login(token, refresh, { id: match.id, username: match.username, firstName: match.firstName, lastName: match.lastName, isAdmin: match.isAdmin, photo: match.photo });
-        }
         navigate('/');
       })
       .catch(() => navigate('/login'));

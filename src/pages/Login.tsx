@@ -1,13 +1,12 @@
 import { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { loginUser } from '../api/auth';
-import { apiClient } from '../api/client';
+import { getMe } from '../api/users';
 import { useAuth } from '../context/AuthContext';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
 import styles from './Auth.module.css';
 import heroImg from '../assets/hero.png';
-import type { User } from '../types';
 
 export default function Login() {
   const navigate = useNavigate();
@@ -29,25 +28,17 @@ export default function Login() {
     setError('');
     try {
       const { data } = await loginUser(username.trim(), password);
-
-      // Decode JWT to extract username for user lookup
-      const payload = JSON.parse(atob(data.access_token.split('.')[1]));
-      const jwtUsername: string = payload.preferred_username ?? payload.sub ?? username.trim();
-
-      // Fetch user record matching the authenticated username
       localStorage.setItem('access_token', data.access_token);
-      const usersRes = await apiClient.get<User[]>('/api/users');
-      const match = usersRes.data.find((u) => u.username === jwtUsername);
 
-      if (!match) throw new Error('User not found');
+      const { data: me } = await getMe();
 
       login(data.access_token, data.refresh_token, {
-        id: match.id,
-        username: match.username,
-        firstName: match.firstName,
-        lastName: match.lastName,
-        isAdmin: match.isAdmin,
-        photo: match.photo,
+        id: me.id,
+        username: me.username,
+        firstName: me.firstName,
+        lastName: me.lastName,
+        isAdmin: me.isAdmin,
+        photo: me.photo,
       });
 
       navigate('/');
