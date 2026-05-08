@@ -7,6 +7,7 @@ import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
 import ImageUpload from '../components/ui/ImageUpload';
 import Toast from '../components/ui/Toast';
+import TournamentHistory from '../components/profile/TournamentHistory';
 import styles from './Profile.module.css';
 
 export default function Profile() {
@@ -127,6 +128,8 @@ export default function Profile() {
               </div>
             )}
           </div>
+
+          {authUser && <TournamentHistory userId={authUser.id} />}
         </div>
       </div>
     </div>

@@ -1,14 +1,14 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { getTournamentById, getParticipants, getResults, registerParticipant, unregisterParticipant, startTournament } from '../api/tournaments';
-import type { Tournament, Participant, TournamentResult } from '../types';
+import { getTournamentById, getParticipants, getResults, getRegistrationLog, registerParticipant, unregisterParticipant, startTournament } from '../api/tournaments';
+import type { Tournament, Participant, TournamentResult, RegistrationLogPage } from '../types';
 import { useAuth } from '../context/AuthContext';
+import { isEditable, TOURNAMENT_STATUS } from '../utils/tournament';
 import Badge from '../components/ui/Badge';
 import Button from '../components/ui/Button';
+import Input from '../components/ui/Input';
 import BracketView from '../components/tournament/BracketView';
 import styles from './TournamentDetail.module.css';
-
-const TOURNAMENT_STATUS = { ACTIVE: 1, UPCOMING: 2, FINISHED: 3 } as const;
 
 const FORMAT_LABEL: Record<string, string> = {
   SINGLE_ELIMINATION: 'Single Elimination',
@@ -23,7 +23,7 @@ const PHASE_LABEL: Record<string, string> = {
   COMPLETED: 'Завершён',
 };
 
-type Tab = 'info' | 'participants' | 'results' | 'bracket';
+type Tab = 'info' | 'participants' | 'results' | 'bracket' | 'activity';
 
 function statusVariant(name: string): 'teal' | 'blue' | 'gray' {
   if (name === 'Активные') return 'teal';
@@ -45,6 +45,9 @@ export default function TournamentDetail() {
   const [unregisterMsg, setUnregisterMsg] = useState('');
   const [swissCurrentRound, setSwissCurrentRound] = useState<number | null>(null);
   const [startLoading, setStartLoading] = useState(false);
+  const [psnModalOpen, setPsnModalOpen] = useState(false);
+  const [psn, setPsn] = useState('');
+  const [psnError, setPsnError] = useState('');
 
   const numId = Number(id);
 
@@ -79,7 +82,7 @@ export default function TournamentDetail() {
   };
 
   const isParticipant = user ? participants.some(p => p.userId === user.id) : false;
-  const isUpcoming = tournament?.tournamentStatusId === TOURNAMENT_STATUS.UPCOMING;
+  const isUpcoming = tournament !== null && isEditable(tournament);
   const isFull = tournament ? participants.length >= tournament.capacity : false;
   const today = new Date().toISOString().slice(0, 10);
   const isRegistrationOpen = tournament ? today <= tournament.endDate : true;
@@ -100,17 +103,46 @@ export default function TournamentDetail() {
     }
   };
 
-  const handleJoin = async () => {
+  const openPsnModal = () => {
+    setPsn('');
+    setPsnError('');
+    setPsnModalOpen(true);
+  };
+
+  const closePsnModal = () => {
+    if (joining) return;
+    setPsnModalOpen(false);
+    setPsn('');
+    setPsnError('');
+  };
+
+  const handleJoin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!psn.trim()) {
+      setPsnError('PSN обязателен');
+      return;
+    }
     if (!user || !tournament) return;
     setJoining(true);
     setJoinMsg('');
+    setPsnError('');
     try {
-      const p = await registerParticipant(numId, user.id);
+      const p = await registerParticipant(numId, user.id, psn.trim());
       setParticipants(prev => [...prev, p.data]);
       setJoinMsg('Вы успешно зарегистрированы!');
+      setPsnModalOpen(false);
     } catch (err: unknown) {
       const status = (err as { response?: { status?: number } })?.response?.status;
-      setJoinMsg(status === 400 ? 'Турнир заполнен' : 'Ошибка при регистрации');
+      const message = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? '';
+      if (status === 400 && message.toLowerCase().includes('psn')) {
+        setPsnError('PSN обязателен');
+      } else if (status === 400) {
+        setJoinMsg('Турнир заполнен');
+        setPsnModalOpen(false);
+      } else {
+        setJoinMsg('Ошибка при регистрации');
+        setPsnModalOpen(false);
+      }
     } finally {
       setJoining(false);
     }
@@ -124,7 +156,19 @@ export default function TournamentDetail() {
     participants: 'Участники',
     results: 'Результаты',
     bracket: 'Сетка',
+    activity: 'Активность регистрации',
   };
+
+  const visibleTabs: Tab[] = [
+    'info',
+    'participants',
+    ...(tournament.phase !== null ? ['bracket' as Tab] : []),
+    ...(tournament.phase === 'COMPLETED' ? ['results' as Tab] : []),
+    ...(user?.isAdmin ? ['activity' as Tab] : []),
+  ];
+
+  // If the active tab was hidden (e.g. phase changed), fall back to info
+  const activeTab = visibleTabs.includes(tab) ? tab : 'info';
 
   return (
     <div className={styles.page}>
@@ -157,7 +201,7 @@ export default function TournamentDetail() {
                 Раунд {swissCurrentRound}{tournament.totalRounds ? ` / ${tournament.totalRounds}` : ''}
               </Badge>
             )}
-            {user?.isAdmin && (
+            {user?.isAdmin && isEditable(tournament) && (
               <button
                 onClick={() => navigate(`/admin/tournaments/${id}/edit`)}
                 style={{ background: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.3)', color: '#fff', padding: '3px 12px', borderRadius: '20px', fontSize: '12px', cursor: 'pointer' }}
@@ -182,10 +226,10 @@ export default function TournamentDetail() {
       <div className={styles.container}>
         {/* Tabs */}
         <div className={styles.tabs}>
-          {(['info', 'participants', 'results', 'bracket'] as Tab[]).map(t => (
+          {visibleTabs.map(t => (
             <button
               key={t}
-              className={[styles.tab, tab === t ? styles.tabActive : ''].join(' ')}
+              className={[styles.tab, activeTab === t ? styles.tabActive : ''].join(' ')}
               onClick={() => setTab(t)}
             >
               {TAB_LABELS[t]}
@@ -195,7 +239,7 @@ export default function TournamentDetail() {
         </div>
 
         {/* Info tab */}
-        {tab === 'info' && (
+        {activeTab === 'info' && (
           <div className={styles.infoGrid}>
             <div className={styles.infoCard}>
               <InfoRow label="Дата начала" value={new Date(tournament.startDate).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' })} />
@@ -226,7 +270,7 @@ export default function TournamentDetail() {
                   <>
                     <h3>Участвовать</h3>
                     <p>{isFull ? 'Турнир заполнен' : 'Зарегистрируйтесь для участия в турнире'}</p>
-                    <Button onClick={handleJoin} loading={joining} fullWidth size="lg" disabled={isFull}>
+                    <Button onClick={openPsnModal} fullWidth size="lg" disabled={isFull}>
                       Зарегистрироваться
                     </Button>
                     {joinMsg && <p className={joinMsg.includes('успешно') ? styles.successMsg : styles.errorMsg}>{joinMsg}</p>}
@@ -253,14 +297,14 @@ export default function TournamentDetail() {
         )}
 
         {/* Participants tab */}
-        {tab === 'participants' && (
+        {activeTab === 'participants' && (
           <div className={styles.tableWrap}>
             {participants.length === 0 ? (
               <p className={styles.empty}>Пока нет участников</p>
             ) : (
               <table className={styles.table}>
                 <thead>
-                  <tr><th>#</th><th>Игрок</th><th>Дата регистрации</th><th /></tr>
+                  <tr><th>#</th><th>Игрок</th><th>PSN</th><th>Дата регистрации</th><th /></tr>
                 </thead>
                 <tbody>
                   {participants.map((p, i) => {
@@ -273,6 +317,7 @@ export default function TournamentDetail() {
                           <span className={styles.playerName}>{p.firstName} {p.lastName}</span>
                           <span className={styles.username}>@{p.username}</span>
                         </td>
+                        <td>{p.psn}</td>
                         <td>{new Date(p.registeredDate).toLocaleDateString('ru-RU')}</td>
                         <td>
                           {canRemove && (
@@ -303,12 +348,12 @@ export default function TournamentDetail() {
         )}
 
         {/* Results tab — self-contained, re-fetches on every mount */}
-        {tab === 'results' && (
+        {activeTab === 'results' && (
           <ResultsTab tournamentId={numId} />
         )}
 
         {/* Bracket tab — key on phase so mounting/unmounting re-fetches when tournament starts */}
-        {tab === 'bracket' && (
+        {activeTab === 'bracket' && (
           <BracketView
             key={tournament.phase ?? 'null'}
             tournamentId={numId}
@@ -320,7 +365,40 @@ export default function TournamentDetail() {
             onSwissRoundChange={setSwissCurrentRound}
           />
         )}
+
+        {/* Activity tab — admin only */}
+        {activeTab === 'activity' && (
+          <RegistrationActivityTab tournamentId={numId} />
+        )}
       </div>
+
+      {psnModalOpen && (
+        <div className={styles.modalOverlay} onClick={closePsnModal}>
+          <div className={styles.modal} onClick={e => e.stopPropagation()}>
+            <h3 className={styles.modalTitle}>Регистрация на турнир</h3>
+            <form onSubmit={handleJoin}>
+              <div className={styles.modalBody}>
+                <Input
+                  label="PSN"
+                  placeholder="Введите ваш PSN"
+                  value={psn}
+                  onChange={e => { setPsn(e.target.value); setPsnError(''); }}
+                  error={psnError}
+                  autoFocus
+                />
+              </div>
+              <div className={styles.modalActions}>
+                <Button type="button" variant="outline" onClick={closePsnModal} disabled={joining}>
+                  Отмена
+                </Button>
+                <Button type="submit" loading={joining}>
+                  Зарегистрироваться
+                </Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -388,6 +466,147 @@ function ResultsTab({ tournamentId }: { tournamentId: number }) {
             ))}
           </tbody>
         </table>
+      )}
+    </div>
+  );
+}
+
+function buildPages(current: number, total: number): (number | '…')[] {
+  if (total <= 7) return Array.from({ length: total }, (_, i) => i);
+  const set = new Set([0, total - 1, current, current - 1, current + 1]);
+  const sorted = [...set].filter(n => n >= 0 && n < total).sort((a, b) => a - b);
+  const result: (number | '…')[] = [];
+  for (let i = 0; i < sorted.length; i++) {
+    if (i > 0 && sorted[i] - sorted[i - 1] > 1) result.push('…');
+    result.push(sorted[i]);
+  }
+  return result;
+}
+
+function RegistrationActivityTab({ tournamentId }: { tournamentId: number }) {
+  const [search, setSearch] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [page, setPage] = useState(0);
+  const [data, setData] = useState<RegistrationLogPage | null>(null);
+  const [loading, setLoading] = useState(true);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setSearch(value);
+    if (timerRef.current) clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(() => {
+      setDebouncedSearch(value);
+      setPage(0);
+    }, 300);
+  };
+
+  useEffect(() => {
+    setLoading(true);
+    getRegistrationLog(tournamentId, page, 20, debouncedSearch || undefined)
+      .then(r => setData(r.data))
+      .catch(() => setData(null))
+      .finally(() => setLoading(false));
+  }, [tournamentId, page, debouncedSearch]);
+
+  return (
+    <div>
+      <div className={styles.activitySearch}>
+        <Input
+          placeholder="Поиск по PSN, имени или нику..."
+          value={search}
+          onChange={handleSearchChange}
+        />
+      </div>
+
+      {loading ? (
+        <div className={styles.tableWrap}>
+          <table className={styles.table}>
+            <thead>
+              <tr><th>Дата и время</th><th>Игрок</th><th>Действие</th><th>PSN</th></tr>
+            </thead>
+            <tbody>
+              {Array.from({ length: 5 }).map((_, i) => (
+                <tr key={i}>
+                  <td><div className={styles.skeletonCell} style={{ width: 120 }} /></td>
+                  <td><div className={styles.skeletonCell} style={{ width: 160 }} /></td>
+                  <td><div className={styles.skeletonCell} style={{ width: 80 }} /></td>
+                  <td><div className={styles.skeletonCell} style={{ width: 100 }} /></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ) : !data || data.totalElements === 0 ? (
+        <p className={styles.empty}>
+          {debouncedSearch ? 'Ничего не найдено' : 'Активности пока нет'}
+        </p>
+      ) : (
+        <>
+          <div className={styles.tableWrap}>
+            <table className={styles.table}>
+              <thead>
+                <tr><th>Дата и время</th><th>Игрок</th><th>Действие</th><th>PSN</th></tr>
+              </thead>
+              <tbody>
+                {data.content.map(entry => (
+                  <tr key={entry.id}>
+                    <td style={{ whiteSpace: 'nowrap', color: 'var(--text-secondary)', fontSize: '13px' }}>
+                      {new Date(entry.createdDate).toLocaleString('ru-RU', {
+                        day: '2-digit', month: '2-digit', year: 'numeric',
+                        hour: '2-digit', minute: '2-digit',
+                      })}
+                    </td>
+                    <td>
+                      <span className={styles.playerName}>{entry.firstName} {entry.lastName}</span>
+                      <span className={styles.username}>@{entry.username}</span>
+                    </td>
+                    <td>
+                      <Badge variant={entry.action === 'REGISTER' ? 'teal' : 'red'}>
+                        {entry.action === 'REGISTER' ? 'REGISTER' : 'UNREGISTER'}
+                      </Badge>
+                    </td>
+                    <td style={{ color: 'var(--text-secondary)', fontSize: '13px' }}>{entry.psn}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {data.totalPages > 1 && (
+            <div className={styles.pagination}>
+              <button
+                className={styles.pageBtn}
+                disabled={page === 0}
+                onClick={() => setPage(p => p - 1)}
+              >
+                ← Назад
+              </button>
+              <div className={styles.pageNumbers}>
+                {buildPages(page, data.totalPages).map((item, i) =>
+                  item === '…' ? (
+                    <span key={`ellipsis-${i}`} className={styles.ellipsis}>…</span>
+                  ) : (
+                    <button
+                      key={item}
+                      className={[styles.pageNum, item === page ? styles.pageNumActive : ''].join(' ')}
+                      onClick={() => setPage(item)}
+                    >
+                      {item + 1}
+                    </button>
+                  )
+                )}
+              </div>
+              <button
+                className={styles.pageBtn}
+                disabled={page === data.totalPages - 1}
+                onClick={() => setPage(p => p + 1)}
+              >
+                Вперёд →
+              </button>
+            </div>
+          )}
+        </>
       )}
     </div>
   );

@@ -4,6 +4,7 @@ import { createTournament, getTournamentById, updateTournament, uploadTournament
 import { getTournamentTypes } from '../../api/dictionary';
 import type { Tournament, DictionaryItem, TournamentFormat } from '../../types';
 import { useAuth } from '../../context/AuthContext';
+import { isEditable } from '../../utils/tournament';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
 import ImageUpload from '../../components/ui/ImageUpload';
@@ -105,14 +106,29 @@ export default function TournamentForm() {
     });
   };
 
+  const reloadTournament = async () => {
+    if (!id) return;
+    try {
+      const { data } = await getTournamentById(Number(id));
+      setTournament(data);
+      setLogoUrl(data.logo);
+    } catch { /* ignore */ }
+  };
+
   const handleLogoUpload = async (file: File) => {
     if (isEdit && tournament) {
       try {
         const { data } = await uploadTournamentLogo(tournament.id, file);
         setTournament(data);
         setLogoUrl(data.logo);
-      } catch {
-        setToast({ message: 'Не удалось загрузить логотип', type: 'error' });
+      } catch (err: unknown) {
+        const resp = (err as { response?: { status?: number } })?.response;
+        if (resp?.status === 400) {
+          setToast({ message: 'Этот турнир больше нельзя редактировать.', type: 'error' });
+          await reloadTournament();
+        } else {
+          setToast({ message: 'Не удалось загрузить логотип', type: 'error' });
+        }
         throw new Error('upload failed');
       }
     } else {
@@ -159,14 +175,27 @@ export default function TournamentForm() {
 
       setToast({ message: isEdit ? 'Турнир сохранён' : 'Турнир создан', type: 'success' });
       setTimeout(() => navigate(`/tournaments/${saved.id}`), 1000);
-    } catch {
-      setToast({ message: 'Ошибка при сохранении', type: 'error' });
+    } catch (err: unknown) {
+      const resp = (err as { response?: { status?: number } })?.response;
+      if (resp?.status === 400) {
+        setToast({ message: 'Этот турнир больше нельзя редактировать.', type: 'error' });
+        await reloadTournament();
+      } else {
+        setToast({ message: 'Ошибка при сохранении', type: 'error' });
+      }
     } finally {
       setSaving(false);
     }
   };
 
   const formatLocked = isEdit && tournament?.phase !== null;
+  const readOnly = isEdit && tournament !== null && !isEditable(tournament);
+
+  const readOnlyNotice = readOnly && tournament ? (
+    tournament.tournamentStatusId === 1
+      ? 'Турнир уже начался и не может быть изменён.'
+      : 'Турнир завершён и не может быть изменён.'
+  ) : null;
 
   return (
     <div className={styles.page}>
@@ -175,6 +204,16 @@ export default function TournamentForm() {
       <div className={styles.container}>
         <h1 className={styles.pageTitle}>{isEdit ? 'Редактировать турнир' : 'Новый турнир'}</h1>
 
+        {readOnlyNotice && (
+          <div className={styles.readOnlyBanner} style={{ marginBottom: '20px' }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.5" />
+              <path d="M12 8v4m0 4h.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+            </svg>
+            {readOnlyNotice}
+          </div>
+        )}
+
         <form className={styles.form} onSubmit={handleSubmit}>
           <div className={styles.card}>
             <h2>Логотип</h2>
@@ -182,6 +221,7 @@ export default function TournamentForm() {
               currentUrl={logoUrl}
               onUpload={handleLogoUpload}
               label="Загрузить логотип"
+              disabled={readOnly}
             />
           </div>
 
@@ -193,6 +233,7 @@ export default function TournamentForm() {
                 value={form.name}
                 onChange={set('name')}
                 placeholder="Название турнира"
+                disabled={readOnly}
               />
               <div className={styles.row}>
                 <Input
@@ -200,6 +241,7 @@ export default function TournamentForm() {
                   type="date"
                   value={form.startDate}
                   onChange={set('startDate')}
+                  disabled={readOnly}
                 />
                 <Input
                   label="Дата окончания"
@@ -207,6 +249,7 @@ export default function TournamentForm() {
                   value={form.endDate}
                   onChange={set('endDate')}
                   min={form.startDate || undefined}
+                  disabled={readOnly}
                 />
               </div>
               <div className={styles.row}>
@@ -217,6 +260,7 @@ export default function TournamentForm() {
                   value={form.capacity}
                   onChange={set('capacity')}
                   placeholder="16"
+                  disabled={readOnly}
                 />
                 <Input
                   label="Призовой фонд (₸)"
@@ -225,6 +269,7 @@ export default function TournamentForm() {
                   value={form.prizeMoney}
                   onChange={set('prizeMoney')}
                   placeholder="100000"
+                  disabled={readOnly}
                 />
               </div>
               <div className={styles.row}>
@@ -234,7 +279,7 @@ export default function TournamentForm() {
                     className={styles.select}
                     value={form.format}
                     onChange={handleFormatChange}
-                    disabled={formatLocked}
+                    disabled={formatLocked || readOnly}
                   >
                     <option value="">Выберите формат</option>
                     <option value="SINGLE_ELIMINATION">Single Elimination</option>
@@ -250,6 +295,7 @@ export default function TournamentForm() {
                     value={form.totalRounds}
                     onChange={set('totalRounds')}
                     placeholder="авто"
+                    disabled={readOnly}
                   />
                 ) : <div />}
               </div>
@@ -260,6 +306,7 @@ export default function TournamentForm() {
                     className={styles.select}
                     value={form.tournamentTypeId}
                     onChange={handleTypeChange}
+                    disabled={readOnly}
                   >
                     {types.map(t => (
                       <option key={t.id} value={t.id}>{t.name}</option>
@@ -280,11 +327,13 @@ export default function TournamentForm() {
 
           <div className={styles.actions}>
             <Button type="button" variant="outline" onClick={() => navigate(-1)}>
-              Отмена
+              {readOnly ? 'Назад' : 'Отмена'}
             </Button>
-            <Button type="submit" loading={saving}>
-              {isEdit ? 'Сохранить' : 'Создать турнир'}
-            </Button>
+            {!readOnly && (
+              <Button type="submit" loading={saving}>
+                {isEdit ? 'Сохранить' : 'Создать турнир'}
+              </Button>
+            )}
           </div>
         </form>
       </div>

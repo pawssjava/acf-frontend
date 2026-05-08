@@ -51,6 +51,7 @@ export interface Participant {
   firstName: string;
   lastName: string;
   registeredDate: string;
+  psn: string;
 }
 
 export interface TournamentResult {
@@ -134,4 +135,47 @@ export interface ApiError {
   error: string;
   message: string;
   path: string;
+}
+
+export interface RegistrationLogEntry {
+  id: number;
+  tournamentId: number;
+  userId: number;
+  username: string;
+  firstName: string;
+  lastName: string;
+  action: 'REGISTER' | 'UNREGISTER';
+  psn: string;
+  createdDate: string;
+}
+
+export interface RegistrationLogPage {
+  content: RegistrationLogEntry[];
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
+}
+
+export interface UserTournamentEntry {
+  tournamentId: number;
+  tournamentName: string;
+  logo: string | null;
+  startDate: string;
+  endDate: string;
+  tournamentStatusId: number;
+  tournamentStatusName: string;
+  tournamentTypeId: number;
+  tournamentTypeName: string;
+  format: TournamentFormat;
+  place: number | null;
+  score: string | null;
+}
+
+export interface UserTournamentsPage {
+  content: UserTournamentEntry[];
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
 }

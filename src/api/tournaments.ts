@@ -1,5 +1,5 @@
 import { apiClient } from './client';
-import type { Tournament, Participant, TournamentResult, TournamentFormat, TournamentMatch, GroupStanding, BracketDto } from '../types';
+import type { Tournament, Participant, TournamentResult, TournamentFormat, TournamentMatch, GroupStanding, BracketDto, RegistrationLogPage } from '../types';
 
 export const getTournaments = () =>
   apiClient.get<Tournament[]>('/api/tournaments');
@@ -65,11 +65,17 @@ export const setMatchWinner = (id: number, matchId: number, winnerId: number) =>
 export const getParticipants = (tournamentId: number) =>
   apiClient.get<Participant[]>(`/api/tournaments/${tournamentId}/participants`);
 
-export const registerParticipant = (tournamentId: number, userId: number) =>
-  apiClient.post<Participant>(`/api/tournaments/${tournamentId}/participants`, { userId });
+export const registerParticipant = (tournamentId: number, userId: number, psn: string) =>
+  apiClient.post<Participant>(`/api/tournaments/${tournamentId}/participants`, { userId, psn });
 
 export const unregisterParticipant = (tournamentId: number, userId: number) =>
   apiClient.delete(`/api/tournaments/${tournamentId}/participants/${userId}`);
+
+export const getRegistrationLog = (tournamentId: number, page: number, size: number, search?: string) => {
+  const params: Record<string, string | number> = { page, size };
+  if (search) params.search = search;
+  return apiClient.get<RegistrationLogPage>(`/api/tournaments/${tournamentId}/registration-log`, { params });
+};
 
 // Results
 export const getResults = (tournamentId: number) =>

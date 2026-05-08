@@ -8,6 +8,7 @@ interface Props {
   initials?: string;
   label?: string;
   accept?: string;
+  disabled?: boolean;
 }
 
 export default function ImageUpload({
@@ -17,11 +18,12 @@ export default function ImageUpload({
   initials = '',
   label = 'Загрузить изображение',
   accept = 'image/*',
+  disabled = false,
 }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
 
-  const trigger = () => !uploading && inputRef.current?.click();
+  const trigger = () => !uploading && !disabled && inputRef.current?.click();
 
   const handleChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -37,12 +39,13 @@ export default function ImageUpload({
 
   return (
     <div
-      className={[styles.wrap, styles[shape]].join(' ')}
+      className={[styles.wrap, styles[shape], disabled ? styles.disabled : ''].join(' ')}
       onClick={trigger}
       role="button"
-      tabIndex={0}
+      tabIndex={disabled ? -1 : 0}
       onKeyDown={(e) => e.key === 'Enter' && trigger()}
       aria-label={label}
+      aria-disabled={disabled}
     >
       {currentUrl ? (
         <img src={currentUrl} alt="" className={styles.img} />

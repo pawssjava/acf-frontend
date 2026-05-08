@@ -52,6 +52,11 @@
   color: var(--text-muted);
 }
 
+.input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 .suffix {
   padding: 0 12px;
   display: flex;

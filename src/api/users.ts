@@ -1,5 +1,5 @@
 import { apiClient } from './client';
-import type { User } from '../types';
+import type { User, UserTournamentsPage } from '../types';
 
 export const getMe = () =>
   apiClient.get<User>('/api/users/me');
@@ -21,3 +21,6 @@ export const uploadUserPhoto = (id: number, file: File) => {
   fd.append('file', file);
   return apiClient.post<User>(`/api/users/${id}/photo`, fd);
 };
+
+export const getUserTournaments = (id: number, page = 0, size = 10) =>
+  apiClient.get<UserTournamentsPage>(`/api/users/${id}/tournaments`, { params: { page, size } });

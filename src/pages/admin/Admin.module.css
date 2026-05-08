@@ -101,6 +101,26 @@
   gap: 12px;
 }
 
+.readOnlyBanner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 18px;
+  background: rgba(231, 76, 60, 0.08);
+  border: 1px solid rgba(231, 76, 60, 0.3);
+  border-radius: var(--radius-lg);
+  color: var(--danger);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.readOnlyBanner svg { flex-shrink: 0; }
+
+.select:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 @media (max-width: 600px) {
   .row { grid-template-columns: 1fr; }
   .page { padding: 20px 16px 60px; }
