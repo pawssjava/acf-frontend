@@ -7,6 +7,8 @@ import Badge from '../components/ui/Badge';
 import Button from '../components/ui/Button';
 import styles from './TournamentDetail.module.css';
 
+const TOURNAMENT_STATUS = { ACTIVE: 1, UPCOMING: 2, FINISHED: 3 } as const;
+
 type Tab = 'info' | 'participants' | 'results';
 
 function statusVariant(name: string): 'teal' | 'blue' | 'gray' {
@@ -45,6 +47,8 @@ export default function TournamentDetail() {
   }, [numId]);
 
   const isParticipant = user ? participants.some(p => p.userId === user.id) : false;
+  const isUpcoming = tournament?.tournamentStatusId === TOURNAMENT_STATUS.UPCOMING;
+  const isFull = tournament ? participants.length >= tournament.capacity : false;
 
   const handleUnregister = async () => {
     if (!user) return;
@@ -137,7 +141,7 @@ export default function TournamentDetail() {
 
             {isAuthenticated ? (
               <div className={styles.joinCard}>
-                {isParticipant ? (
+                {isUpcoming && isParticipant && (
                   <>
                     <p className={styles.alreadyJoined}>Вы уже участвуете в этом турнире</p>
                     <Button variant="danger" onClick={handleUnregister} loading={unregistering} fullWidth>
@@ -145,15 +149,22 @@ export default function TournamentDetail() {
                     </Button>
                     {unregisterMsg && <p className={styles.errorMsg}>{unregisterMsg}</p>}
                   </>
-                ) : (
+                )}
+                {isUpcoming && !isParticipant && (
                   <>
                     <h3>Участвовать</h3>
-                    <p>Зарегистрируйтесь для участия в турнире</p>
-                    <Button onClick={handleJoin} loading={joining} fullWidth size="lg">
+                    <p>{isFull ? 'Турнир заполнен' : 'Зарегистрируйтесь для участия в турнире'}</p>
+                    <Button onClick={handleJoin} loading={joining} fullWidth size="lg" disabled={isFull}>
                       Зарегистрироваться
                     </Button>
                     {joinMsg && <p className={joinMsg.includes('успешно') ? styles.successMsg : styles.errorMsg}>{joinMsg}</p>}
                   </>
+                )}
+                {!isUpcoming && isParticipant && (
+                  <p className={styles.alreadyJoined}>Вы участвуете в этом турнире</p>
+                )}
+                {!isUpcoming && !isParticipant && (
+                  <p style={{ color: 'var(--text-secondary)', fontSize: '13px' }}>Регистрация завершена</p>
                 )}
               </div>
             ) : (
@@ -179,7 +190,7 @@ export default function TournamentDetail() {
                 <tbody>
                   {participants.map((p, i) => {
                     const isOwn = user?.id === p.userId;
-                    const canRemove = isOwn || user?.isAdmin;
+                    const canRemove = isUpcoming && (isOwn || user?.isAdmin);
                     return (
                       <tr key={p.id}>
                         <td>{i + 1}</td>
