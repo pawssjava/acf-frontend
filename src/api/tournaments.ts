@@ -1,5 +1,5 @@
 import { apiClient } from './client';
-import type { Tournament, Participant, TournamentResult } from '../types';
+import type { Tournament, Participant, TournamentResult, TournamentFormat, TournamentMatch, GroupStanding, BracketDto } from '../types';
 
 export const getTournaments = () =>
   apiClient.get<Tournament[]>('/api/tournaments');
@@ -10,6 +10,9 @@ export const getTournamentById = (id: number) =>
 export interface TournamentPayload {
   name: string;
   startDate: string;
+  endDate: string;
+  format: TournamentFormat;
+  totalRounds?: number;
   capacity: number;
   prizeMoney: number;
   tournamentStatusId: number;
@@ -30,6 +33,33 @@ export const uploadTournamentLogo = (id: number, file: File) => {
   fd.append('file', file);
   return apiClient.post<Tournament>(`/api/tournaments/${id}/logo`, fd);
 };
+
+// Tournament lifecycle
+export const startTournament = (id: number) =>
+  apiClient.post(`/api/tournaments/${id}/start`);
+
+export const nextRound = (id: number) =>
+  apiClient.post(`/api/tournaments/${id}/next-round`);
+
+export const advanceRegularSeason = (id: number, advancersPerGroup: number) =>
+  apiClient.post(`/api/tournaments/${id}/advance-regular-season`, { advancersPerGroup });
+
+// Bracket & standings
+export const getBracket = (id: number) =>
+  apiClient.get<BracketDto>(`/api/tournaments/${id}/bracket`);
+
+export const getStandings = (id: number) =>
+  apiClient.get<GroupStanding[]>(`/api/tournaments/${id}/standings`);
+
+// Match operations
+export const setMatchScore = (id: number, matchId: number, score1: number, score2: number) =>
+  apiClient.patch<TournamentMatch>(`/api/tournaments/${id}/matches/${matchId}/score`, { score1, score2 });
+
+export const completeMatch = (id: number, matchId: number) =>
+  apiClient.post<TournamentMatch>(`/api/tournaments/${id}/matches/${matchId}/complete`);
+
+export const setMatchWinner = (id: number, matchId: number, winnerId: number) =>
+  apiClient.put<TournamentMatch>(`/api/tournaments/${id}/matches/${matchId}/winner`, { winnerId });
 
 // Participants
 export const getParticipants = (tournamentId: number) =>

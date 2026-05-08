@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { createTournament, getTournamentById, updateTournament, uploadTournamentLogo } from '../../api/tournaments';
-import { getTournamentTypes, getTournamentStatuses } from '../../api/dictionary';
-import type { Tournament, DictionaryItem } from '../../types';
+import { getTournamentTypes } from '../../api/dictionary';
+import type { Tournament, DictionaryItem, TournamentFormat } from '../../types';
 import { useAuth } from '../../context/AuthContext';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
@@ -13,11 +13,15 @@ import styles from './Admin.module.css';
 interface FormState {
   name: string;
   startDate: string;
+  endDate: string;
+  format: TournamentFormat | '';
+  totalRounds: string;
   capacity: string;
   prizeMoney: string;
-  tournamentStatusId: string;
   tournamentTypeId: string;
 }
+
+const EKPL_TYPE_ID = '5';
 
 export default function TournamentForm() {
   const { id } = useParams<{ id: string }>();
@@ -27,9 +31,9 @@ export default function TournamentForm() {
 
   const [tournament, setTournament] = useState<Tournament | null>(null);
   const [types, setTypes] = useState<DictionaryItem[]>([]);
-  const [statuses, setStatuses] = useState<DictionaryItem[]>([]);
   const [form, setForm] = useState<FormState>({
-    name: '', startDate: '', capacity: '', prizeMoney: '', tournamentStatusId: '', tournamentTypeId: '',
+    name: '', startDate: '', endDate: '', format: '', totalRounds: '',
+    capacity: '', prizeMoney: '', tournamentTypeId: '',
   });
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const [pendingFile, setPendingFile] = useState<File | null>(null);
@@ -39,16 +43,11 @@ export default function TournamentForm() {
   useEffect(() => {
     if (!isAuthenticated || !user?.isAdmin) { navigate('/'); return; }
 
-    Promise.all([getTournamentTypes(), getTournamentStatuses()])
-      .then(([t, s]) => {
+    getTournamentTypes()
+      .then(t => {
         setTypes(t.data);
-        setStatuses(s.data);
         if (!isEdit) {
-          setForm(f => ({
-            ...f,
-            tournamentTypeId: String(t.data[0]?.id ?? ''),
-            tournamentStatusId: String(s.data[0]?.id ?? ''),
-          }));
+          setForm(f => ({ ...f, tournamentTypeId: String(t.data[0]?.id ?? '') }));
         }
       })
       .catch(() => {});
@@ -62,9 +61,11 @@ export default function TournamentForm() {
         setForm({
           name: t.name,
           startDate: t.startDate,
+          endDate: t.endDate,
+          format: t.format,
+          totalRounds: t.totalRounds != null ? String(t.totalRounds) : '',
           capacity: String(t.capacity),
           prizeMoney: String(t.prizeMoney),
-          tournamentStatusId: String(t.tournamentStatusId),
           tournamentTypeId: String(t.tournamentTypeId),
         });
       })
@@ -74,6 +75,35 @@ export default function TournamentForm() {
   const set = (key: keyof FormState) =>
     (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
       setForm(f => ({ ...f, [key]: e.target.value }));
+
+  const handleFormatChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newFormat = e.target.value as TournamentFormat | '';
+    setForm(f => {
+      const updates: Partial<FormState> = { format: newFormat };
+      if (newFormat === 'EKPL') {
+        updates.tournamentTypeId = EKPL_TYPE_ID;
+      } else if (f.tournamentTypeId === EKPL_TYPE_ID) {
+        updates.tournamentTypeId = '';
+      }
+      if (newFormat !== 'SWISS') {
+        updates.totalRounds = '';
+      }
+      return { ...f, ...updates };
+    });
+  };
+
+  const handleTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newTypeId = e.target.value;
+    setForm(f => {
+      const updates: Partial<FormState> = { tournamentTypeId: newTypeId };
+      if (newTypeId === EKPL_TYPE_ID) {
+        updates.format = 'EKPL';
+      } else if (f.format === 'EKPL') {
+        updates.format = 'SINGLE_ELIMINATION';
+      }
+      return { ...f, ...updates };
+    });
+  };
 
   const handleLogoUpload = async (file: File) => {
     if (isEdit && tournament) {
@@ -93,8 +123,12 @@ export default function TournamentForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.name.trim() || !form.startDate || !form.capacity || !form.prizeMoney) {
+    if (!form.name.trim() || !form.startDate || !form.endDate || !form.format || !form.capacity || !form.prizeMoney) {
       setToast({ message: 'Заполните все обязательные поля', type: 'error' });
+      return;
+    }
+    if (form.endDate < form.startDate) {
+      setToast({ message: 'Дата окончания не может быть раньше даты начала', type: 'error' });
       return;
     }
     setSaving(true);
@@ -102,9 +136,11 @@ export default function TournamentForm() {
       const payload = {
         name: form.name,
         startDate: form.startDate,
+        endDate: form.endDate,
+        format: form.format as TournamentFormat,
+        ...(form.totalRounds ? { totalRounds: Number(form.totalRounds) } : {}),
         capacity: Number(form.capacity),
         prizeMoney: Number(form.prizeMoney),
-        tournamentStatusId: Number(form.tournamentStatusId),
         tournamentTypeId: Number(form.tournamentTypeId),
       };
 
@@ -129,6 +165,8 @@ export default function TournamentForm() {
       setSaving(false);
     }
   };
+
+  const formatLocked = isEdit && tournament?.phase !== null;
 
   return (
     <div className={styles.page}>
@@ -164,6 +202,15 @@ export default function TournamentForm() {
                   onChange={set('startDate')}
                 />
                 <Input
+                  label="Дата окончания"
+                  type="date"
+                  value={form.endDate}
+                  onChange={set('endDate')}
+                  min={form.startDate || undefined}
+                />
+              </div>
+              <div className={styles.row}>
+                <Input
                   label="Вместимость"
                   type="number"
                   min="2"
@@ -171,40 +218,62 @@ export default function TournamentForm() {
                   onChange={set('capacity')}
                   placeholder="16"
                 />
+                <Input
+                  label="Призовой фонд (₸)"
+                  type="number"
+                  min="0"
+                  value={form.prizeMoney}
+                  onChange={set('prizeMoney')}
+                  placeholder="100000"
+                />
               </div>
-              <Input
-                label="Призовой фонд (₸)"
-                type="number"
-                min="0"
-                value={form.prizeMoney}
-                onChange={set('prizeMoney')}
-                placeholder="100000"
-              />
+              <div className={styles.row}>
+                <div className={styles.field}>
+                  <label className={styles.label}>Формат {formatLocked && <span style={{ color: 'var(--text-muted)', fontWeight: 400 }}>(нельзя изменить)</span>}</label>
+                  <select
+                    className={styles.select}
+                    value={form.format}
+                    onChange={handleFormatChange}
+                    disabled={formatLocked}
+                  >
+                    <option value="">Выберите формат</option>
+                    <option value="SINGLE_ELIMINATION">Single Elimination</option>
+                    <option value="SWISS">Swiss System</option>
+                    <option value="EKPL">eKPL (Electronic Kazakhstan Premier League)</option>
+                  </select>
+                </div>
+                {form.format === 'SWISS' ? (
+                  <Input
+                    label="Количество раундов"
+                    type="number"
+                    min="1"
+                    value={form.totalRounds}
+                    onChange={set('totalRounds')}
+                    placeholder="авто"
+                  />
+                ) : <div />}
+              </div>
               <div className={styles.row}>
                 <div className={styles.field}>
                   <label className={styles.label}>Тип турнира</label>
                   <select
                     className={styles.select}
                     value={form.tournamentTypeId}
-                    onChange={set('tournamentTypeId')}
+                    onChange={handleTypeChange}
                   >
                     {types.map(t => (
                       <option key={t.id} value={t.id}>{t.name}</option>
                     ))}
                   </select>
                 </div>
-                <div className={styles.field}>
-                  <label className={styles.label}>Статус</label>
-                  <select
-                    className={styles.select}
-                    value={form.tournamentStatusId}
-                    onChange={set('tournamentStatusId')}
-                  >
-                    {statuses.map(s => (
-                      <option key={s.id} value={s.id}>{s.name}</option>
-                    ))}
-                  </select>
-                </div>
+                {isEdit && tournament && (
+                  <div className={styles.field}>
+                    <label className={styles.label}>Статус</label>
+                    <div style={{ padding: '9px 12px', background: 'var(--bg-secondary)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', fontSize: '14px', color: 'var(--text-secondary)' }}>
+                      {tournament.tournamentStatusName}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>

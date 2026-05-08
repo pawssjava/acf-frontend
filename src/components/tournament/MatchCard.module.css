@@ -1,0 +1,133 @@
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.byeCard {
+  opacity: 0.45;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.matchNum {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Players: stacked rows */
+.players {
+  display: flex;
+  flex-direction: column;
+}
+
+.player {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 12px;
+  min-width: 0;
+}
+
+.player + .player {
+  border-top: 1px solid var(--border);
+}
+
+.winner {
+  background: rgba(32, 201, 151, 0.08);
+}
+
+.loser .playerName {
+  opacity: 0.5;
+}
+
+.dot {
+  font-size: 8px;
+  color: var(--text-muted);
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.winner .dot {
+  color: var(--accent-teal);
+}
+
+.playerName {
+  flex: 1;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.winner .playerName {
+  font-weight: 700;
+  color: var(--accent-teal);
+}
+
+.playerScore {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  flex-shrink: 0;
+  min-width: 20px;
+  text-align: right;
+}
+
+.winner .playerScore {
+  color: var(--accent-teal);
+}
+
+/* Admin area */
+.adminArea {
+  border-top: 1px solid var(--border);
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.scoreRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.scoreInput {
+  width: 44px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-light);
+  color: var(--text-primary);
+  padding: 5px 6px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  text-align: center;
+  flex-shrink: 0;
+}
+.scoreInput:focus { border-color: var(--accent-blue); outline: none; }
+
+.colon {
+  font-size: 13px;
+  color: var(--text-muted);
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.msg {
+  font-size: 11px;
+  color: var(--warning);
+  line-height: 1.4;
+}

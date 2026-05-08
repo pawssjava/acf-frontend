@@ -47,11 +47,13 @@
   color: var(--text-primary);
 }
 
+/* Right-side actions */
 .actions {
   display: flex;
   align-items: center;
   gap: 12px;
   margin-left: auto;
+  flex-shrink: 0;
 }
 
 .loginBtn {
@@ -68,58 +70,156 @@
   background: var(--accent-teal-hover);
 }
 
-.profileBtn {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: var(--text-primary);
-  font-size: 14px;
-  font-weight: 500;
+/* Avatar button (always visible) */
+.userMenu {
+  position: relative;
 }
 
-.avatar {
-  width: 32px;
-  height: 32px;
+.avatarBtn {
+  background: transparent;
+  border: none;
+  padding: 2px;
   border-radius: 50%;
-  object-fit: cover;
-}
-
-.avatarPlaceholder {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background: var(--accent-blue);
+  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 13px;
+  transition: opacity 0.15s;
+}
+
+.avatarBtn:hover {
+  opacity: 0.85;
+}
+
+.avatarBtn:hover .avatar,
+.avatarBtn:hover .avatarPlaceholder {
+  box-shadow: 0 0 0 2px var(--accent-teal);
+}
+
+.avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  transition: box-shadow 0.15s;
+}
+
+.avatarPlaceholder {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent-blue), var(--accent-teal));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
   font-weight: 700;
   color: #fff;
   text-transform: uppercase;
+  flex-shrink: 0;
+  transition: box-shadow 0.15s;
 }
 
-.logoutBtn {
-  background: transparent;
-  color: var(--text-secondary);
-  font-size: 13px;
-  padding: 6px 12px;
+/* Dropdown */
+.dropdown {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  background: var(--bg-card);
   border: 1px solid var(--border-light);
-  border-radius: var(--radius-sm);
-  transition: all 0.2s;
+  border-radius: var(--radius-lg);
+  min-width: 220px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  overflow: hidden;
+  z-index: 200;
+  animation: dropIn 0.15s ease;
 }
 
-.logoutBtn:hover {
+@keyframes dropIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.dropdownUser {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+}
+
+.dropdownAvatar {
+  width: 40px !important;
+  height: 40px !important;
+  font-size: 16px !important;
+  flex-shrink: 0;
+}
+
+.dropdownUserInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.dropdownName {
+  font-size: 14px;
+  font-weight: 600;
   color: var(--text-primary);
-  border-color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
+.dropdownUsername {
+  font-size: 12px;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dropdownDivider {
+  height: 1px;
+  background: var(--border);
+  margin: 0;
+}
+
+.dropdownItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 12px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  background: transparent;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.dropdownItem:hover {
+  background: var(--bg-card-hover);
+  color: var(--text-primary);
+}
+
+.dropdownLogout:hover {
+  color: var(--danger);
+}
+
+/* Burger (mobile only) */
 .burger {
   display: none;
   flex-direction: column;
+  justify-content: center;
   gap: 5px;
   padding: 4px;
   background: transparent;
-  margin-left: auto;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
 }
 
 .burger span {
@@ -128,38 +228,15 @@
   height: 2px;
   background: var(--text-primary);
   border-radius: 2px;
+  transition: all 0.2s;
 }
-
-.mobileAuth {
-  display: none;
-}
-
-.mobileAuthLink {
-  background: transparent;
-  color: var(--text-secondary);
-  font-size: 14px;
-  font-weight: 500;
-  text-align: left;
-  padding: 0;
-  transition: color 0.2s;
-}
-.mobileAuthLink:hover { color: var(--text-primary); }
-
-.mobileLoginBtn {
-  display: inline-block;
-  background: var(--accent-teal);
-  color: #fff;
-  padding: 9px 20px;
-  border-radius: var(--radius-md);
-  font-size: 14px;
-  font-weight: 600;
-  transition: background 0.2s;
-}
-.mobileLoginBtn:hover { background: var(--accent-teal-hover); }
 
 @media (max-width: 768px) {
+  .inner { gap: 16px; }
+
   .burger { display: flex; }
 
+  /* Nav slides down from header */
   .nav {
     display: none;
     position: absolute;
@@ -171,20 +248,18 @@
     flex-direction: column;
     align-items: flex-start;
     padding: 16px 24px 24px;
-    gap: 16px;
+    gap: 18px;
     z-index: 99;
   }
 
   .nav.open { display: flex; }
 
-  .actions { display: none; }
+  /* Avatar + login always visible on mobile — don't hide .actions */
+  .actions { gap: 8px; }
 
-  .mobileAuth {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    padding-top: 12px;
-    border-top: 1px solid var(--border);
-    width: 100%;
-  }
+  /* Dropdown opens upward if near bottom, but keep default for now */
+}
+
+@media (max-width: 480px) {
+  .inner { padding: 0 16px; }
 }

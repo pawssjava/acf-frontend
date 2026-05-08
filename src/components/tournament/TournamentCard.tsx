@@ -31,7 +31,10 @@ export default function TournamentCard({ tournament }: Props) {
         <p className={styles.type}>{tournament.tournamentTypeName}</p>
         <h3 className={styles.name}>{tournament.name}</h3>
         <div className={styles.meta}>
-          <span>{new Date(tournament.startDate).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
+          <span>
+            {new Date(tournament.startDate).toLocaleDateString('ru-RU')}
+            {tournament.endDate && ` – ${new Date(tournament.endDate).toLocaleDateString('ru-RU')}`}
+          </span>
           <span>{tournament.capacity} игроков</span>
         </div>
         <div className={styles.prize}>

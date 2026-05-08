@@ -20,11 +20,19 @@ export interface News {
   updatedDate: string;
 }
 
+export type TournamentFormat = 'SINGLE_ELIMINATION' | 'SWISS' | 'EKPL';
+export type TournamentPhase = 'PLAYOFF' | 'SWISS' | 'REGULAR_SEASON' | 'COMPLETED';
+export type MatchStatus = 'PENDING' | 'IN_PROGRESS' | 'COMPLETED' | 'BYE';
+
 export interface Tournament {
   id: number;
   name: string;
   logo: string | null;
   startDate: string;
+  endDate: string;
+  format: TournamentFormat;
+  phase: TournamentPhase | null;
+  totalRounds: number | null;
   capacity: number;
   prizeMoney: number;
   tournamentStatusId: number;
@@ -55,6 +63,62 @@ export interface TournamentResult {
   place: number;
   score: number;
   createdDate: string;
+}
+
+export interface TournamentMatch {
+  id: number;
+  phase: string;
+  roundNumber: number;
+  matchNumber: number;
+  groupName: string | null;
+  participant1Id: number | null;
+  participant1Username: string | null;
+  participant1FirstName: string | null;
+  participant1LastName: string | null;
+  participant2Id: number | null;
+  participant2Username: string | null;
+  participant2FirstName: string | null;
+  participant2LastName: string | null;
+  score1: number | null;
+  score2: number | null;
+  winnerId: number | null;
+  status: MatchStatus;
+  nextMatchId: number | null;
+}
+
+export interface GroupStanding {
+  userId: number;
+  groupName: string | null;
+  username: string;
+  firstName: string;
+  lastName: string;
+  played: number;
+  wins: number;
+  draws: number;
+  losses: number;
+  points: number;
+  scoreDiff: number;
+  swissPoints: number;
+  buchholz: number;
+}
+
+export interface GroupDto {
+  groupName: string;
+  matches: TournamentMatch[];
+  standings: GroupStanding[];
+}
+
+export interface PlayoffRoundDto {
+  roundNumber: number;
+  roundName: string;
+  matches: TournamentMatch[];
+}
+
+export interface BracketDto {
+  format: TournamentFormat;
+  phase: TournamentPhase | null;
+  groups: GroupDto[];
+  playoffRounds: PlayoffRoundDto[];
 }
 
 export interface DictionaryItem {
