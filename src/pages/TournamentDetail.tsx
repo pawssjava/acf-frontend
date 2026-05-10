@@ -10,6 +10,16 @@ import Input from '../components/ui/Input';
 import BracketView from '../components/tournament/BracketView';
 import styles from './TournamentDetail.module.css';
 
+function validatePsn(val: string): string | undefined {
+  if (val.length < 3)  return 'Минимум 3 символа';
+  if (val.length > 16) return 'Максимум 16 символов';
+  if (!/^[a-zA-Z0-9_-]+$/.test(val)) return 'Только латинские буквы, цифры, _ и -';
+  if (/^[_-]/.test(val)) return 'Не может начинаться с _ или -';
+  if (/[_-]$/.test(val)) return 'Не может заканчиваться на _ или -';
+  if (/[_-]{2}/.test(val)) return 'Нельзя использовать два спецсимвола подряд';
+  return undefined;
+}
+
 const FORMAT_LABEL: Record<string, string> = {
   SINGLE_ELIMINATION: 'Single Elimination',
   SWISS: 'Swiss System',
@@ -118,8 +128,14 @@ export default function TournamentDetail() {
 
   const handleJoin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!psn.trim()) {
+    const trimmed = psn.trim();
+    if (!trimmed) {
       setPsnError('PSN обязателен');
+      return;
+    }
+    const psnFormatErr = validatePsn(trimmed);
+    if (psnFormatErr) {
+      setPsnError(psnFormatErr);
       return;
     }
     if (!user || !tournament) return;
@@ -382,8 +398,13 @@ export default function TournamentDetail() {
                   label="PSN"
                   placeholder="Введите ваш PSN"
                   value={psn}
-                  onChange={e => { setPsn(e.target.value); setPsnError(''); }}
-                  error={psnError}
+                  onChange={e => {
+                    const val = e.target.value;
+                    setPsn(val);
+                    setPsnError(val.length > 0 ? (validatePsn(val) ?? '') : '');
+                  }}
+                  maxLength={16}
+                  error={psnError || undefined}
                   autoFocus
                 />
               </div>
