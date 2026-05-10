@@ -4,7 +4,8 @@
       "Bash(npx tsc *)",
       "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\gazizdev\\\\WebstormProjects\\\\acf-front\" -Force)",
       "Bash(Select-Object Name, FullName)",
-      "Bash(npx vite *)"
+      "Bash(npx vite *)",
+      "Bash(Copy-Item *)"
     ]
   }
 }
