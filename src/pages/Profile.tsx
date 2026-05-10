@@ -48,6 +48,10 @@ export default function Profile() {
 
   const handleSave = async () => {
     if (!authUser) return;
+    if (form.birthDate > new Date().toISOString().slice(0, 10)) {
+      setSaveMsg('Дата рождения не может быть в будущем');
+      return;
+    }
     setSaving(true);
     setSaveMsg('');
     try {
@@ -108,7 +112,7 @@ export default function Profile() {
                   <Input label="Имя" value={form.firstName} onChange={set('firstName')} />
                   <Input label="Фамилия" value={form.lastName} onChange={set('lastName')} />
                 </div>
-                <Input label="Дата рождения" type="date" value={form.birthDate} onChange={set('birthDate')} />
+                <Input label="Дата рождения" type="date" value={form.birthDate} max={new Date().toISOString().slice(0, 10)} onChange={set('birthDate')} />
                 <div className={styles.editActions}>
                   <Button onClick={handleSave} loading={saving}>Сохранить</Button>
                   {saveMsg && (

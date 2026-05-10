@@ -263,3 +263,92 @@
 @media (max-width: 480px) {
   .inner { padding: 0 16px; }
 }
+
+/* ── Admin panel nav dropdown ── */
+.adminNavItem {
+  position: relative;
+}
+
+.adminNavBtn {
+  background: transparent;
+  border: none;
+  padding: 0;
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  transition: color 0.2s;
+  font-family: inherit;
+}
+
+.adminNavBtn:hover,
+.adminNavBtnOpen {
+  color: var(--text-primary);
+}
+
+.adminChevron {
+  flex-shrink: 0;
+  transition: transform 0.2s;
+}
+
+.adminChevronOpen {
+  transform: rotate(180deg);
+}
+
+.adminDropdown {
+  position: absolute;
+  top: calc(100% + 14px);
+  left: 0;
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  min-width: 180px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  overflow: hidden;
+  z-index: 200;
+  animation: dropIn 0.15s ease;
+}
+
+.adminDropdownItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  transition: background 0.15s, color 0.15s;
+}
+
+.adminDropdownItem:hover {
+  background: var(--bg-card-hover);
+  color: var(--text-primary);
+}
+
+/* Mobile: collapse into the vertical nav flow */
+@media (max-width: 768px) {
+  .adminNavItem { position: static; width: 100%; }
+
+  .adminNavBtn { width: 100%; }
+
+  .adminDropdown {
+    position: static;
+    box-shadow: none;
+    border: none;
+    border-radius: 0;
+    background: transparent;
+    min-width: unset;
+    animation: none;
+    padding-left: 12px;
+    border-left: 2px solid var(--border-light);
+    margin-top: 4px;
+  }
+
+  .adminDropdownItem {
+    padding: 8px 12px;
+    font-size: 13px;
+  }
+}

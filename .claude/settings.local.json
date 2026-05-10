@@ -1,7 +1,10 @@
 {
   "permissions": {
     "allow": [
-      "Bash(npx tsc *)"
+      "Bash(npx tsc *)",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\gazizdev\\\\WebstormProjects\\\\acf-front\" -Force)",
+      "Bash(Select-Object Name, FullName)",
+      "Bash(npx vite *)"
     ]
   }
 }

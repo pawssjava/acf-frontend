@@ -9,6 +9,15 @@ import styles from './Auth.module.css';
 type Step = 'phone' | 'code' | 'details';
 type FieldStatus = 'idle' | 'checking' | 'valid' | 'taken';
 
+function validateUsername(val: string): string | undefined {
+  if (val.length < 3)  return 'Минимум 3 символа';
+  if (val.length > 20) return 'Максимум 20 символов';
+  if (!/^[a-zA-Z0-9_]+$/.test(val)) return 'Только латинские буквы, цифры и _';
+  if (val.startsWith('_') || val.endsWith('_')) return 'Не может начинаться или заканчиваться на _';
+  if (val.includes('__')) return 'Нельзя использовать два _ подряд';
+  return undefined;
+}
+
 const STEPS: Step[] = ['phone', 'code', 'details'];
 const STEP_LABELS = ['Телефон', 'Код', 'Данные'];
 
@@ -84,7 +93,7 @@ export default function Register() {
     setUsernameStatus('idle');
 
     if (usernameTimer.current) clearTimeout(usernameTimer.current);
-    if (val.length >= 3) {
+    if (!validateUsername(val)) {
       usernameTimer.current = setTimeout(() => runCheckUsername(val), 500);
     }
   };
@@ -149,6 +158,15 @@ export default function Register() {
       setError('Пароль должен содержать минимум 6 символов');
       return;
     }
+    if (birthDate > new Date().toISOString().slice(0, 10)) {
+      setError('Дата рождения не может быть в будущем');
+      return;
+    }
+    const usernameFormatErr = validateUsername(username);
+    if (usernameFormatErr) {
+      setError(usernameFormatErr);
+      return;
+    }
     if (usernameStatus === 'taken') {
       setError('Имя пользователя уже занято');
       return;
@@ -188,14 +206,16 @@ export default function Register() {
   };
 
   const phoneError = phoneStatus === 'taken' ? 'Этот номер телефона уже зарегистрирован' : undefined;
-  const usernameError = usernameStatus === 'taken' ? 'Имя пользователя уже занято' : undefined;
+
+  const usernameFormatError = username.length > 0 ? validateUsername(username) : undefined;
+  const usernameError = usernameFormatError ?? (usernameStatus === 'taken' ? 'Имя пользователя уже занято' : undefined);
 
   const phoneSuffix =
     phoneStatus === 'checking' ? <span className={styles.inlineSpinner} /> :
     phoneStatus === 'valid' ? <span className={styles.inlineCheck}>✓</span> :
     null;
 
-  const usernameSuffix =
+  const usernameSuffix = usernameFormatError ? null :
     usernameStatus === 'checking' ? <span className={styles.inlineSpinner} /> :
     usernameStatus === 'valid' ? <span className={styles.inlineCheck}>✓</span> :
     null;
@@ -278,6 +298,7 @@ export default function Register() {
                 value={username}
                 onChange={handleUsernameChange}
                 autoComplete="username"
+                maxLength={20}
                 suffix={usernameSuffix}
                 error={usernameError}
               />
@@ -307,6 +328,7 @@ export default function Register() {
                 label="Дата рождения"
                 type="date"
                 value={birthDate}
+                max={new Date().toISOString().slice(0, 10)}
                 onChange={e => { setBirthDate(e.target.value); setError(''); }}
               />
               <Button

@@ -179,3 +179,24 @@ export interface UserTournamentsPage {
   totalElements: number;
   totalPages: number;
 }
+
+export type SmsAction = 'REGISTRATION' | 'FORGOT_PASSWORD';
+
+export interface SmsLogEntry {
+  id: number;
+  phoneNumber: string;
+  code: string;
+  action: SmsAction;
+  sentAt: string;
+  expiresAt: string;
+  verifiedAt: string | null;
+  used: boolean;
+}
+
+export interface SmsLogPage {
+  content: SmsLogEntry[];
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
+}
