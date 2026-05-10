@@ -58,6 +58,7 @@ export default function TournamentDetail() {
   const [psnModalOpen, setPsnModalOpen] = useState(false);
   const [psn, setPsn] = useState('');
   const [psnError, setPsnError] = useState('');
+  const [verificationRequired, setVerificationRequired] = useState(false);
 
   const numId = Number(id);
 
@@ -114,6 +115,11 @@ export default function TournamentDetail() {
   };
 
   const openPsnModal = () => {
+    if (user?.isVerified === false) {
+      setVerificationRequired(true);
+      return;
+    }
+    setVerificationRequired(false);
     setPsn('');
     setPsnError('');
     setPsnModalOpen(true);
@@ -154,6 +160,9 @@ export default function TournamentDetail() {
         setPsnError('PSN обязателен');
       } else if (status === 400) {
         setJoinMsg('Турнир заполнен');
+        setPsnModalOpen(false);
+      } else if (status === 403) {
+        setVerificationRequired(true);
         setPsnModalOpen(false);
       } else {
         setJoinMsg('Ошибка при регистрации');
@@ -286,10 +295,27 @@ export default function TournamentDetail() {
                   <>
                     <h3>Участвовать</h3>
                     <p>{isFull ? 'Турнир заполнен' : 'Зарегистрируйтесь для участия в турнире'}</p>
-                    <Button onClick={openPsnModal} fullWidth size="lg" disabled={isFull}>
-                      Зарегистрироваться
-                    </Button>
-                    {joinMsg && <p className={joinMsg.includes('успешно') ? styles.successMsg : styles.errorMsg}>{joinMsg}</p>}
+                    {verificationRequired ? (
+                      <div className={styles.verifBanner}>
+                        <div className={styles.verifBannerIcon}>
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                        </div>
+                        <div className={styles.verifBannerText}>
+                          <span className={styles.verifBannerTitle}>Требуется верификация документа</span>
+                          <span className={styles.verifBannerSub}>Загрузите удостоверение личности в профиле, чтобы участвовать в турнирах.</span>
+                        </div>
+                        <Link to="/profile?tab=verification" className={styles.verifBannerLink}>
+                          Верифицировать →
+                        </Link>
+                      </div>
+                    ) : (
+                      <>
+                        <Button onClick={openPsnModal} fullWidth size="lg" disabled={isFull}>
+                          Зарегистрироваться
+                        </Button>
+                        {joinMsg && <p className={joinMsg.includes('успешно') ? styles.successMsg : styles.errorMsg}>{joinMsg}</p>}
+                      </>
+                    )}
                   </>
                 )}
                 {isUpcoming && !isParticipant && !isRegistrationOpen && (

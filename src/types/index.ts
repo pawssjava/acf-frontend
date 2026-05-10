@@ -2,13 +2,56 @@ export interface User {
   id: number;
   username: string;
   phoneNumber: number;
-  firstName: string;
-  lastName: string;
-  birthDate: string;
+  firstName: string | null;
+  lastName: string | null;
+  birthDate: string | null;
   isAdmin: boolean;
+  isVerified: boolean;
   photo: string | null;
+  cityId: number | null;
+  cityNameRu: string | null;
+  cityNameKk: string | null;
+  cityNameEn: string | null;
+  clubId: number | null;
+  clubNameRu: string | null;
   createdDate: string;
   updatedDate: string;
+}
+
+export interface City {
+  id: number;
+  nameRu: string;
+  nameKk: string;
+  nameEn: string;
+}
+
+export interface Club {
+  id: number;
+  nameRu: string;
+  nameKk: string;
+  nameEn: string;
+}
+
+export interface MatchEntry {
+  matchId: number;
+  tournamentId: number;
+  tournamentName: string;
+  opponentId: number | null;
+  opponentUsername: string | null;
+  opponentPhoto: string | null;
+  myScore: number;
+  opponentScore: number;
+  result: 'WIN' | 'LOSS' | 'DRAW';
+  status: string;
+  updatedDate: string;
+}
+
+export interface MatchesPage {
+  content: MatchEntry[];
+  page: number;
+  size: number;
+  total: number;
+  totalPages: number;
 }
 
 export interface News {
@@ -177,9 +220,9 @@ export interface UserTournamentEntry {
   tournamentStatusName: string;
   tournamentTypeId: number;
   tournamentTypeName: string;
-  format: TournamentFormat;
+  format: string;
   place: number | null;
-  score: string | null;
+  score: number | null;
 }
 
 export interface UserTournamentsPage {

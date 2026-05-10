@@ -1,0 +1,121 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.bannerVerified,
+.bannerUnverified {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px 24px;
+  border-radius: var(--radius-xl);
+  border: 1px solid;
+  flex-wrap: wrap;
+}
+
+.bannerVerified {
+  background: rgba(43,196,138,0.08);
+  border-color: rgba(43,196,138,0.25);
+}
+
+.bannerUnverified {
+  background: rgba(231,76,60,0.08);
+  border-color: rgba(231,76,60,0.25);
+}
+
+.bannerIcon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.bannerVerified .bannerIcon {
+  background: var(--accent-green);
+  color: #fff;
+}
+
+.bannerUnverified .bannerIcon {
+  background: var(--danger);
+  color: #fff;
+}
+
+.bannerText { flex: 1; }
+
+.bannerTitle {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.bannerSub {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.dropZone {
+  background: var(--bg-card);
+  border: 2px dashed var(--border-light);
+  border-radius: var(--radius-xl);
+  padding: 32px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.dropZone:hover:not(.dropZoneVerified) {
+  border-color: var(--accent-blue);
+  background: rgba(26,159,216,0.04);
+}
+
+.dragOver {
+  border-color: var(--accent-blue);
+  background: rgba(26,159,216,0.06);
+}
+
+.dropZoneVerified {
+  cursor: default;
+}
+
+.pdfIcon { margin-bottom: 4px; }
+
+.hint {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.dropText {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.fine {
+  font-size: 12px;
+  color: var(--text-muted);
+  text-align: center;
+  max-width: 420px;
+  line-height: 1.6;
+}
+
+.error {
+  font-size: 13px;
+  color: var(--danger);
+  text-align: center;
+}
+
+.hidden { display: none; }
+
+@media (max-width: 640px) {
+  .bannerUnverified { flex-direction: column; align-items: flex-start; }
+  .bannerUnverified button { width: 100%; }
+}

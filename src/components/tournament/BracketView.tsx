@@ -43,6 +43,7 @@ export default function BracketView({
       if (bRes.status === 'fulfilled') {
         const b = bRes.value.data;
         b.groups = b.groups ?? [];
+        b.playoffRounds = b.playoffRounds ?? [];
         setBracket(b);
         if (b.playoffRounds.length > 0) {
           const cur = b.playoffRounds.find(r =>
@@ -111,7 +112,7 @@ export default function BracketView({
 
   if (loading) return <div className={styles.loading}>Загружаем...</div>;
 
-  const hasData = bracket && ((bracket.groups ?? []).length > 0 || bracket.playoffRounds.length > 0);
+  const hasData = bracket && ((bracket.groups ?? []).length > 0 || (bracket.playoffRounds ?? []).length > 0);
 
   return (
     <div className={styles.wrap}>

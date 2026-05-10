@@ -1,0 +1,141 @@
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+
+.banner {
+  height: 120px;
+  background: linear-gradient(135deg, #0d2144 0%, #1a3a6b 40%, #0f2a52 70%, #091a38 100%);
+  position: relative;
+}
+
+.body {
+  display: flex;
+  align-items: flex-end;
+  gap: 20px;
+  padding: 0 24px 24px;
+}
+
+.avatarWrap {
+  position: relative;
+  margin-top: -44px;
+  flex-shrink: 0;
+  cursor: pointer;
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+}
+
+.avatar {
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid var(--bg-card);
+  display: block;
+}
+
+.avatarPlaceholder {
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent-blue), var(--accent-teal));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  font-weight: 700;
+  color: #fff;
+  border: 3px solid var(--bg-card);
+}
+
+.cameraBtn {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--accent-blue);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  border: 2px solid var(--bg-card);
+}
+
+.hidden { display: none; }
+
+.spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.info {
+  padding-bottom: 4px;
+  min-width: 0;
+}
+
+.nameRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 4px;
+}
+
+.username {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.badgeVerified {
+  background: rgba(43,196,138,0.15);
+  color: var(--accent-green);
+  border: 1px solid rgba(43,196,138,0.3);
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.badgeUnverified {
+  background: rgba(231,76,60,0.15);
+  color: var(--danger);
+  border: 1px solid rgba(231,76,60,0.3);
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.userId {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-bottom: 4px;
+}
+
+.city {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+@media (max-width: 480px) {
+  .body { padding: 0 16px 20px; gap: 14px; }
+  .username { font-size: 18px; }
+  .banner { height: 100px; }
+}

@@ -1,0 +1,77 @@
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding: 28px;
+}
+
+.title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 24px;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.inputWrap {
+  display: flex;
+  align-items: center;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+
+.inputWrap:focus-within {
+  border-color: var(--accent-blue);
+}
+
+.input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  padding: 11px 14px;
+  color: var(--text-primary);
+  font-size: 14px;
+}
+
+.input::placeholder { color: var(--text-muted); }
+
+.eyeBtn {
+  padding: 0 14px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  transition: color 0.15s;
+}
+
+.eyeBtn:hover { color: var(--text-primary); }
+
+.ok { font-size: 13px; color: var(--accent-teal); margin-bottom: 16px; }
+.err { font-size: 13px; color: var(--danger); margin-bottom: 16px; }
+
+@media (max-width: 640px) {
+  .card { padding: 20px; }
+}

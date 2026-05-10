@@ -7,6 +7,7 @@ interface AuthUser {
   firstName: string;
   lastName: string;
   isAdmin: boolean;
+  isVerified: boolean;
   photo: string | null;
 }
 
@@ -16,6 +17,7 @@ interface AuthContextValue {
   isAuthenticated: boolean;
   login: (accessToken: string, refreshToken: string, user: AuthUser) => void;
   logout: () => Promise<void>;
+  updateUser: (patch: Partial<AuthUser>) => void;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -43,6 +45,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(newUser);
   };
 
+  const updateUser = (patch: Partial<AuthUser>) => {
+    setUser(prev => prev ? { ...prev, ...patch } : prev);
+  };
+
   const logout = async () => {
     const storedRefresh = localStorage.getItem('refresh_token');
     if (storedRefresh) {
@@ -58,7 +64,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, isAuthenticated: !!token, login, logout }}>
+    <AuthContext.Provider value={{ user, token, isAuthenticated: !!token, login, logout, updateUser }}>
       {children}
     </AuthContext.Provider>
   );

@@ -38,6 +38,7 @@ export default function Login() {
         firstName: me.firstName,
         lastName: me.lastName,
         isAdmin: me.isAdmin,
+        isVerified: me.isVerified,
         photo: me.photo,
       });
 

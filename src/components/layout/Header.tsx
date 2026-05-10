@@ -38,7 +38,7 @@ export default function Header() {
   return (
     <header className={styles.header}>
       <div className={styles.inner}>
-        <Link to="/news" className={styles.logo}>ACF<span>.</span></Link>
+        <Link to="/news" className={styles.logo} onClick={closeAll}>ACF<span>.</span></Link>
 
         <nav className={[styles.nav, menuOpen ? styles.open : ''].join(' ')}>
           <NavLink to="/tournaments" className={({ isActive }) => isActive ? styles.active : ''} onClick={closeAll}>Турниры</NavLink>
@@ -85,7 +85,7 @@ export default function Header() {
             <div className={styles.userMenu} ref={dropdownRef}>
               <button
                 className={styles.avatarBtn}
-                onClick={() => setDropdownOpen(o => !o)}
+                onClick={() => { setMenuOpen(false); setDropdownOpen(o => !o); }}
                 aria-label="Профиль"
                 aria-expanded={dropdownOpen}
               >
@@ -111,7 +111,7 @@ export default function Header() {
                   <Link
                     to="/profile"
                     className={styles.dropdownItem}
-                    onClick={() => setDropdownOpen(false)}
+                    onClick={() => { setDropdownOpen(false); setMenuOpen(false); }}
                   >
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
                     Профиль

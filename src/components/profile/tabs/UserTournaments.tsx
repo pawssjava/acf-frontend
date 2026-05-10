@@ -1,0 +1,112 @@
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { getUserTournaments } from '../../../api/users';
+import type { User, UserTournamentEntry, UserTournamentsPage } from '../../../types';
+import Button from '../../ui/Button';
+import styles from './UserTournaments.module.css';
+
+interface Props { user: User; }
+
+const FORMAT_LABELS: Record<string, string> = {
+  SINGLE_ELIMINATION: 'eFootball · 1v1',
+  SWISS: 'Swiss',
+  EKPL: 'eFootball · 1v1',
+};
+
+function fmtDateRange(start: string, end: string) {
+  const opts: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'long', year: 'numeric' };
+  const s = new Date(start + 'T00:00:00').toLocaleDateString('ru-RU', opts);
+  const e = new Date(end + 'T00:00:00').toLocaleDateString('ru-RU', opts);
+  if (start.slice(0, 7) === end.slice(0, 7)) {
+    const sd = new Date(start + 'T00:00:00').toLocaleDateString('ru-RU', { day: 'numeric' });
+    const ed = new Date(end + 'T00:00:00').toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' });
+    return `${sd}–${ed}`;
+  }
+  return `${s} – ${e}`;
+}
+
+function buildPages(cur: number, total: number): (number | '…')[] {
+  if (total <= 7) return Array.from({ length: total }, (_, i) => i);
+  const set = new Set([0, total - 1, cur, cur - 1, cur + 1]);
+  const sorted = [...set].filter(n => n >= 0 && n < total).sort((a, b) => a - b);
+  const result: (number | '…')[] = [];
+  for (let i = 0; i < sorted.length; i++) {
+    if (i > 0 && sorted[i] - sorted[i - 1] > 1) result.push('…');
+    result.push(sorted[i]);
+  }
+  return result;
+}
+
+function TournamentCard({ t }: { t: UserTournamentEntry }) {
+  const navigate = useNavigate();
+  return (
+    <div className={styles.card}>
+      <div className={styles.banner}>
+        {t.logo
+          ? <img src={t.logo} alt="" className={styles.bannerImg} />
+          : <div className={styles.bannerPlaceholder} />
+        }
+      </div>
+      <div className={styles.body}>
+        <div className={styles.tName}>{t.tournamentName}</div>
+        <div className={styles.tDates}>{fmtDateRange(t.startDate, t.endDate)}</div>
+        {t.place != null && (
+          <div className={styles.place}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="8 21 12 17 16 21"/><path d="M5 3H3a2 2 0 0 0-2 2v2a6 6 0 0 0 6 6h6a6 6 0 0 0 6-6V5a2 2 0 0 0-2-2h-2"/><rect x="5" y="3" width="14" height="8" rx="1"/></svg>
+            Топ-{t.place}
+          </div>
+        )}
+        <div className={styles.statsRow}>
+          <div className={styles.stat}><span className={styles.statLabel}>Команда</span><span className={styles.statVal}>—</span></div>
+          <div className={styles.stat}><span className={styles.statLabel}>Формат</span><span className={styles.statVal}>{FORMAT_LABELS[t.format] ?? t.format}</span></div>
+          <div className={styles.stat}><span className={styles.statLabel}>Выигрыш</span><span className={styles.statVal}>{t.score ?? '—'}</span></div>
+        </div>
+        <Button fullWidth size="sm" onClick={() => navigate(`/tournaments/${t.tournamentId}`)}>Подробнее</Button>
+      </div>
+    </div>
+  );
+}
+
+export default function UserTournaments({ user }: Props) {
+  const [data, setData] = useState<UserTournamentsPage | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(0);
+
+  useEffect(() => {
+    setLoading(true);
+    getUserTournaments(user.id, page, 10)
+      .then(r => setData(r.data))
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, [user.id, page]);
+
+  return (
+    <div className={styles.wrap}>
+      {loading ? (
+        <div className={styles.loading}>Загружаем...</div>
+      ) : !data || data.totalElements === 0 ? (
+        <div className={styles.empty}>Турниров пока нет</div>
+      ) : (
+        <>
+          <div className={styles.grid}>
+            {data.content.map(t => <TournamentCard key={t.tournamentId} t={t} />)}
+          </div>
+
+          {data.totalPages > 1 && (
+            <div className={styles.pagination}>
+              <button className={styles.pageBtn} disabled={page === 0} onClick={() => setPage(p => p - 1)}>← Назад</button>
+              <div className={styles.pageNumbers}>
+                {buildPages(page, data.totalPages).map((item, i) =>
+                  item === '…'
+                    ? <span key={`e${i}`} className={styles.ellipsis}>…</span>
+                    : <button key={item} className={[styles.pageNum, item === page ? styles.pageNumActive : ''].join(' ')} onClick={() => setPage(item)}>{item + 1}</button>
+                )}
+              </div>
+              <button className={styles.pageBtn} disabled={page === data.totalPages - 1} onClick={() => setPage(p => p + 1)}>Вперёд →</button>
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  );
+}
