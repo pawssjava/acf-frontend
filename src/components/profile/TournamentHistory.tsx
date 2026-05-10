@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { getUserTournaments } from '../../api/users';
 import type { UserTournamentsPage } from '../../types';
 import styles from './TournamentHistory.module.css';
@@ -40,6 +41,7 @@ interface Props {
 }
 
 export default function TournamentHistory({ userId }: Props) {
+  const navigate = useNavigate();
   const [data, setData] = useState<UserTournamentsPage | null>(null);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(0);
@@ -80,7 +82,11 @@ export default function TournamentHistory({ userId }: Props) {
               </thead>
               <tbody>
                 {data.content.map(t => (
-                  <tr key={t.tournamentId}>
+                  <tr
+                    key={t.tournamentId}
+                    className={styles.clickableRow}
+                    onClick={() => navigate(`/tournaments/${t.tournamentId}`)}
+                  >
                     <td>
                       <div className={styles.nameCell}>
                         {t.logo ? (

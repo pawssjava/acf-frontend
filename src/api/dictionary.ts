@@ -1,8 +1,8 @@
-import { apiClient } from './client';
+import { publicClient } from './client';
 import type { DictionaryItem } from '../types';
 
 export const getTournamentTypes = () =>
-  apiClient.get<DictionaryItem[]>('/api/dictionary/tournament-types');
+  publicClient.get<DictionaryItem[]>('/api/dictionary/tournament-types');
 
 export const getTournamentStatuses = () =>
-  apiClient.get<DictionaryItem[]>('/api/dictionary/tournament-statuses');
+  publicClient.get<DictionaryItem[]>('/api/dictionary/tournament-statuses');

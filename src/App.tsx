@@ -12,7 +12,10 @@ import Profile from './pages/Profile';
 import ForgotPassword from './pages/ForgotPassword';
 import NewsForm from './pages/admin/NewsForm';
 import TournamentForm from './pages/admin/TournamentForm';
+import PartnerForm from './pages/admin/PartnerForm';
 import SmsLogPage from './pages/admin/SmsLogPage';
+import PartnersPage from './pages/Partners';
+import PartnerDetail from './pages/PartnerDetail';
 import NotFound from './pages/NotFound';
 
 export default function App() {
@@ -35,6 +38,10 @@ export default function App() {
             <Route path="admin/news/:id/edit" element={<NewsForm />} />
             <Route path="admin/tournaments/new" element={<TournamentForm />} />
             <Route path="admin/tournaments/:id/edit" element={<TournamentForm />} />
+            <Route path="partners" element={<PartnersPage />} />
+            <Route path="partners/:id" element={<PartnerDetail />} />
+            <Route path="admin/partners/new" element={<PartnerForm />} />
+            <Route path="admin/partners/:id/edit" element={<PartnerForm />} />
             <Route path="admin/sms-log" element={<SmsLogPage />} />
             <Route path="*" element={<NotFound />} />
           </Route>

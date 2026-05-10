@@ -43,7 +43,7 @@ export default function Header() {
         <nav className={[styles.nav, menuOpen ? styles.open : ''].join(' ')}>
           <NavLink to="/tournaments" className={({ isActive }) => isActive ? styles.active : ''} onClick={closeAll}>Турниры</NavLink>
           <NavLink to="/news" className={({ isActive }) => isActive ? styles.active : ''} onClick={closeAll}>Блог</NavLink>
-          <NavLink to="/#partners" onClick={closeAll}>Партнеры</NavLink>
+          <NavLink to="/partners" className={({ isActive }) => isActive ? styles.active : ''} onClick={closeAll}>Партнеры</NavLink>
 
           {user?.isAdmin && (
             <div className={styles.adminNavItem} ref={adminRef}>

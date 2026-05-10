@@ -1,0 +1,140 @@
+.loading, .notFound {
+  text-align: center;
+  padding: 80px 24px;
+  color: var(--text-secondary);
+}
+
+.page {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 40px 24px 80px;
+}
+
+.container { width: 100%; }
+
+.topBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 32px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.back {
+  display: inline-block;
+  color: var(--accent-blue);
+  font-size: 13px;
+  font-weight: 500;
+  transition: color 0.2s;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  font-family: inherit;
+}
+
+.back:hover { color: var(--accent-blue-hover); }
+
+.adminActions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.danger { color: var(--danger) !important; }
+.danger:hover { color: #c0392b !important; }
+
+.heroCard {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  display: flex;
+}
+
+.logoArea {
+  width: 260px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-secondary);
+  padding: 32px;
+  min-height: 240px;
+}
+
+.logo {
+  max-width: 100%;
+  max-height: 180px;
+  object-fit: contain;
+}
+
+.logoPlaceholder {
+  width: 100%;
+  min-height: 180px;
+  background: linear-gradient(135deg, #0f2040, #1a3560);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-md);
+}
+
+.logoPlaceholder span {
+  font-size: 32px;
+  font-weight: 800;
+  color: var(--border-light);
+  letter-spacing: 4px;
+}
+
+.info {
+  flex: 1;
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.name {
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--text-primary);
+  line-height: 1.2;
+}
+
+.description {
+  color: var(--text-secondary);
+  font-size: 15px;
+  line-height: 1.8;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex: 1;
+}
+
+.visitBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--accent-blue);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 12px 24px;
+  border-radius: var(--radius-md);
+  text-decoration: none;
+  transition: background 0.2s;
+  align-self: flex-start;
+  margin-top: auto;
+}
+
+.visitBtn:hover { background: var(--accent-blue-hover); }
+
+@media (max-width: 700px) {
+  .heroCard { flex-direction: column; }
+  .logoArea { width: 100%; min-height: 160px; }
+  .info { padding: 24px; }
+  .name { font-size: 22px; }
+  .page { padding: 24px 16px 60px; }
+}

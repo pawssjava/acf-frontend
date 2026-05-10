@@ -1,82 +1,135 @@
 .page { width: 100%; }
 
-.heroBanner {
-  position: relative;
-  height: 280px;
-  background: linear-gradient(135deg, #0d1f3c 0%, #1a3560 100%);
-  overflow: hidden;
-  display: flex;
-  align-items: flex-end;
-}
-
-.heroBannerOverlay {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(to top, rgba(10,22,40,0.9), transparent);
-}
-
-.heroBannerContent {
-  position: relative;
-  max-width: 1200px;
-  width: 100%;
-  margin: 0 auto;
-  padding: 0 24px 40px;
-}
-
-.heroBannerContent h1 {
-  font-size: 40px;
-  font-weight: 800;
-  color: var(--text-primary);
-  margin-bottom: 8px;
-}
-
-.heroBannerContent p {
-  color: var(--text-secondary);
-  font-size: 15px;
-}
-
 .container {
   max-width: 1200px;
   margin: 0 auto;
   padding: 40px 24px;
 }
 
+.pageHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 28px;
+}
+
 .pageTitle {
   font-size: 32px;
   font-weight: 800;
   color: var(--text-primary);
-  margin-bottom: 32px;
 }
 
-.filterBar {
-  display: flex;
+/* Filter toggle button */
+.filterRow {
+  position: relative;
+  margin-bottom: 28px;
+}
+
+.filterToggle {
+  display: inline-flex;
+  align-items: center;
   gap: 8px;
-  margin-bottom: 32px;
-  flex-wrap: wrap;
-}
-
-.filterBtn {
   background: var(--bg-card);
   border: 1px solid var(--border);
-  color: var(--text-secondary);
-  padding: 8px 18px;
-  border-radius: 20px;
-  font-size: 13px;
-  font-weight: 500;
-  transition: all 0.2s;
-}
-
-.filterBtn:hover {
-  border-color: var(--border-light);
   color: var(--text-primary);
+  padding: 9px 18px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color 0.2s;
 }
 
-.filterBtn.filterActive {
-  background: var(--accent-blue);
+.filterToggle:hover,
+.filterToggleOpen {
+  border-color: var(--border-light);
+}
+
+/* Filter panel dropdown */
+.filterPanel {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  z-index: 100;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+  min-width: 220px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+.filterPanelTitle {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 16px;
+}
+
+.filterGroup {
+  margin-bottom: 20px;
+}
+
+.filterGroupLabel {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  margin-bottom: 10px;
+}
+
+.radioItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 0;
+  font-size: 14px;
+  color: var(--text-primary);
+  cursor: pointer;
+  gap: 12px;
+}
+
+.radioItem input[type='radio'] {
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid var(--border-light);
+  flex-shrink: 0;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.radioItem input[type='radio']:checked {
   border-color: var(--accent-blue);
-  color: #fff;
+  background: var(--accent-blue);
+  box-shadow: inset 0 0 0 3px var(--bg-card);
 }
 
+.applyBtn {
+  width: 100%;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  font-size: 14px;
+  font-weight: 600;
+  padding: 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  margin-top: 4px;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.applyBtn:hover {
+  background: var(--border);
+  border-color: var(--border-light);
+}
+
+/* Card grid */
 .grid3 {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -96,12 +149,6 @@
 
 @media (max-width: 600px) {
   .grid3 { grid-template-columns: 1fr; }
-  .heroBanner { height: 200px; }
-  .heroBannerContent h1 { font-size: 24px; }
-  .heroBannerContent p { font-size: 13px; }
-  .heroBannerContent { padding: 0 16px 24px; }
   .container { padding: 24px 16px; }
-
-  .filterBar { gap: 6px; }
-  .filterBtn { padding: 7px 14px; font-size: 12px; }
+  .pageTitle { font-size: 24px; }
 }

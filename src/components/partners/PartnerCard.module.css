@@ -1,0 +1,90 @@
+.logoWrap {
+  height: 160px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-secondary);
+}
+
+.logo {
+  max-width: 80%;
+  max-height: 120px;
+  object-fit: contain;
+  transition: transform 0.3s;
+}
+
+.logoWrap:hover .logo {
+  transform: scale(1.04);
+}
+
+.logoPlaceholder {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #0f2040, #1a3560);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.logoPlaceholder span {
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--border-light);
+  letter-spacing: 3px;
+}
+
+.body {
+  padding: 16px;
+}
+
+.name {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+
+.excerpt {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.adminBar {
+  display: flex;
+  gap: 6px;
+  padding: 10px 12px;
+  border-top: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+
+.adminBtn {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 4px 10px;
+  cursor: pointer;
+  transition: all 0.15s;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+}
+
+.adminBtn:hover {
+  border-color: var(--border-light);
+  color: var(--text-primary);
+}
+
+.dangerBtn {
+  color: var(--danger);
+  border-color: rgba(231, 76, 60, 0.3);
+}
+
+.dangerBtn:hover {
+  background: rgba(231, 76, 60, 0.1);
+  border-color: var(--danger);
+}

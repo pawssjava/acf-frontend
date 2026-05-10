@@ -122,6 +122,16 @@ export interface BracketDto {
   playoffRounds: PlayoffRoundDto[];
 }
 
+export interface Partner {
+  id: number;
+  name: string;
+  logo: string | null;
+  description: string;
+  hyperlink: string;
+  createdDate: string;
+  updatedDate: string;
+}
+
 export interface DictionaryItem {
   id: number;
   name: string;

@@ -1,8 +1,10 @@
-import { apiClient } from './client';
+import { publicClient, apiClient } from './client';
 import type { Tournament, Participant, TournamentResult, TournamentFormat, TournamentMatch, GroupStanding, BracketDto, RegistrationLogPage } from '../types';
 
-export const getTournaments = () =>
-  apiClient.get<Tournament[]>('/api/tournaments');
+export const getTournaments = (tournamentTypeId?: number | null) => {
+  const params = tournamentTypeId ? { tournamentTypeId } : {};
+  return publicClient.get<Tournament[]>('/api/tournaments', { params });
+};
 
 export const getTournamentById = (id: number) =>
   apiClient.get<Tournament>(`/api/tournaments/${id}`);
