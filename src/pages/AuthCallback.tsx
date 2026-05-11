@@ -43,8 +43,8 @@ export default function AuthCallback() {
         login(token, refresh, {
           id: me.id,
           username: me.username,
-          firstName: me.firstName,
-          lastName: me.lastName,
+          firstName: me.firstName ?? '',
+          lastName: me.lastName ?? '',
           isAdmin: me.isAdmin,
           isVerified: me.isVerified,
           photo: me.photo,

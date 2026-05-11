@@ -3,7 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { getTournamentById, getParticipants, getResults, getRegistrationLog, registerParticipant, unregisterParticipant, startTournament } from '../api/tournaments';
 import type { Tournament, Participant, TournamentResult, RegistrationLogPage } from '../types';
 import { useAuth } from '../context/AuthContext';
-import { isEditable, TOURNAMENT_STATUS } from '../utils/tournament';
+import { isEditable } from '../utils/tournament';
 import Badge from '../components/ui/Badge';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
@@ -223,7 +223,7 @@ export default function TournamentDetail() {
             }
             {tournament.format === 'SWISS' && tournament.phase === 'SWISS' && swissCurrentRound !== null && (
               <Badge variant="gray">
-                Раунд {swissCurrentRound}{tournament.totalRounds ? ` / ${tournament.totalRounds}` : ''}
+                {`Раунд ${swissCurrentRound}${tournament.totalRounds ? ` / ${tournament.totalRounds}` : ''}`}
               </Badge>
             )}
             {user?.isAdmin && isEditable(tournament) && (

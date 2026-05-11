@@ -44,7 +44,7 @@ function useIsMobile() {
 }
 
 export default function Profile() {
-  const { user: authUser, isAuthenticated, logout, updateUser: updateAuthUser } = useAuth();
+  const { isAuthenticated, updateUser: updateAuthUser } = useAuth();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const isMobile = useIsMobile();
@@ -83,8 +83,6 @@ export default function Profile() {
       setToast({ message: 'Не удалось загрузить фото. Попробуйте снова.', type: 'error' });
     }
   };
-
-  const handleLogout = () => logout().then(() => navigate('/'));
 
   if (loading) return <div className={styles.loading}>Загружаем...</div>;
   if (!user) return <div className={styles.loading}>Профиль не найден</div>;

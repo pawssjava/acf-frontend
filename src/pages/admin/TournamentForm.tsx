@@ -158,6 +158,7 @@ export default function TournamentForm() {
         capacity: Number(form.capacity),
         prizeMoney: Number(form.prizeMoney),
         tournamentTypeId: Number(form.tournamentTypeId),
+        tournamentStatusId: tournament?.tournamentStatusId ?? 2,
       };
 
       let saved: Tournament;
