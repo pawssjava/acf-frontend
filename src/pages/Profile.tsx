@@ -59,7 +59,10 @@ export default function Profile() {
   useEffect(() => {
     if (!isAuthenticated) { navigate('/login'); return; }
     getMe()
-      .then(r => setUser(r.data))
+      .then(r => {
+        setUser(r.data);
+        updateAuthUser({ photo: r.data.photo, isVerified: r.data.isVerified });
+      })
       .catch(() => {})
       .finally(() => setLoading(false));
   }, [isAuthenticated, navigate]);
