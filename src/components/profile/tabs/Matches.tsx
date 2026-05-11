@@ -80,7 +80,7 @@ export default function Matches({ user }: Props) {
     <div className={styles.wrap}>
       {loading ? (
         <div className={styles.loading}>Загружаем...</div>
-      ) : !data || data.total === 0 ? (
+      ) : !data || data.content.length === 0 ? (
         <div className={styles.empty}>Матчей пока нет</div>
       ) : (
         <>
