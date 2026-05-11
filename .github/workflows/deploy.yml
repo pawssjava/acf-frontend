@@ -23,6 +23,8 @@ jobs:
           context: .
           push: true
           tags: ghcr.io/pawssjava/acf-frontend:latest
+          build-args: |
+            VITE_API_URL=https://api.cyberfootball.kz
 
       - name: Deploy to VPS
         uses: appleboy/ssh-action@v1
