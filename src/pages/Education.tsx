@@ -14,6 +14,7 @@ import type { EducationMaterialDto, EducationPage } from '../types';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
 import Toast from '../components/ui/Toast';
+import VideoPlayer from '../components/ui/VideoPlayer';
 import styles from './Education.module.css';
 
 const PAGE_SIZE = 12;
@@ -73,7 +74,6 @@ export default function EducationPage() {
   const filterRef = useRef<HTMLDivElement>(null);
 
   const [videoModal, setVideoModal] = useState<EducationMaterialDto | null>(null);
-  const videoRef = useRef<HTMLVideoElement>(null);
 
   const [deleteId, setDeleteId] = useState<number | null>(null);
   const [deleting, setDeleting] = useState(false);
@@ -134,10 +134,7 @@ export default function EducationPage() {
     setFilterOpen(false);
   };
 
-  const closeVideo = () => {
-    videoRef.current?.pause();
-    setVideoModal(null);
-  };
+  const closeVideo = () => setVideoModal(null);
 
   const handleDelete = async () => {
     if (deleteId == null) return;
@@ -412,16 +409,7 @@ export default function EducationPage() {
                 <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
               </svg>
             </button>
-            <video
-              ref={videoRef}
-              src={videoModal.videoUrl!}
-              controls
-              controlsList="nodownload"
-              disablePictureInPicture
-              onContextMenu={e => e.preventDefault()}
-              preload="metadata"
-              className={styles.videoPlayer}
-            />
+            <VideoPlayer src={videoModal.videoUrl!} />
           </div>
         </div>
       )}

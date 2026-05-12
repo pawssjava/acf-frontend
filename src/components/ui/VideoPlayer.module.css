@@ -1,0 +1,261 @@
+.player {
+  position: relative;
+  width: 100%;
+  background: #000;
+  border-radius: var(--radius-lg, 12px);
+  overflow: hidden;
+  user-select: none;
+}
+
+.hideCursor { cursor: none; }
+
+.video {
+  width: 100%;
+  display: block;
+  max-height: 80vh;
+  cursor: pointer;
+}
+
+/* ── Center play overlay ── */
+.centerOverlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.centerOverlayVisible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.bigPlayBtn {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(6px);
+  border: 2px solid rgba(255, 255, 255, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.15s, background 0.15s;
+}
+
+.bigPlayBtn:hover {
+  background: rgba(0, 0, 0, 0.72);
+  transform: scale(1.08);
+}
+
+/* ── Skip flash ── */
+.skipFlash {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  border-radius: 50%;
+  width: 64px;
+  height: 64px;
+  justify-content: center;
+  pointer-events: none;
+  animation: flashFade 0.6s ease-out forwards;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.skipFlashLeft { left: 12%; }
+.skipFlashRight { right: 12%; }
+
+@keyframes flashFade {
+  0%   { opacity: 1; transform: translateY(-50%) scale(1); }
+  70%  { opacity: 1; }
+  100% { opacity: 0; transform: translateY(-50%) scale(1.15); }
+}
+
+/* ── Controls bar ── */
+.controls {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 0 16px 12px;
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.82));
+  opacity: 0;
+  transition: opacity 0.25s;
+  pointer-events: none;
+}
+
+.controlsVisible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* ── Progress bar ── */
+.progressTrack {
+  position: relative;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 2px;
+  margin-bottom: 10px;
+  cursor: pointer;
+  transition: height 0.15s;
+}
+
+.progressTrack:hover,
+.progressTrack:active {
+  height: 6px;
+}
+
+.progressBuf {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 2px;
+  pointer-events: none;
+}
+
+.progressFill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  background: #e53935;
+  border-radius: 2px;
+  pointer-events: none;
+}
+
+.progressThumb {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%) scale(0);
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #fff;
+  pointer-events: none;
+  transition: transform 0.12s;
+}
+
+.progressTrack:hover .progressThumb,
+.progressTrack:active .progressThumb {
+  transform: translate(-50%, -50%) scale(1);
+}
+
+/* ── Bottom control row ── */
+.controlRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+}
+
+.leftControls,
+.rightControls {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.iconBtn {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: none;
+  background: transparent;
+  color: #fff;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: background 0.15s, color 0.15s;
+  flex-shrink: 0;
+}
+
+.iconBtn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+}
+
+.skipLabel {
+  position: absolute;
+  bottom: 3px;
+  right: 4px;
+  font-size: 9px;
+  font-weight: 800;
+  line-height: 1;
+  pointer-events: none;
+}
+
+/* ── Volume ── */
+.volumeGroup {
+  display: flex;
+  align-items: center;
+  gap: 0;
+}
+
+.volumeSlider {
+  width: 0;
+  overflow: hidden;
+  transition: width 0.2s;
+  cursor: pointer;
+  padding: 8px 0;
+  display: flex;
+  align-items: center;
+}
+
+.volumeSliderVisible {
+  width: 72px;
+  padding: 8px 6px;
+}
+
+.volumeTrack {
+  position: relative;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: 2px;
+  width: 100%;
+}
+
+.volumeFill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  background: #fff;
+  border-radius: 2px;
+  pointer-events: none;
+}
+
+.volumeThumb {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #fff;
+  pointer-events: none;
+}
+
+/* ── Time ── */
+.time {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.9);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+  padding: 0 4px;
+}
