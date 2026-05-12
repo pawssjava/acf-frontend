@@ -1,7 +1,8 @@
 .toast {
   position: fixed;
-  bottom: 32px;
-  right: 32px;
+  top: 24px;
+  left: 50%;
+  transform: translateX(-50%);
   z-index: 9999;
   padding: 13px 18px;
   border-radius: var(--radius-md);
@@ -12,7 +13,7 @@
   box-shadow: var(--shadow);
   min-width: 240px;
   max-width: 420px;
-  animation: slideUp 0.2s ease;
+  animation: slideDown 0.2s ease;
 }
 
 .success {
@@ -42,11 +43,16 @@
 }
 .close:hover { opacity: 1; }
 
-@keyframes slideUp {
-  from { opacity: 0; transform: translateY(10px); }
-  to   { opacity: 1; transform: translateY(0); }
+@keyframes slideDown {
+  from { opacity: 0; transform: translateX(-50%) translateY(-10px); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
 }
 
 @media (max-width: 500px) {
-  .toast { left: 16px; right: 16px; bottom: 20px; min-width: 0; }
+  .toast { left: 16px; right: 16px; top: 16px; transform: none; min-width: 0; animation: slideDownMobile 0.2s ease; }
+}
+
+@keyframes slideDownMobile {
+  from { opacity: 0; transform: translateY(-10px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
