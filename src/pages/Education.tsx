@@ -392,14 +392,6 @@ export default function EducationPage() {
                     <div className={styles.sideBody}>
                       <h4 className={styles.sideTitle}>{m.title}</h4>
                       <p className={styles.sideDesc}>{m.description}</p>
-                      {m.presentationUrl && (
-                        <button
-                          className={styles.sideLink}
-                          onClick={() => downloadPresentation(m.presentationUrl!)}
-                        >
-                          {t('education.downloadPresentation')} ›
-                        </button>
-                      )}
                     </div>
                   </div>
                 ))}
