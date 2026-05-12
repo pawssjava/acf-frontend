@@ -125,6 +125,7 @@ const kk = {
     backToBlog: '← Блогқа оралу',
     notFound: 'Мақала табылмады',
     edit: 'Өңдеу',
+    readMore: 'Толығырақ →',
   },
   tournaments: {
     title: 'Турнирлер',
@@ -139,6 +140,20 @@ const kk = {
     upcoming: 'Алдағы',
     finished: 'Аяқталған',
     apply: 'Қолдану',
+    players: '{{count}} ойыншы',
+    prizePool: 'Жүлделік қор',
+  },
+  tournamentHistory: {
+    title: 'Турнирлер тарихы',
+    loading: 'Жүктелуде...',
+    empty: 'Аяқталған турнирлер жоқ',
+    colTournament: 'Турнир',
+    colFormat: 'Формат',
+    colDates: 'Күндер',
+    colPlace: 'Орын',
+    colPoints: 'Ұпайлар',
+    prev: '← Артқа',
+    next: 'Алға →',
   },
   tournamentDetail: {
     loading: 'Жүктелуде...',

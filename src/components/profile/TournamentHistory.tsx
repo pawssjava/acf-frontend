@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { getUserTournaments } from '../../api/users';
 import type { UserTournamentsPage } from '../../types';
 import styles from './TournamentHistory.module.css';
@@ -10,7 +11,7 @@ const FORMAT_LABELS: Record<string, string> = {
   EKPL: 'EKPL',
 };
 
-function fmtDate(d: string) {
+function fmtDateNumeric(d: string) {
   return new Date(d + 'T00:00:00').toLocaleDateString('ru-RU', {
     day: '2-digit',
     month: '2-digit',
@@ -42,6 +43,7 @@ interface Props {
 
 export default function TournamentHistory({ userId }: Props) {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [data, setData] = useState<UserTournamentsPage | null>(null);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(0);
@@ -61,48 +63,48 @@ export default function TournamentHistory({ userId }: Props) {
 
   return (
     <div className={styles.card}>
-      <h2>История турниров</h2>
+      <h2>{t('tournamentHistory.title')}</h2>
 
       {loading ? (
-        <div className={styles.loading}>Загружаем...</div>
+        <div className={styles.loading}>{t('tournamentHistory.loading')}</div>
       ) : !data || data.totalElements === 0 ? (
-        <div className={styles.empty}>Завершённых турниров нет</div>
+        <div className={styles.empty}>{t('tournamentHistory.empty')}</div>
       ) : (
         <>
           <div className={styles.tableWrap}>
             <table className={styles.table}>
               <thead>
                 <tr>
-                  <th>Турнир</th>
-                  <th>Формат</th>
-                  <th>Даты</th>
-                  <th>Место</th>
-                  <th>Очки</th>
+                  <th>{t('tournamentHistory.colTournament')}</th>
+                  <th>{t('tournamentHistory.colFormat')}</th>
+                  <th>{t('tournamentHistory.colDates')}</th>
+                  <th>{t('tournamentHistory.colPlace')}</th>
+                  <th>{t('tournamentHistory.colPoints')}</th>
                 </tr>
               </thead>
               <tbody>
-                {data.content.map(t => (
+                {data.content.map(tour => (
                   <tr
-                    key={t.tournamentId}
+                    key={tour.tournamentId}
                     className={styles.clickableRow}
-                    onClick={() => navigate(`/tournaments/${t.tournamentId}`)}
+                    onClick={() => navigate(`/tournaments/${tour.tournamentId}`)}
                   >
                     <td>
                       <div className={styles.nameCell}>
-                        {t.logo ? (
-                          <img src={t.logo} alt="" className={styles.logo} />
+                        {tour.logo ? (
+                          <img src={tour.logo} alt="" className={styles.logo} />
                         ) : (
                           <div className={styles.logoPlaceholder} />
                         )}
-                        <span className={styles.tournamentName}>{t.tournamentName}</span>
+                        <span className={styles.tournamentName}>{tour.tournamentName}</span>
                       </div>
                     </td>
-                    <td className={styles.secondary}>{FORMAT_LABELS[t.format] ?? t.format}</td>
+                    <td className={styles.secondary}>{FORMAT_LABELS[tour.format] ?? tour.format}</td>
                     <td className={styles.dates}>
-                      {fmtDate(t.startDate)} → {fmtDate(t.endDate)}
+                      {fmtDateNumeric(tour.startDate)} → {fmtDateNumeric(tour.endDate)}
                     </td>
-                    <td><PlaceCell place={t.place} /></td>
-                    <td className={styles.secondary}>{t.score ?? '—'}</td>
+                    <td><PlaceCell place={tour.place} /></td>
+                    <td className={styles.secondary}>{tour.score ?? '—'}</td>
                   </tr>
                 ))}
               </tbody>
@@ -116,7 +118,7 @@ export default function TournamentHistory({ userId }: Props) {
                 disabled={page === 0}
                 onClick={() => setPage(p => p - 1)}
               >
-                ← Назад
+                {t('tournamentHistory.prev')}
               </button>
               <div className={styles.pageNumbers}>
                 {buildPages(page, data.totalPages).map((item, i) =>
@@ -138,7 +140,7 @@ export default function TournamentHistory({ userId }: Props) {
                 disabled={page === data.totalPages - 1}
                 onClick={() => setPage(p => p + 1)}
               >
-                Вперёд →
+                {t('tournamentHistory.next')}
               </button>
             </div>
           )}

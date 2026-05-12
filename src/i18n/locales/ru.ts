@@ -125,6 +125,7 @@ const ru = {
     backToBlog: '← Назад к блогу',
     notFound: 'Статья не найдена',
     edit: 'Редактировать',
+    readMore: 'Читать подробнее →',
   },
   tournaments: {
     title: 'Турниры',
@@ -139,6 +140,20 @@ const ru = {
     upcoming: 'Будущие',
     finished: 'Завершенные',
     apply: 'Применить',
+    players: '{{count}} игроков',
+    prizePool: 'Призовой фонд',
+  },
+  tournamentHistory: {
+    title: 'История турниров',
+    loading: 'Загружаем...',
+    empty: 'Завершённых турниров нет',
+    colTournament: 'Турнир',
+    colFormat: 'Формат',
+    colDates: 'Даты',
+    colPlace: 'Место',
+    colPoints: 'Очки',
+    prev: '← Назад',
+    next: 'Вперёд →',
   },
   tournamentDetail: {
     loading: 'Загружаем...',

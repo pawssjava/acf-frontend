@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import type { Tournament } from '../../types';
 import Badge from '../ui/Badge';
 import Card from '../ui/Card';
@@ -14,6 +15,8 @@ function statusVariant(name: string): 'teal' | 'blue' | 'gray' {
 
 export default function TournamentCard({ tournament }: Props) {
   const navigate = useNavigate();
+  const { t, i18n } = useTranslation();
+  const locale = i18n.language === 'en' ? 'en-US' : 'ru-RU';
   return (
     <Card hoverable onClick={() => navigate(`/tournaments/${tournament.id}`)}>
       <div className={styles.imgWrap}>
@@ -32,14 +35,14 @@ export default function TournamentCard({ tournament }: Props) {
         <h3 className={styles.name}>{tournament.name}</h3>
         <div className={styles.meta}>
           <span>
-            {new Date(tournament.startDate).toLocaleDateString('ru-RU')}
-            {tournament.endDate && ` – ${new Date(tournament.endDate).toLocaleDateString('ru-RU')}`}
+            {new Date(tournament.startDate).toLocaleDateString(locale)}
+            {tournament.endDate && ` – ${new Date(tournament.endDate).toLocaleDateString(locale)}`}
           </span>
-          <span>{tournament.capacity} игроков</span>
+          <span>{t('tournaments.players', { count: tournament.capacity })}</span>
         </div>
         <div className={styles.prize}>
-          <span className={styles.prizeLabel}>Призовой фонд</span>
-          <span className={styles.prizeValue}>{tournament.prizeMoney.toLocaleString('ru-RU')} ₸</span>
+          <span className={styles.prizeLabel}>{t('tournaments.prizePool')}</span>
+          <span className={styles.prizeValue}>{tournament.prizeMoney.toLocaleString(locale)} ₸</span>
         </div>
       </div>
     </Card>

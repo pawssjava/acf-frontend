@@ -5,6 +5,7 @@ import { getTournamentById, getParticipants, getResults, getRegistrationLog, reg
 import type { Tournament, Participant, TournamentResult, RegistrationLogPage } from '../types';
 import { useAuth } from '../context/AuthContext';
 import { isEditable } from '../utils/tournament';
+import { fmtDate } from '../utils/fmtDate';
 import Badge from '../components/ui/Badge';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
@@ -45,7 +46,7 @@ export default function TournamentDetail() {
   const [psnError, setPsnError] = useState('');
   const [verificationRequired, setVerificationRequired] = useState(false);
 
-  const locale = i18n.language === 'kk' ? 'kk-KZ' : i18n.language === 'en' ? 'en-US' : 'ru-RU';
+  const locale = i18n.language === 'en' ? 'en-US' : 'ru-RU';
 
   function validatePsn(val: string): string | undefined {
     if (val.length < 3)  return t('tournamentDetail.psnMin');
@@ -269,8 +270,8 @@ export default function TournamentDetail() {
         {activeTab === 'info' && (
           <div className={styles.infoGrid}>
             <div className={styles.infoCard}>
-              <InfoRow label={t('tournamentDetail.labelStartDate')} value={new Date(tournament.startDate).toLocaleDateString(locale, { day: 'numeric', month: 'long', year: 'numeric' })} />
-              <InfoRow label={t('tournamentDetail.labelEndDate')} value={new Date(tournament.endDate).toLocaleDateString(locale, { day: 'numeric', month: 'long', year: 'numeric' })} />
+              <InfoRow label={t('tournamentDetail.labelStartDate')} value={fmtDate(tournament.startDate, i18n.language)} />
+              <InfoRow label={t('tournamentDetail.labelEndDate')} value={fmtDate(tournament.endDate, i18n.language)} />
               <InfoRow label={t('tournamentDetail.labelFormat')} value={FORMAT_LABEL[tournament.format] ?? tournament.format} />
               <InfoRow label={t('tournamentDetail.labelPhase')} value={tournament.phase ? (PHASE_LABEL[tournament.phase] ?? tournament.phase) : t('tournamentDetail.notStarted')} />
               {tournament.format === 'SWISS' && tournament.totalRounds && (
@@ -461,7 +462,7 @@ function InfoRow({ label, value }: { label: string; value: string }) {
 
 function ResultsTab({ tournamentId }: { tournamentId: number }) {
   const { t, i18n } = useTranslation();
-  const locale = i18n.language === 'kk' ? 'kk-KZ' : i18n.language === 'en' ? 'en-US' : 'ru-RU';
+  const locale = i18n.language === 'en' ? 'en-US' : 'ru-RU';
   const [results, setResults] = useState<TournamentResult[]>([]);
   const [fetching, setFetching] = useState(true);
 
@@ -534,7 +535,7 @@ function buildPages(current: number, total: number): (number | '…')[] {
 
 function RegistrationActivityTab({ tournamentId }: { tournamentId: number }) {
   const { t, i18n } = useTranslation();
-  const locale = i18n.language === 'kk' ? 'kk-KZ' : i18n.language === 'en' ? 'en-US' : 'ru-RU';
+  const locale = i18n.language === 'en' ? 'en-US' : 'ru-RU';
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [page, setPage] = useState(0);

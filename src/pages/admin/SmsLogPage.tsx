@@ -5,6 +5,7 @@ import { useAuth } from '../../context/AuthContext';
 import { fetchSmsLog } from '../../api/smsLog';
 import type { SmsAction, SmsLogEntry, SmsLogPage } from '../../types';
 import Badge from '../../components/ui/Badge';
+import { fmtDate } from '../../utils/fmtDate';
 import styles from './SmsLogPage.module.css';
 
 const PAGE_SIZE = 20;
@@ -76,17 +77,8 @@ export default function SmsLogPage() {
 
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const locale = i18n.language === 'kk' ? 'kk-KZ' : i18n.language === 'en' ? 'en-US' : 'ru-RU';
-
-  function fmtDate(iso: string): string {
-    return new Date(iso).toLocaleString(locale, {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-  }
+  const fmt = (iso: string) =>
+    fmtDate(iso, i18n.language, { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 
   useEffect(() => {
     if (!isAuthenticated || !user?.isAdmin) {
@@ -245,10 +237,10 @@ export default function SmsLogPage() {
                               {row.action === 'REGISTRATION' ? t('smsLog.actionRegister') : t('smsLog.actionForgot')}
                             </Badge>
                           </td>
-                          <td className={styles.dateCell}>{fmtDate(row.sentAt)}</td>
+                          <td className={styles.dateCell}>{fmt(row.sentAt)}</td>
                           <td className={styles.dateCell}>
                             {row.verifiedAt
-                              ? fmtDate(row.verifiedAt)
+                              ? fmt(row.verifiedAt)
                               : <span className={styles.dash}>—</span>}
                           </td>
                           <td>

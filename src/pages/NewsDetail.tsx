@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { getNewsById } from '../api/news';
 import type { News } from '../types';
 import { useAuth } from '../context/AuthContext';
+import { fmtDate } from '../utils/fmtDate';
 import styles from './DetailPage.module.css';
 
 export default function NewsDetail() {
@@ -24,7 +25,6 @@ export default function NewsDetail() {
   if (loading) return <div className={styles.loading}>{t('news.loading')}</div>;
   if (!news) return <div className={styles.notFound}>{t('news.notFound')}</div>;
 
-  const locale = i18n.language === 'kk' ? 'kk-KZ' : i18n.language === 'en' ? 'en-US' : 'ru-RU';
 
   return (
     <div className={styles.page}>
@@ -44,7 +44,7 @@ export default function NewsDetail() {
 
         <div className={styles.content}>
           <p className={styles.date}>
-            {new Date(news.createdDate).toLocaleDateString(locale, { day: 'numeric', month: 'long', year: 'numeric' })}
+            {fmtDate(news.createdDate, i18n.language)}
           </p>
           <h1 className={styles.title}>{news.title}</h1>
           <div className={styles.body}>

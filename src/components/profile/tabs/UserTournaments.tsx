@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { getUserTournaments } from '../../../api/users';
 import type { User, UserTournamentEntry, UserTournamentsPage } from '../../../types';
+import { fmtDate } from '../../../utils/fmtDate';
 import Button from '../../ui/Button';
 import styles from './UserTournaments.module.css';
 
@@ -29,16 +30,13 @@ function buildPages(cur: number, total: number): (number | '…')[] {
 function TournamentCard({ t: entry }: { t: UserTournamentEntry }) {
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
-  const locale = i18n.language === 'kk' ? 'kk-KZ' : i18n.language === 'en' ? 'en-US' : 'ru-RU';
 
   function fmtDateRange(start: string, end: string) {
-    const opts: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'long', year: 'numeric' };
-    const s = new Date(start + 'T00:00:00').toLocaleDateString(locale, opts);
-    const e = new Date(end + 'T00:00:00').toLocaleDateString(locale, opts);
+    const s = fmtDate(start + 'T00:00:00', i18n.language);
+    const e = fmtDate(end + 'T00:00:00', i18n.language);
     if (start.slice(0, 7) === end.slice(0, 7)) {
-      const sd = new Date(start + 'T00:00:00').toLocaleDateString(locale, { day: 'numeric' });
-      const ed = new Date(end + 'T00:00:00').toLocaleDateString(locale, { day: 'numeric', month: 'long', year: 'numeric' });
-      return `${sd}–${ed}`;
+      const sd = new Date(start + 'T00:00:00').getDate();
+      return `${sd}–${e}`;
     }
     return `${s} – ${e}`;
   }

@@ -28,7 +28,7 @@ const Checkmark = () => (
 function MatchCard({ match, myUsername }: { match: MatchEntry; myUsername: string }) {
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
-  const locale = i18n.language === 'kk' ? 'kk-KZ' : i18n.language === 'en' ? 'en-US' : 'ru-RU';
+  const locale = i18n.language === 'en' ? 'en-US' : 'ru-RU';
 
   function fmtDate(iso: string) {
     const d = new Date(iso);

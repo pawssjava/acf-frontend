@@ -91,7 +91,7 @@ export default function PersonalInfo({ user, onUpdate }: Props) {
               onChange={e => setForm(f => ({ ...f, cityId: e.target.value ? Number(e.target.value) : null }))}
             >
               <option value="">{t('personalInfo.notSpecified')}</option>
-              {cities.map(c => <option key={c.id} value={c.id}>{c.nameRu}</option>)}
+              {cities.map(c => <option key={c.id} value={c.id}>{c.nameKk}</option>)}
             </select>
           </div>
         </div>

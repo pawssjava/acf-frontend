@@ -125,6 +125,7 @@ const en = {
     backToBlog: '← Back to blog',
     notFound: 'Article not found',
     edit: 'Edit',
+    readMore: 'Read more →',
   },
   tournaments: {
     title: 'Tournaments',
@@ -139,6 +140,20 @@ const en = {
     upcoming: 'Upcoming',
     finished: 'Finished',
     apply: 'Apply',
+    players: '{{count}} players',
+    prizePool: 'Prize pool',
+  },
+  tournamentHistory: {
+    title: 'Tournament history',
+    loading: 'Loading...',
+    empty: 'No completed tournaments',
+    colTournament: 'Tournament',
+    colFormat: 'Format',
+    colDates: 'Dates',
+    colPlace: 'Place',
+    colPoints: 'Points',
+    prev: '← Prev',
+    next: 'Next →',
   },
   tournamentDetail: {
     loading: 'Loading...',
