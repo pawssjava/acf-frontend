@@ -65,7 +65,7 @@ export default function Header() {
     <header className={styles.header}>
       <div className={styles.inner}>
         <Link to="/news" className={styles.logo} onClick={closeAll}>
-          <img src={theme === 'dark' ? logoWhite : logoBlack} alt="ACF" className={styles.logoImg} />
+          <img src={theme === 'dark' ? logoBlack : logoWhite} alt="ACF" className={styles.logoImg} />
         </Link>
 
         <nav className={[styles.nav, menuOpen ? styles.open : ''].join(' ')}>
