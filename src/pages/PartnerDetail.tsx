@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { getPartnerById, deletePartner, uploadPartnerLogo } from '../api/partners';
 import type { Partner } from '../types';
 import { useAuth } from '../context/AuthContext';
@@ -9,6 +10,7 @@ import styles from './PartnerDetail.module.css';
 export default function PartnerDetail() {
   const { id } = useParams<{ id: string }>();
   const { user } = useAuth();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const fileRef = useRef<HTMLInputElement>(null);
   const [partner, setPartner] = useState<Partner | null>(null);
@@ -29,43 +31,43 @@ export default function PartnerDetail() {
     try {
       const { data } = await uploadPartnerLogo(partner.id, file);
       setPartner(data);
-      setToast({ message: 'Логотип обновлён', type: 'success' });
+      setToast({ message: t('partners.logoUpdated'), type: 'success' });
     } catch {
-      setToast({ message: 'Не удалось загрузить логотип', type: 'error' });
+      setToast({ message: t('partners.logoError'), type: 'error' });
     }
     e.target.value = '';
   };
 
   const handleDelete = async () => {
     if (!partner) return;
-    if (!window.confirm(`Удалить партнёра "${partner.name}"?`)) return;
+    if (!window.confirm(t('partners.deleteConfirm', { name: partner.name }))) return;
     try {
       await deletePartner(partner.id);
       navigate('/partners');
     } catch {
-      setToast({ message: 'Не удалось удалить партнёра', type: 'error' });
+      setToast({ message: t('partners.deleteError'), type: 'error' });
     }
   };
 
-  if (loading) return <div className={styles.loading}>Загружаем...</div>;
-  if (!partner) return <div className={styles.notFound}>Партнёр не найден</div>;
+  if (loading) return <div className={styles.loading}>{t('partners.loading')}</div>;
+  if (!partner) return <div className={styles.notFound}>{t('partners.notFound')}</div>;
 
   return (
     <div className={styles.page}>
       {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
       <div className={styles.container}>
         <div className={styles.topBar}>
-          <Link to="/partners" className={styles.back}>← Назад к партнёрам</Link>
+          <Link to="/partners" className={styles.back}>{t('partners.backToPartners')}</Link>
           {user?.isAdmin && (
             <div className={styles.adminActions}>
               <Link to={`/admin/partners/${id}/edit`} className={styles.back}>
-                Редактировать
+                {t('partners.edit')}
               </Link>
               <button className={styles.back} onClick={() => fileRef.current?.click()}>
-                Загрузить логотип
+                {t('partners.uploadLogo')}
               </button>
               <button className={[styles.back, styles.danger].join(' ')} onClick={handleDelete}>
-                Удалить
+                {t('partners.delete')}
               </button>
               <input
                 ref={fileRef}
@@ -96,7 +98,7 @@ export default function PartnerDetail() {
               rel="noopener noreferrer"
               className={styles.visitBtn}
             >
-              Перейти на сайт →
+              {t('partners.visitSite')}
             </a>
           </div>
         </div>

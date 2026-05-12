@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
 import { fetchSmsLog } from '../../api/smsLog';
 import type { SmsAction, SmsLogEntry, SmsLogPage } from '../../types';
@@ -10,16 +11,6 @@ const PAGE_SIZE = 20;
 
 type StatusFilter = 'all' | 'used' | 'unused';
 type ActionFilter = 'all' | SmsAction;
-
-function fmtDate(iso: string): string {
-  return new Date(iso).toLocaleString('ru-RU', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
-}
 
 function buildPages(current: number, total: number): (number | '…')[] {
   if (total <= 7) return Array.from({ length: total }, (_, i) => i);
@@ -37,25 +28,26 @@ function buildPages(current: number, total: number): (number | '…')[] {
 }
 
 function ExpandedRow({ entry }: { entry: SmsLogEntry }) {
+  const { t } = useTranslation();
   return (
     <tr className={styles.expandRow}>
       <td colSpan={6}>
         <div className={styles.expandContent}>
           <div className={styles.expandItem}>
-            <span className={styles.expandLabel}>Код:</span>
+            <span className={styles.expandLabel}>{t('smsLog.expandCode')}</span>
             <code className={styles.code}>{entry.code}</code>
           </div>
           <div className={styles.expandItem}>
-            <span className={styles.expandLabel}>Истекает:</span>
+            <span className={styles.expandLabel}>{t('smsLog.expandExpires')}</span>
             <span className={styles.expandValue}>{entry.expiresAt}</span>
           </div>
           <div className={styles.expandItem}>
-            <span className={styles.expandLabel}>Отправлен (ISO):</span>
+            <span className={styles.expandLabel}>{t('smsLog.expandSentIso')}</span>
             <span className={styles.expandValue}>{entry.sentAt}</span>
           </div>
           {entry.verifiedAt && (
             <div className={styles.expandItem}>
-              <span className={styles.expandLabel}>Подтверждён (ISO):</span>
+              <span className={styles.expandLabel}>{t('smsLog.expandVerifiedIso')}</span>
               <span className={styles.expandValue}>{entry.verifiedAt}</span>
             </div>
           )}
@@ -68,6 +60,7 @@ function ExpandedRow({ entry }: { entry: SmsLogEntry }) {
 export default function SmsLogPage() {
   const navigate = useNavigate();
   const { isAuthenticated, user } = useAuth();
+  const { t, i18n } = useTranslation();
 
   const [data, setData] = useState<SmsLogPage | null>(null);
   const [loading, setLoading] = useState(true);
@@ -76,15 +69,24 @@ export default function SmsLogPage() {
 
   const [phoneInput, setPhoneInput] = useState('');
   const [phone, setPhone] = useState('');
-  // NOTE: action is filtered client-side on the current page because the API does not
-  // support an action query parameter. For large datasets this limits accuracy — the
-  // filter only applies within the currently loaded page, not the full dataset.
   const [actionFilter, setActionFilter] = useState<ActionFilter>('all');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
 
   const [expandedId, setExpandedId] = useState<number | null>(null);
 
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const locale = i18n.language === 'kk' ? 'kk-KZ' : i18n.language === 'en' ? 'en-US' : 'ru-RU';
+
+  function fmtDate(iso: string): string {
+    return new Date(iso).toLocaleString(locale, {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  }
 
   useEffect(() => {
     if (!isAuthenticated || !user?.isAdmin) {
@@ -157,7 +159,7 @@ export default function SmsLogPage() {
     return (
       <div className={styles.page}>
         <div className={styles.container}>
-          <div className={styles.errorBox}>У вас нет прав администратора для просмотра этой страницы.</div>
+          <div className={styles.errorBox}>{t('smsLog.forbidden')}</div>
         </div>
       </div>
     );
@@ -166,14 +168,14 @@ export default function SmsLogPage() {
   return (
     <div className={styles.page}>
       <div className={styles.container}>
-        <h1 className={styles.pageTitle}>SMS Log</h1>
+        <h1 className={styles.pageTitle}>{t('smsLog.title')}</h1>
 
         <div className={styles.filtersBar}>
           <input
             type="text"
             value={phoneInput}
             onChange={handlePhoneChange}
-            placeholder="🔍 Поиск по номеру телефона"
+            placeholder={t('smsLog.searchPhone')}
             className={styles.phoneInput}
           />
           <select
@@ -181,9 +183,9 @@ export default function SmsLogPage() {
             onChange={handleActionChange}
             className={styles.select}
           >
-            <option value="all">Все действия</option>
-            <option value="REGISTRATION">Регистрация</option>
-            <option value="FORGOT_PASSWORD">Забыл пароль</option>
+            <option value="all">{t('smsLog.allActions')}</option>
+            <option value="REGISTRATION">{t('smsLog.actionRegister')}</option>
+            <option value="FORGOT_PASSWORD">{t('smsLog.actionForgot')}</option>
           </select>
           <div className={styles.segmented}>
             {(['all', 'used', 'unused'] as StatusFilter[]).map(v => (
@@ -192,7 +194,7 @@ export default function SmsLogPage() {
                 className={[styles.segBtn, statusFilter === v ? styles.segBtnActive : ''].join(' ')}
                 onClick={() => handleStatusChange(v)}
               >
-                {v === 'all' ? 'Все' : v === 'used' ? 'Использован' : 'Не использован'}
+                {v === 'all' ? t('smsLog.statusAll') : v === 'used' ? t('smsLog.statusUsed') : t('smsLog.statusUnused')}
               </button>
             ))}
           </div>
@@ -207,13 +209,13 @@ export default function SmsLogPage() {
             </div>
           ) : error === 'other' ? (
             <div className={styles.stateBox}>
-              <p>Не удалось загрузить данные. Попробуйте снова.</p>
-              <button className={styles.actionBtn} onClick={load}>Повторить</button>
+              <p>{t('smsLog.loadError')}</p>
+              <button className={styles.actionBtn} onClick={load}>{t('smsLog.retry')}</button>
             </div>
           ) : rows.length === 0 ? (
             <div className={styles.stateBox}>
-              <p>Нет SMS-кодов, соответствующих текущим фильтрам.</p>
-              <button className={styles.actionBtn} onClick={clearFilters}>Сбросить фильтры</button>
+              <p>{t('smsLog.noResults')}</p>
+              <button className={styles.actionBtn} onClick={clearFilters}>{t('smsLog.clearFilters')}</button>
             </div>
           ) : (
             <>
@@ -221,12 +223,12 @@ export default function SmsLogPage() {
                 <table className={styles.table}>
                   <thead>
                     <tr>
-                      <th className={styles.thId}>ID</th>
-                      <th>Телефон</th>
-                      <th>Действие</th>
-                      <th>Отправлен</th>
-                      <th>Подтверждён</th>
-                      <th>Использован</th>
+                      <th className={styles.thId}>{t('smsLog.colId')}</th>
+                      <th>{t('smsLog.colPhone')}</th>
+                      <th>{t('smsLog.colAction')}</th>
+                      <th>{t('smsLog.colSent')}</th>
+                      <th>{t('smsLog.colVerified')}</th>
+                      <th>{t('smsLog.colUsed')}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -240,7 +242,7 @@ export default function SmsLogPage() {
                           <td>{row.phoneNumber}</td>
                           <td>
                             <Badge variant={row.action === 'REGISTRATION' ? 'blue' : 'yellow'}>
-                              {row.action === 'REGISTRATION' ? 'Регистрация' : 'Забыл пароль'}
+                              {row.action === 'REGISTRATION' ? t('smsLog.actionRegister') : t('smsLog.actionForgot')}
                             </Badge>
                           </td>
                           <td className={styles.dateCell}>{fmtDate(row.sentAt)}</td>
@@ -251,7 +253,7 @@ export default function SmsLogPage() {
                           </td>
                           <td>
                             <Badge variant={row.used ? 'teal' : 'gray'}>
-                              {row.used ? 'Да' : 'Нет'}
+                              {row.used ? t('smsLog.yes') : t('smsLog.no')}
                             </Badge>
                           </td>
                         </tr>
@@ -264,7 +266,7 @@ export default function SmsLogPage() {
 
               <div className={styles.tableFooter}>
                 <span className={styles.totalInfo}>
-                  Показано {from}–{to} из {data?.totalElements ?? 0}
+                  {t('smsLog.showing', { from, to, total: data?.totalElements ?? 0 })}
                 </span>
 
                 {data && data.totalPages > 1 && (
@@ -274,7 +276,7 @@ export default function SmsLogPage() {
                       disabled={page === 0}
                       onClick={() => setPage(p => p - 1)}
                     >
-                      ← Назад
+                      {t('smsLog.prev')}
                     </button>
                     <div className={styles.pageNumbers}>
                       {buildPages(page, data.totalPages).map((item, i) =>
@@ -296,7 +298,7 @@ export default function SmsLogPage() {
                       disabled={page === data.totalPages - 1}
                       onClick={() => setPage(p => p + 1)}
                     >
-                      Вперёд →
+                      {t('smsLog.next')}
                     </button>
                   </div>
                 )}
