@@ -6,6 +6,7 @@ import type { Partner } from '../types';
 import { useAuth } from '../context/AuthContext';
 import PartnerCard from '../components/partners/PartnerCard';
 import Button from '../components/ui/Button';
+import Toast from '../components/ui/Toast';
 import styles from './ListPage.module.css';
 
 export default function PartnersPage() {
@@ -13,11 +14,12 @@ export default function PartnersPage() {
   const { t } = useTranslation();
   const [partners, setPartners] = useState<Partner[]>([]);
   const [loading, setLoading] = useState(true);
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
   useEffect(() => {
     getPartnersList()
       .then(r => setPartners(r.data))
-      .catch(() => {})
+      .catch(() => setToast({ message: t('partners.loadError'), type: 'error' }))
       .finally(() => setLoading(false));
   }, []);
 
@@ -29,6 +31,7 @@ export default function PartnersPage() {
 
   return (
     <div className={styles.page}>
+      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
       <div className={styles.container}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '32px' }}>
           <h1 className={styles.pageTitle} style={{ margin: 0 }}>{t('partners.title')}</h1>

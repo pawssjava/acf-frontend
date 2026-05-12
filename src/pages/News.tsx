@@ -6,6 +6,7 @@ import type { News } from '../types';
 import { useAuth } from '../context/AuthContext';
 import NewsCard from '../components/news/NewsCard';
 import Button from '../components/ui/Button';
+import Toast from '../components/ui/Toast';
 import styles from './ListPage.module.css';
 
 export default function NewsPage() {
@@ -13,16 +14,18 @@ export default function NewsPage() {
   const { t } = useTranslation();
   const [news, setNews] = useState<News[]>([]);
   const [loading, setLoading] = useState(true);
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
   useEffect(() => {
     getNewsList()
       .then(r => setNews(r.data))
-      .catch(() => {})
+      .catch(() => setToast({ message: t('news.loadError'), type: 'error' }))
       .finally(() => setLoading(false));
   }, []);
 
   return (
     <div className={styles.page}>
+      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
       <div className={styles.container}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '32px' }}>
           <h1 className={styles.pageTitle} style={{ margin: 0 }}>{t('news.title')}</h1>

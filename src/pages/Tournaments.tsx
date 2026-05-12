@@ -7,6 +7,7 @@ import type { Tournament, DictionaryItem } from '../types';
 import { useAuth } from '../context/AuthContext';
 import TournamentCard from '../components/tournament/TournamentCard';
 import Button from '../components/ui/Button';
+import Toast from '../components/ui/Toast';
 import styles from './ListPage.module.css';
 
 export default function TournamentsPage() {
@@ -23,6 +24,7 @@ export default function TournamentsPage() {
     t('tournaments.finished'),
   ];
 
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
   const [appliedTypeId, setAppliedTypeId] = useState<number | null>(null);
   const [appliedStatus, setAppliedStatus] = useState(0);
 
@@ -45,7 +47,7 @@ export default function TournamentsPage() {
     setLoading(true);
     getTournaments(appliedTypeId)
       .then(r => setTournaments(r.data))
-      .catch(() => {})
+      .catch(() => setToast({ message: t('tournaments.loadError'), type: 'error' }))
       .finally(() => setLoading(false));
   }, [appliedTypeId]);
 
@@ -79,6 +81,7 @@ export default function TournamentsPage() {
 
   return (
     <div className={styles.page}>
+      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
       <div className={styles.container}>
         <div className={styles.pageHeader}>
           <h1 className={styles.pageTitle}>{t('tournaments.title')}</h1>

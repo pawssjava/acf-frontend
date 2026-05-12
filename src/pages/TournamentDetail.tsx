@@ -9,6 +9,7 @@ import { fmtDate } from '../utils/fmtDate';
 import Badge from '../components/ui/Badge';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
+import Toast from '../components/ui/Toast';
 import BracketView from '../components/tournament/BracketView';
 import styles from './TournamentDetail.module.css';
 
@@ -41,6 +42,7 @@ export default function TournamentDetail() {
   const [unregisterMsg, setUnregisterMsg] = useState('');
   const [swissCurrentRound, setSwissCurrentRound] = useState<number | null>(null);
   const [startLoading, setStartLoading] = useState(false);
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
   const [psnModalOpen, setPsnModalOpen] = useState(false);
   const [psn, setPsn] = useState('');
   const [psnError, setPsnError] = useState('');
@@ -92,8 +94,10 @@ export default function TournamentDetail() {
       await startTournament(numId);
       await reloadTournament();
       setTab('bracket');
-    } catch { /* ignore */ }
-    finally { setStartLoading(false); }
+    } catch (err: unknown) {
+      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
+      setToast({ message: msg || t('tournamentDetail.startError'), type: 'error' });
+    } finally { setStartLoading(false); }
   };
 
   const isParticipant = user ? participants.some(p => p.userId === user.id) : false;
@@ -414,6 +418,8 @@ export default function TournamentDetail() {
           <RegistrationActivityTab tournamentId={numId} />
         )}
       </div>
+
+      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
 
       {psnModalOpen && (
         <div className={styles.modalOverlay} onClick={closePsnModal}>
