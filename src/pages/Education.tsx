@@ -318,22 +318,22 @@ export default function EducationPage() {
               <div className={styles.grid2}>
                 {content.map(m => (
                   <div key={m.id} className={styles.card}>
-                    <div
-                      className={styles.thumbnail}
-                      onClick={() => m.videoUrl ? setVideoModal(m) : undefined}
-                      style={{ cursor: m.videoUrl ? 'pointer' : 'default' }}
-                    >
+                    <div className={styles.thumbnail}>
                       {m.thumbnailUrl ? (
                         <img src={m.thumbnailUrl} alt={m.title} className={styles.thumbImg} />
                       ) : (
                         <div className={styles.thumbPlaceholder} />
                       )}
                       {m.videoUrl && (
-                        <div className={styles.playBtn} aria-label={t('education.playVideo')}>
+                        <button
+                          className={styles.playBtn}
+                          aria-label={t('education.playVideo')}
+                          onClick={() => setVideoModal(m)}
+                        >
                           <svg width="20" height="20" viewBox="0 0 24 24" fill="white" aria-hidden="true">
                             <polygon points="5 3 19 12 5 21 5 3" />
                           </svg>
-                        </div>
+                        </button>
                       )}
                     </div>
 
@@ -371,22 +371,22 @@ export default function EducationPage() {
               <div className={styles.sideList}>
                 {content.map(m => (
                   <div key={m.id} className={styles.sideCard}>
-                    <div
-                      className={styles.sideThumb}
-                      onClick={() => m.videoUrl ? setVideoModal(m) : undefined}
-                      style={{ cursor: m.videoUrl ? 'pointer' : 'default' }}
-                    >
+                    <div className={styles.sideThumb}>
                       {m.thumbnailUrl ? (
                         <img src={m.thumbnailUrl} alt={m.title} className={styles.sideThumbImg} />
                       ) : (
                         <div className={styles.sideThumbPlaceholder} />
                       )}
                       {m.videoUrl && (
-                        <div className={styles.sidePlayBtn} aria-label={t('education.playVideo')}>
+                        <button
+                          className={styles.sidePlayBtn}
+                          aria-label={t('education.playVideo')}
+                          onClick={() => setVideoModal(m)}
+                        >
                           <svg width="10" height="10" viewBox="0 0 24 24" fill="white" aria-hidden="true">
                             <polygon points="5 3 19 12 5 21 5 3" />
                           </svg>
-                        </div>
+                        </button>
                       )}
                     </div>
                     <div className={styles.sideBody}>
@@ -444,7 +444,6 @@ export default function EducationPage() {
               disablePictureInPicture
               onContextMenu={e => e.preventDefault()}
               preload="metadata"
-              autoPlay
               className={styles.videoPlayer}
             />
           </div>

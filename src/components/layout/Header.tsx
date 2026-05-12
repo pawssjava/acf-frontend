@@ -6,6 +6,8 @@ import { useTheme } from '../../context/ThemeContext';
 import flagKz from '../../assets/flags/kz.svg';
 import flagRu from '../../assets/flags/ru.svg';
 import flagGb from '../../assets/flags/gb.svg';
+import logoWhite from '../../assets/LogoWhiteTheme.svg';
+import logoBlack from '../../assets/LogoBlackTheme.svg';
 import styles from './Header.module.css';
 
 const LANGS = [
@@ -62,7 +64,9 @@ export default function Header() {
   return (
     <header className={styles.header}>
       <div className={styles.inner}>
-        <Link to="/news" className={styles.logo} onClick={closeAll}>ACF<span>.</span></Link>
+        <Link to="/news" className={styles.logo} onClick={closeAll}>
+          <img src={theme === 'dark' ? logoWhite : logoBlack} alt="ACF" className={styles.logoImg} />
+        </Link>
 
         <nav className={[styles.nav, menuOpen ? styles.open : ''].join(' ')}>
           <NavLink to="/tournaments" className={({ isActive }) => isActive ? styles.active : ''} onClick={closeAll}>{t('nav.tournaments')}</NavLink>

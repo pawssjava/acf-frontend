@@ -151,22 +151,21 @@
 .thumbnail {
   position: relative;
   width: 100%;
-  padding-top: 56.25%; /* 16:9 */
+  aspect-ratio: 16 / 9;
   background: var(--bg-secondary);
   overflow: hidden;
 }
 
 .thumbImg {
-  position: absolute;
-  inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
+  display: block;
 }
 
 .thumbPlaceholder {
-  position: absolute;
-  inset: 0;
+  width: 100%;
+  height: 100%;
   background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--border) 100%);
 }
 
@@ -177,7 +176,12 @@
   align-items: center;
   justify-content: center;
   background: rgba(0, 0, 0, 0.25);
+  border: none;
+  cursor: pointer;
   transition: background 0.2s;
+  padding: 0;
+  width: 100%;
+  height: 100%;
 }
 
 .playBtn::after {
@@ -187,16 +191,21 @@
   border-radius: 50%;
   background: #e53935;
   position: absolute;
+  transition: transform 0.15s;
+}
+
+.playBtn:hover {
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.playBtn:hover::after {
+  transform: scale(1.1);
 }
 
 .playBtn svg {
   position: relative;
   z-index: 1;
   margin-left: 3px;
-}
-
-.thumbnail:hover .playBtn {
-  background: rgba(0, 0, 0, 0.4);
 }
 
 .cardBody {
@@ -317,6 +326,7 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+  display: block;
 }
 
 .sideThumbPlaceholder {
@@ -332,6 +342,16 @@
   align-items: center;
   justify-content: center;
   background: rgba(0, 0, 0, 0.3);
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  transition: background 0.2s;
+}
+
+.sidePlayBtn:hover {
+  background: rgba(0, 0, 0, 0.5);
 }
 
 .sidePlayBtn::after {

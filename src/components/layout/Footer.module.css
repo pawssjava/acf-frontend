@@ -20,13 +20,9 @@
 }
 
 .logo {
-  font-size: 20px;
-  font-weight: 800;
-  color: var(--text-primary);
-}
-
-.logo span {
-  color: var(--accent-teal);
+  height: 32px;
+  width: auto;
+  display: block;
 }
 
 .brand p {

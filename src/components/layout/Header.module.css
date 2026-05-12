@@ -17,15 +17,15 @@
 }
 
 .logo {
-  font-size: 22px;
-  font-weight: 800;
-  color: var(--text-primary);
-  letter-spacing: -0.5px;
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
 }
 
-.logo span {
-  color: var(--accent-teal);
+.logoImg {
+  height: 36px;
+  width: auto;
+  display: block;
 }
 
 .nav {
