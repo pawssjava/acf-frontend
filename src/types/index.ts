@@ -32,6 +32,26 @@ export interface Club {
   nameEn: string;
 }
 
+export interface CityRecord {
+  id: number;
+  nameRu: string;
+  nameKk: string;
+  nameEn: string;
+  isActive: boolean;
+  createdDate: string;
+  updatedDate: string;
+}
+
+export interface ClubRecord {
+  id: number;
+  nameRu: string;
+  nameKk: string;
+  nameEn: string;
+  isActive: boolean;
+  createdDate: string;
+  updatedDate: string;
+}
+
 export interface MatchEntry {
   matchId: number;
   tournamentId: number;

@@ -15,6 +15,7 @@ import NewsForm from './pages/admin/NewsForm';
 import TournamentForm from './pages/admin/TournamentForm';
 import PartnerForm from './pages/admin/PartnerForm';
 import SmsLogPage from './pages/admin/SmsLogPage';
+import DictionariesPage from './pages/admin/DictionariesPage';
 import PartnersPage from './pages/Partners';
 import PartnerDetail from './pages/PartnerDetail';
 import EducationPage from './pages/Education';
@@ -47,6 +48,7 @@ export default function App() {
             <Route path="admin/partners/:id/edit" element={<PartnerForm />} />
             <Route path="education" element={<EducationPage />} />
             <Route path="admin/sms-log" element={<SmsLogPage />} />
+            <Route path="admin/dictionaries" element={<DictionariesPage />} />
             <Route path="*" element={<NotFound />} />
           </Route>
         </Routes>
