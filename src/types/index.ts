@@ -233,6 +233,27 @@ export interface UserTournamentsPage {
   totalPages: number;
 }
 
+export interface EducationMaterialDto {
+  id: number;
+  title: string;
+  description: string;
+  category: string | null;
+  thumbnailUrl: string | null;
+  presentationUrl: string | null;
+  videoUrl: string | null;
+  ordering: number;
+  createdDate: string;
+  updatedDate: string;
+}
+
+export interface EducationPage {
+  content: EducationMaterialDto[];
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
+}
+
 export type SmsAction = 'REGISTRATION' | 'FORGOT_PASSWORD';
 
 export interface SmsLogEntry {

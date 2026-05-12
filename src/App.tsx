@@ -17,6 +17,7 @@ import PartnerForm from './pages/admin/PartnerForm';
 import SmsLogPage from './pages/admin/SmsLogPage';
 import PartnersPage from './pages/Partners';
 import PartnerDetail from './pages/PartnerDetail';
+import EducationPage from './pages/Education';
 import NotFound from './pages/NotFound';
 
 export default function App() {
@@ -44,6 +45,7 @@ export default function App() {
             <Route path="partners/:id" element={<PartnerDetail />} />
             <Route path="admin/partners/new" element={<PartnerForm />} />
             <Route path="admin/partners/:id/edit" element={<PartnerForm />} />
+            <Route path="education" element={<EducationPage />} />
             <Route path="admin/sms-log" element={<SmsLogPage />} />
             <Route path="*" element={<NotFound />} />
           </Route>
