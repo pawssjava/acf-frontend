@@ -13,7 +13,9 @@ interface Props {
 }
 
 export default function PersonalInfo({ user, onUpdate }: Props) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const localName = (ru: string, kk: string, en: string) =>
+    i18n.language === 'kk' ? (kk || ru) : i18n.language === 'en' ? (en || ru) : ru;
   const [form, setForm] = useState({
     firstName: user.firstName ?? '',
     lastName: user.lastName ?? '',
@@ -92,7 +94,7 @@ export default function PersonalInfo({ user, onUpdate }: Props) {
               onChange={e => setForm(f => ({ ...f, cityId: e.target.value ? Number(e.target.value) : null }))}
             >
               <option value="">{t('personalInfo.notSpecified')}</option>
-              {cities.map(c => <option key={c.id} value={c.id}>{c.nameKk}</option>)}
+              {cities.map(c => <option key={c.id} value={c.id}>{localName(c.nameRu, c.nameKk, c.nameEn)}</option>)}
             </select>
           </div>
         </div>
@@ -111,7 +113,7 @@ export default function PersonalInfo({ user, onUpdate }: Props) {
               onChange={e => setForm(f => ({ ...f, clubId: e.target.value ? Number(e.target.value) : null }))}
             >
               <option value="">{t('personalInfo.notSpecified')}</option>
-              {clubs.map(c => <option key={c.id} value={c.id}>{c.nameRu}</option>)}
+              {clubs.map(c => <option key={c.id} value={c.id}>{localName(c.nameRu, c.nameKk, c.nameEn)}</option>)}
             </select>
           </div>
         </div>
