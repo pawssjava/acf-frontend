@@ -363,40 +363,6 @@ export default function EducationPage() {
                 ))}
               </div>
             )}
-          </main>
-
-          {/* Sidebar */}
-          <aside className={styles.sidebar}>
-            {!loading && content.length > 0 && (
-              <div className={styles.sideList}>
-                {content.map(m => (
-                  <div key={m.id} className={styles.sideCard}>
-                    <div className={styles.sideThumb}>
-                      {m.thumbnailUrl ? (
-                        <img src={m.thumbnailUrl} alt={m.title} className={styles.sideThumbImg} />
-                      ) : (
-                        <div className={styles.sideThumbPlaceholder} />
-                      )}
-                      {m.videoUrl && (
-                        <button
-                          className={styles.sidePlayBtn}
-                          aria-label={t('education.playVideo')}
-                          onClick={() => setVideoModal(m)}
-                        >
-                          <svg width="10" height="10" viewBox="0 0 24 24" fill="white" aria-hidden="true">
-                            <polygon points="5 3 19 12 5 21 5 3" />
-                          </svg>
-                        </button>
-                      )}
-                    </div>
-                    <div className={styles.sideBody}>
-                      <h4 className={styles.sideTitle}>{m.title}</h4>
-                      <p className={styles.sideDesc}>{m.description}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
 
             {totalPages > 1 && (
               <div className={styles.pagination}>
@@ -415,7 +381,8 @@ export default function EducationPage() {
                 )}
               </div>
             )}
-          </aside>
+          </main>
+
         </div>
       </div>
 
