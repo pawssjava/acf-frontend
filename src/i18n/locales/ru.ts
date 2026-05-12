@@ -356,6 +356,7 @@ const ru = {
   education: {
     title: 'Обучение',
     filters: 'Фильтры',
+    apply: 'Применить',
     allCategories: 'Все',
     categoryPlaceholder: 'например, Тактика',
     loading: 'Загружаем...',

@@ -67,6 +67,8 @@ export default function EducationPage() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [allCategories, setAllCategories] = useState<string[]>([]);
 
+  const [pendingCategory, setPendingCategory] = useState<string | null>(null);
+
   const [filterOpen, setFilterOpen] = useState(false);
   const filterRef = useRef<HTMLDivElement>(null);
 
@@ -121,8 +123,13 @@ export default function EducationPage() {
     fetchData(page, selectedCategory);
   }, [page, selectedCategory]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const handleFilterSelect = (cat: string | null) => {
-    setSelectedCategory(cat);
+  const openFilter = () => {
+    setPendingCategory(selectedCategory);
+    setFilterOpen(true);
+  };
+
+  const handleApply = () => {
+    setSelectedCategory(pendingCategory);
     setPage(0);
     setFilterOpen(false);
   };
@@ -267,13 +274,20 @@ export default function EducationPage() {
         <div className={styles.filterRow} ref={filterRef}>
           <button
             className={[styles.filterToggle, filterOpen ? styles.filterToggleOpen : ''].join(' ')}
-            onClick={() => setFilterOpen(o => !o)}
+            onClick={filterOpen ? () => setFilterOpen(false) : openFilter}
           >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-              <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <line x1="4" y1="6" x2="20" y2="6" /><line x1="8" y1="12" x2="16" y2="12" /><line x1="11" y1="18" x2="13" y2="18" />
             </svg>
             {t('education.filters')}
             {selectedCategory && <span className={styles.filterBadge}>1</span>}
+            <svg
+              width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"
+              strokeLinecap="round" strokeLinejoin="round"
+              style={{ transform: filterOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}
+            >
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
           </button>
 
           {filterOpen && (
@@ -284,9 +298,9 @@ export default function EducationPage() {
                   <span>{t('education.allCategories')}</span>
                   <input
                     type="radio"
-                    checked={!selectedCategory}
-                    onChange={() => handleFilterSelect(null)}
-                    readOnly={false}
+                    name="edu-category"
+                    checked={pendingCategory === null}
+                    onChange={() => setPendingCategory(null)}
                   />
                 </label>
                 {allCategories.map(cat => (
@@ -294,13 +308,16 @@ export default function EducationPage() {
                     <span>{cat}</span>
                     <input
                       type="radio"
-                      checked={selectedCategory === cat}
-                      onChange={() => handleFilterSelect(cat)}
-                      readOnly={false}
+                      name="edu-category"
+                      checked={pendingCategory === cat}
+                      onChange={() => setPendingCategory(cat)}
                     />
                   </label>
                 ))}
               </div>
+              <button className={styles.applyBtn} onClick={handleApply}>
+                {t('education.apply')}
+              </button>
             </div>
           )}
         </div>

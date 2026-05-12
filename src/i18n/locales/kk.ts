@@ -356,6 +356,7 @@ const kk = {
   education: {
     title: 'Оқыту',
     filters: 'Сүзгілер',
+    apply: 'Қолдану',
     allCategories: 'Барлығы',
     categoryPlaceholder: 'мысалы, Тактика',
     loading: 'Жүктелуде...',

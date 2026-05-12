@@ -356,6 +356,7 @@ const en = {
   education: {
     title: 'Education',
     filters: 'Filters',
+    apply: 'Apply',
     allCategories: 'All',
     categoryPlaceholder: 'e.g. Tactics',
     loading: 'Loading...',
