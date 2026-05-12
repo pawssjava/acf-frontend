@@ -249,7 +249,7 @@ const kk = {
     phone: 'Телефон нөмірі',
     lastName: 'Тегі',
     city: 'Қала',
-    username: 'Нікнейм',
+    username: 'Никнейм',
     club: 'Клуб',
     notSpecified: '— Көрсетілмеген —',
     save: 'Өзгерістерді сақтау',
