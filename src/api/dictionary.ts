@@ -13,8 +13,7 @@ export const getCities = () =>
 export const getClubs = () =>
   publicClient.get<Club[]>('/api/dictionary/clubs');
 
-type MultilingualBody = { nameRu: string; nameKk: string; nameEn: string; isActive: boolean };
-type SimpleBody = { name: string; isActive: boolean };
+type MultilingualBody = { nameRu: string; nameKk: string; nameEn: string };
 
 export const adminGetCities = () => apiClient.get<CityRecord[]>('/api/dictionary/cities');
 export const adminCreateCity = (body: MultilingualBody) => apiClient.post<CityRecord>('/api/dictionary/cities', body);
@@ -27,11 +26,11 @@ export const adminUpdateClub = (id: number, body: MultilingualBody) => apiClient
 export const adminDeleteClub = (id: number) => apiClient.delete(`/api/dictionary/clubs/${id}`);
 
 export const adminGetStatuses = () => apiClient.get<DictionaryItem[]>('/api/dictionary/tournament-statuses');
-export const adminCreateStatus = (body: SimpleBody) => apiClient.post<DictionaryItem>('/api/dictionary/tournament-statuses', body);
-export const adminUpdateStatus = (id: number, body: SimpleBody) => apiClient.put<DictionaryItem>(`/api/dictionary/tournament-statuses/${id}`, body);
+export const adminCreateStatus = (body: MultilingualBody) => apiClient.post<DictionaryItem>('/api/dictionary/tournament-statuses', body);
+export const adminUpdateStatus = (id: number, body: MultilingualBody) => apiClient.put<DictionaryItem>(`/api/dictionary/tournament-statuses/${id}`, body);
 export const adminDeleteStatus = (id: number) => apiClient.delete(`/api/dictionary/tournament-statuses/${id}`);
 
 export const adminGetTypes = () => apiClient.get<DictionaryItem[]>('/api/dictionary/tournament-types');
-export const adminCreateType = (body: SimpleBody) => apiClient.post<DictionaryItem>('/api/dictionary/tournament-types', body);
-export const adminUpdateType = (id: number, body: SimpleBody) => apiClient.put<DictionaryItem>(`/api/dictionary/tournament-types/${id}`, body);
+export const adminCreateType = (body: MultilingualBody) => apiClient.post<DictionaryItem>('/api/dictionary/tournament-types', body);
+export const adminUpdateType = (id: number, body: MultilingualBody) => apiClient.put<DictionaryItem>(`/api/dictionary/tournament-types/${id}`, body);
 export const adminDeleteType = (id: number) => apiClient.delete(`/api/dictionary/tournament-types/${id}`);

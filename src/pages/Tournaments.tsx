@@ -12,7 +12,7 @@ import styles from './ListPage.module.css';
 
 export default function TournamentsPage() {
   const { user } = useAuth();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [types, setTypes] = useState<DictionaryItem[]>([]);
   const [tournaments, setTournaments] = useState<Tournament[]>([]);
   const [loading, setLoading] = useState(true);
@@ -77,7 +77,7 @@ export default function TournamentsPage() {
   const appliedStatusValue = STATUS_VALUES[appliedStatus];
   const filtered = appliedStatusValue === 'Все'
     ? tournaments
-    : tournaments.filter(tour => tour.tournamentStatusName === appliedStatusValue);
+    : tournaments.filter(tour => tour.tournamentStatusNameRu === appliedStatusValue);
 
   return (
     <div className={styles.page}>
@@ -120,12 +120,15 @@ export default function TournamentsPage() {
                   <span>{t('tournaments.all')}</span>
                   <input type="radio" name="type" checked={pendingTypeId === null} onChange={() => setPendingTypeId(null)} />
                 </label>
-                {types.map(tp => (
-                  <label key={tp.id} className={styles.radioItem}>
-                    <span>{tp.name}</span>
-                    <input type="radio" name="type" checked={pendingTypeId === tp.id} onChange={() => setPendingTypeId(tp.id)} />
-                  </label>
-                ))}
+                {types.map(tp => {
+                  const tpName = i18n.language === 'kk' ? (tp.nameKk || tp.nameRu) : i18n.language === 'en' ? (tp.nameEn || tp.nameRu) : tp.nameRu;
+                  return (
+                    <label key={tp.id} className={styles.radioItem}>
+                      <span>{tpName}</span>
+                      <input type="radio" name="type" checked={pendingTypeId === tp.id} onChange={() => setPendingTypeId(tp.id)} />
+                    </label>
+                  );
+                })}
               </div>
 
               <div className={styles.filterGroup}>

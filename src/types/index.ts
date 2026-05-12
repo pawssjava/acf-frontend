@@ -99,9 +99,13 @@ export interface Tournament {
   capacity: number;
   prizeMoney: number;
   tournamentStatusId: number;
-  tournamentStatusName: string;
+  tournamentStatusNameRu: string;
+  tournamentStatusNameKk: string;
+  tournamentStatusNameEn: string;
   tournamentTypeId: number;
-  tournamentTypeName: string;
+  tournamentTypeNameRu: string;
+  tournamentTypeNameKk: string;
+  tournamentTypeNameEn: string;
   createdDate: string;
   updatedDate: string;
 }
@@ -197,7 +201,9 @@ export interface Partner {
 
 export interface DictionaryItem {
   id: number;
-  name: string;
+  nameRu: string;
+  nameKk: string;
+  nameEn: string;
   isActive: boolean;
   createdDate: string;
   updatedDate: string;
@@ -237,9 +243,13 @@ export interface UserTournamentEntry {
   startDate: string;
   endDate: string;
   tournamentStatusId: number;
-  tournamentStatusName: string;
+  tournamentStatusNameRu: string;
+  tournamentStatusNameKk: string;
+  tournamentStatusNameEn: string;
   tournamentTypeId: number;
-  tournamentTypeName: string;
+  tournamentTypeNameRu: string;
+  tournamentTypeNameKk: string;
+  tournamentTypeNameEn: string;
   format: string;
   place: number | null;
   score: number | null;

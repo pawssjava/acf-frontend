@@ -303,7 +303,7 @@ export default function TournamentForm() {
                     disabled={readOnly}
                   >
                     {types.map(t => (
-                      <option key={t.id} value={t.id}>{t.name}</option>
+                      <option key={t.id} value={t.id}>{t.nameRu}</option>
                     ))}
                   </select>
                 </div>
@@ -311,7 +311,7 @@ export default function TournamentForm() {
                   <div className={styles.field}>
                     <label className={styles.label}>Статус</label>
                     <div style={{ padding: '9px 12px', background: 'var(--bg-secondary)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', fontSize: '14px', color: 'var(--text-secondary)' }}>
-                      {tournament.tournamentStatusName}
+                      {tournament.tournamentStatusNameRu}
                     </div>
                   </div>
                 )}

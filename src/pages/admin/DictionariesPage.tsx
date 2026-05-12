@@ -15,8 +15,7 @@ import type { CityRecord, ClubRecord, DictionaryItem } from '../../types';
 import styles from './DictionariesPage.module.css';
 
 type TabKey = 'cities' | 'clubs' | 'statuses' | 'types';
-type MultilingualRecord = CityRecord | ClubRecord;
-type AnyRecord = MultilingualRecord | DictionaryItem;
+type AnyRecord = CityRecord | ClubRecord | DictionaryItem;
 
 interface ModalState {
   tab: TabKey;
@@ -30,19 +29,14 @@ interface ConfirmState {
   name: string;
 }
 
-function isMultilingualTab(tab: TabKey): tab is 'cities' | 'clubs' {
-  return tab === 'cities' || tab === 'clubs';
-}
-
-// --- Multilingual Form (Cities & Clubs) ---
 function MultilingualForm({
   initial,
   onSave,
   onCancel,
   saving,
 }: {
-  initial: MultilingualRecord | null;
-  onSave: (data: { nameRu: string; nameKk: string; nameEn: string; isActive: boolean }) => void;
+  initial: AnyRecord | null;
+  onSave: (data: { nameRu: string; nameKk: string; nameEn: string }) => void;
   onCancel: () => void;
   saving: boolean;
 }) {
@@ -50,13 +44,12 @@ function MultilingualForm({
   const [nameRu, setNameRu] = useState(initial?.nameRu ?? '');
   const [nameKk, setNameKk] = useState(initial?.nameKk ?? '');
   const [nameEn, setNameEn] = useState(initial?.nameEn ?? '');
-  const [isActive, setIsActive] = useState(initial?.isActive ?? true);
   const [error, setError] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!nameRu.trim()) { setError(t('dictionaries.required')); return; }
-    onSave({ nameRu: nameRu.trim(), nameKk: nameKk.trim(), nameEn: nameEn.trim(), isActive });
+    onSave({ nameRu: nameRu.trim(), nameKk: nameKk.trim(), nameEn: nameEn.trim() });
   };
 
   return (
@@ -79,10 +72,6 @@ function MultilingualForm({
         <label className={styles.label}>{t('dictionaries.nameEn')}</label>
         <input className={styles.input} value={nameEn} onChange={e => setNameEn(e.target.value)} />
       </div>
-      <label className={styles.checkboxRow}>
-        <input type="checkbox" checked={isActive} onChange={e => setIsActive(e.target.checked)} />
-        <span>{t('dictionaries.isActive')}</span>
-      </label>
       <div className={styles.modalActions}>
         <Button variant="outline" type="button" size="sm" onClick={onCancel} disabled={saving}>
           {t('dictionaries.cancel')}
@@ -95,58 +84,6 @@ function MultilingualForm({
   );
 }
 
-// --- Simple Name Form (Statuses & Types) ---
-function SimpleNameForm({
-  initial,
-  onSave,
-  onCancel,
-  saving,
-}: {
-  initial: DictionaryItem | null;
-  onSave: (data: { name: string; isActive: boolean }) => void;
-  onCancel: () => void;
-  saving: boolean;
-}) {
-  const { t } = useTranslation();
-  const [name, setName] = useState(initial?.name ?? '');
-  const [isActive, setIsActive] = useState(initial?.isActive ?? true);
-  const [error, setError] = useState('');
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!name.trim()) { setError(t('dictionaries.required')); return; }
-    onSave({ name: name.trim(), isActive });
-  };
-
-  return (
-    <form onSubmit={handleSubmit} className={styles.modalForm}>
-      <div className={styles.field}>
-        <label className={styles.label}>{t('dictionaries.name')} *</label>
-        <input
-          className={[styles.input, error ? styles.inputError : ''].join(' ')}
-          value={name}
-          onChange={e => { setName(e.target.value); setError(''); }}
-          autoFocus
-        />
-        {error && <span className={styles.fieldError}>{error}</span>}
-      </div>
-      <label className={styles.checkboxRow}>
-        <input type="checkbox" checked={isActive} onChange={e => setIsActive(e.target.checked)} />
-        <span>{t('dictionaries.isActive')}</span>
-      </label>
-      <div className={styles.modalActions}>
-        <Button variant="outline" type="button" size="sm" onClick={onCancel} disabled={saving}>
-          {t('dictionaries.cancel')}
-        </Button>
-        <Button variant="primary" type="submit" size="sm" loading={saving}>
-          {t('dictionaries.save')}
-        </Button>
-      </div>
-    </form>
-  );
-}
-
-// --- Edit/Delete icon buttons ---
 function EditIcon() {
   return (
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -168,7 +105,6 @@ function TrashIcon() {
   );
 }
 
-// --- Main Page ---
 export default function DictionariesPage() {
   const navigate = useNavigate();
   const { isAuthenticated, user } = useAuth();
@@ -195,7 +131,6 @@ export default function DictionariesPage() {
   const [deleting, setDeleting] = useState(false);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
-  // Load current tab data
   useEffect(() => {
     if (!isAuthenticated || !user?.isAdmin) return;
 
@@ -203,11 +138,11 @@ export default function DictionariesPage() {
     setTabLoading(true);
     setTabErrorCode(null);
 
-    const fetchers: Record<TabKey, () => Promise<{ data: CityRecord[] | ClubRecord[] | DictionaryItem[] }>> = {
-      cities: adminGetCities,
-      clubs: adminGetClubs,
-      statuses: adminGetStatuses,
-      types: adminGetTypes,
+    const fetchers: Record<TabKey, () => Promise<{ data: AnyRecord[] }>> = {
+      cities: adminGetCities as () => Promise<{ data: AnyRecord[] }>,
+      clubs: adminGetClubs as () => Promise<{ data: AnyRecord[] }>,
+      statuses: adminGetStatuses as () => Promise<{ data: AnyRecord[] }>,
+      types: adminGetTypes as () => Promise<{ data: AnyRecord[] }>,
     };
 
     fetchers[activeTab]().then(({ data }) => {
@@ -227,32 +162,27 @@ export default function DictionariesPage() {
     return () => { cancelled = true; };
   }, [activeTab, isAuthenticated, user?.isAdmin, refreshKey]);
 
-  // Close modal/confirm on tab switch
   useEffect(() => {
     setModal(null);
     setConfirm(null);
   }, [activeTab]);
 
-  const handleSave = async (data: { nameRu?: string; nameKk?: string; nameEn?: string; name?: string; isActive: boolean }) => {
+  const handleSave = async (data: { nameRu: string; nameKk: string; nameEn: string }) => {
     if (!modal) return;
     setSaving(true);
     try {
       if (modal.tab === 'cities') {
-        const body = data as { nameRu: string; nameKk: string; nameEn: string; isActive: boolean };
-        if (modal.mode === 'create') await adminCreateCity(body);
-        else await adminUpdateCity(modal.item!.id, body);
+        if (modal.mode === 'create') await adminCreateCity(data);
+        else await adminUpdateCity(modal.item!.id, data);
       } else if (modal.tab === 'clubs') {
-        const body = data as { nameRu: string; nameKk: string; nameEn: string; isActive: boolean };
-        if (modal.mode === 'create') await adminCreateClub(body);
-        else await adminUpdateClub(modal.item!.id, body);
+        if (modal.mode === 'create') await adminCreateClub(data);
+        else await adminUpdateClub(modal.item!.id, data);
       } else if (modal.tab === 'statuses') {
-        const body = data as { name: string; isActive: boolean };
-        if (modal.mode === 'create') await adminCreateStatus(body);
-        else await adminUpdateStatus(modal.item!.id, body);
+        if (modal.mode === 'create') await adminCreateStatus(data);
+        else await adminUpdateStatus(modal.item!.id, data);
       } else {
-        const body = data as { name: string; isActive: boolean };
-        if (modal.mode === 'create') await adminCreateType(body);
-        else await adminUpdateType(modal.item!.id, body);
+        if (modal.mode === 'create') await adminCreateType(data);
+        else await adminUpdateType(modal.item!.id, data);
       }
       setToast({
         message: modal.mode === 'create' ? t('dictionaries.createSuccess') : t('dictionaries.updateSuccess'),
@@ -319,70 +249,22 @@ export default function DictionariesPage() {
       );
     }
 
-    if (isMultilingualTab(activeTab)) {
-      const items = activeTab === 'cities' ? cities : clubs;
-      if (items.length === 0) return <div className={styles.empty}>{t('dictionaries.empty')}</div>;
-      return (
-        <div className={styles.tableWrap}>
-          <table className={styles.table}>
-            <thead>
-              <tr>
-                <th className={styles.thId}>ID</th>
-                <th>{t('dictionaries.colNameRu')}</th>
-                <th className={styles.thHideMobile}>{t('dictionaries.colNameKk')}</th>
-                <th className={styles.thHideMobile}>{t('dictionaries.colNameEn')}</th>
-                <th>{t('dictionaries.colActive')}</th>
-                <th>{t('dictionaries.colActions')}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {items.map(item => (
-                <tr key={item.id}>
-                  <td className={styles.tdId}>{item.id}</td>
-                  <td>{item.nameRu}</td>
-                  <td className={styles.thHideMobile}>{item.nameKk}</td>
-                  <td className={styles.thHideMobile}>{item.nameEn}</td>
-                  <td>
-                    <span className={item.isActive ? styles.badgeActive : styles.badgeInactive}>
-                      {item.isActive ? t('dictionaries.yes') : t('dictionaries.no')}
-                    </span>
-                  </td>
-                  <td>
-                    <div className={styles.rowActions}>
-                      <button
-                        className={styles.actionBtn}
-                        onClick={() => setModal({ tab: activeTab, mode: 'edit', item })}
-                        title="Edit"
-                      >
-                        <EditIcon />
-                      </button>
-                      <button
-                        className={[styles.actionBtn, styles.actionBtnDanger].join(' ')}
-                        onClick={() => setConfirm({ tab: activeTab, id: item.id, name: item.nameRu })}
-                        title="Delete"
-                      >
-                        <TrashIcon />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      );
-    }
+    const items: AnyRecord[] =
+      activeTab === 'cities' ? cities :
+      activeTab === 'clubs' ? clubs :
+      activeTab === 'statuses' ? statuses : types;
 
-    const items = activeTab === 'statuses' ? statuses : types;
     if (items.length === 0) return <div className={styles.empty}>{t('dictionaries.empty')}</div>;
+
     return (
       <div className={styles.tableWrap}>
         <table className={styles.table}>
           <thead>
             <tr>
               <th className={styles.thId}>ID</th>
-              <th>{t('dictionaries.colName')}</th>
-              <th>{t('dictionaries.colActive')}</th>
+              <th>{t('dictionaries.colNameRu')}</th>
+              <th className={styles.thHideMobile}>{t('dictionaries.colNameKk')}</th>
+              <th className={styles.thHideMobile}>{t('dictionaries.colNameEn')}</th>
               <th>{t('dictionaries.colActions')}</th>
             </tr>
           </thead>
@@ -390,12 +272,9 @@ export default function DictionariesPage() {
             {items.map(item => (
               <tr key={item.id}>
                 <td className={styles.tdId}>{item.id}</td>
-                <td>{item.name}</td>
-                <td>
-                  <span className={item.isActive ? styles.badgeActive : styles.badgeInactive}>
-                    {item.isActive ? t('dictionaries.yes') : t('dictionaries.no')}
-                  </span>
-                </td>
+                <td>{item.nameRu}</td>
+                <td className={styles.thHideMobile}>{item.nameKk}</td>
+                <td className={styles.thHideMobile}>{item.nameEn}</td>
                 <td>
                   <div className={styles.rowActions}>
                     <button
@@ -407,7 +286,7 @@ export default function DictionariesPage() {
                     </button>
                     <button
                       className={[styles.actionBtn, styles.actionBtnDanger].join(' ')}
-                      onClick={() => setConfirm({ tab: activeTab, id: item.id, name: item.name })}
+                      onClick={() => setConfirm({ tab: activeTab, id: item.id, name: item.nameRu })}
                       title="Delete"
                     >
                       <TrashIcon />
@@ -457,7 +336,6 @@ export default function DictionariesPage() {
         </div>
       </div>
 
-      {/* Form Modal */}
       {modal && (
         <div
           className={styles.overlay}
@@ -478,26 +356,16 @@ export default function DictionariesPage() {
                 ×
               </button>
             </div>
-            {isMultilingualTab(modal.tab) ? (
-              <MultilingualForm
-                initial={modal.item as MultilingualRecord | null}
-                onSave={handleSave}
-                onCancel={() => setModal(null)}
-                saving={saving}
-              />
-            ) : (
-              <SimpleNameForm
-                initial={modal.item as DictionaryItem | null}
-                onSave={handleSave}
-                onCancel={() => setModal(null)}
-                saving={saving}
-              />
-            )}
+            <MultilingualForm
+              initial={modal.item}
+              onSave={handleSave}
+              onCancel={() => setModal(null)}
+              saving={saving}
+            />
           </div>
         </div>
       )}
 
-      {/* Confirm Delete */}
       {confirm && (
         <div
           className={styles.overlay}

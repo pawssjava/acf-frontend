@@ -22,10 +22,16 @@ const FORMAT_LABEL: Record<string, string> = {
 
 type Tab = 'info' | 'participants' | 'results' | 'bracket' | 'activity';
 
-function statusVariant(name: string): 'teal' | 'blue' | 'gray' {
-  if (name === 'Активные') return 'teal';
-  if (name === 'Будущие') return 'blue';
+function statusVariant(statusId: number): 'teal' | 'blue' | 'gray' {
+  if (statusId === 1) return 'teal';
+  if (statusId === 2) return 'blue';
   return 'gray';
+}
+
+function localName(ru: string, kk: string, en: string, lang: string): string {
+  if (lang === 'kk') return kk || ru;
+  if (lang === 'en') return en || ru;
+  return ru;
 }
 
 export default function TournamentDetail() {
@@ -209,10 +215,10 @@ export default function TournamentDetail() {
         <div className={styles.heroOverlay} />
         <div className={styles.heroContent}>
           <div className={styles.heroMeta}>
-            <Badge variant={statusVariant(tournament.tournamentStatusName)}>
-              {tournament.tournamentStatusName}
+            <Badge variant={statusVariant(tournament.tournamentStatusId)}>
+              {localName(tournament.tournamentStatusNameRu, tournament.tournamentStatusNameKk, tournament.tournamentStatusNameEn, i18n.language)}
             </Badge>
-            <Badge variant="gray">{tournament.tournamentTypeName}</Badge>
+            <Badge variant="gray">{localName(tournament.tournamentTypeNameRu, tournament.tournamentTypeNameKk, tournament.tournamentTypeNameEn, i18n.language)}</Badge>
             {tournament.format && (
               <Badge variant="blue">{FORMAT_LABEL[tournament.format] ?? tournament.format}</Badge>
             )}
@@ -279,8 +285,8 @@ export default function TournamentDetail() {
               )}
               <InfoRow label={t('tournamentDetail.labelCapacity')} value={t('tournamentDetail.labelCapacityValue', { current: participants.length, total: tournament.capacity })} />
               <InfoRow label={t('tournamentDetail.labelPrize')} value={`${tournament.prizeMoney.toLocaleString(locale)} ₸`} />
-              <InfoRow label={t('tournamentDetail.labelType')} value={tournament.tournamentTypeName} />
-              <InfoRow label={t('tournamentDetail.labelStatus')} value={tournament.tournamentStatusName} />
+              <InfoRow label={t('tournamentDetail.labelType')} value={localName(tournament.tournamentTypeNameRu, tournament.tournamentTypeNameKk, tournament.tournamentTypeNameEn, i18n.language)} />
+              <InfoRow label={t('tournamentDetail.labelStatus')} value={localName(tournament.tournamentStatusNameRu, tournament.tournamentStatusNameKk, tournament.tournamentStatusNameEn, i18n.language)} />
             </div>
 
             {isAuthenticated ? (

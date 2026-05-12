@@ -7,16 +7,25 @@ import styles from './TournamentCard.module.css';
 
 interface Props { tournament: Tournament; }
 
-function statusVariant(name: string): 'teal' | 'blue' | 'gray' {
-  if (name === 'Активные') return 'teal';
-  if (name === 'Будущие') return 'blue';
+function statusVariant(statusId: number): 'teal' | 'blue' | 'gray' {
+  if (statusId === 1) return 'teal';
+  if (statusId === 2) return 'blue';
   return 'gray';
+}
+
+function localName(ru: string, kk: string, en: string, lang: string): string {
+  if (lang === 'kk') return kk || ru;
+  if (lang === 'en') return en || ru;
+  return ru;
 }
 
 export default function TournamentCard({ tournament }: Props) {
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
   const locale = i18n.language === 'en' ? 'en-US' : 'ru-RU';
+  const lang = i18n.language;
+  const statusName = localName(tournament.tournamentStatusNameRu, tournament.tournamentStatusNameKk, tournament.tournamentStatusNameEn, lang);
+  const typeName = localName(tournament.tournamentTypeNameRu, tournament.tournamentTypeNameKk, tournament.tournamentTypeNameEn, lang);
   return (
     <Card hoverable onClick={() => navigate(`/tournaments/${tournament.id}`)}>
       <div className={styles.imgWrap}>
@@ -25,13 +34,13 @@ export default function TournamentCard({ tournament }: Props) {
           : <div className={styles.imgPlaceholder}><span>ACF</span></div>
         }
         <div className={styles.statusBadge}>
-          <Badge variant={statusVariant(tournament.tournamentStatusName)}>
-            {tournament.tournamentStatusName}
+          <Badge variant={statusVariant(tournament.tournamentStatusId)}>
+            {statusName}
           </Badge>
         </div>
       </div>
       <div className={styles.body}>
-        <p className={styles.type}>{tournament.tournamentTypeName}</p>
+        <p className={styles.type}>{typeName}</p>
         <h3 className={styles.name}>{tournament.name}</h3>
         <div className={styles.meta}>
           <span>
