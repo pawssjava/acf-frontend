@@ -387,11 +387,6 @@
   background: rgba(0, 0, 0, 0.6);
 }
 
-.videoPlayer {
-  width: 100%;
-  display: block;
-  max-height: 80vh;
-}
 
 /* Delete confirm modal */
 .confirmModal {
