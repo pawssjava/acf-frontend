@@ -27,7 +27,6 @@ export default function VideoPlayer({ src }: Props) {
   const [muted, setMuted] = useState(false);
   const [fullscreen, setFullscreen] = useState(false);
   const [controlsVisible, setControlsVisible] = useState(true);
-  const [seeking, setSeeking] = useState(false);
   const [showVolumeSlider, setShowVolumeSlider] = useState(false);
   const [skipFlash, setSkipFlash] = useState<'back' | 'forward' | null>(null);
 
@@ -74,7 +73,6 @@ export default function VideoPlayer({ src }: Props) {
   };
 
   const handleProgressMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
-    setSeeking(true);
     seek(e);
     const onMove = (ev: MouseEvent) => {
       const el = progressRef.current;
@@ -85,7 +83,6 @@ export default function VideoPlayer({ src }: Props) {
       v.currentTime = pct * duration;
     };
     const onUp = () => {
-      setSeeking(false);
       window.removeEventListener('mousemove', onMove);
       window.removeEventListener('mouseup', onUp);
     };
