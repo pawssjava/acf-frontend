@@ -47,9 +47,9 @@ export default function TournamentForm() {
 
     getTournamentTypes()
       .then(t => {
-        setTypes(t.data);
+        setTypes(t.data.content);
         if (!isEdit) {
-          setForm(f => ({ ...f, tournamentTypeId: String(t.data[0]?.id ?? '') }));
+          setForm(f => ({ ...f, tournamentTypeId: String(t.data.content[0]?.id ?? '') }));
         }
       })
       .catch(() => {});

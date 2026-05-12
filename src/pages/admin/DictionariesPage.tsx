@@ -11,7 +11,7 @@ import {
   adminGetStatuses, adminCreateStatus, adminUpdateStatus, adminDeleteStatus,
   adminGetTypes, adminCreateType, adminUpdateType, adminDeleteType,
 } from '../../api/dictionary';
-import type { CityRecord, ClubRecord, DictionaryItem } from '../../types';
+import type { CityRecord, ClubRecord, DictionaryItem, DictPage } from '../../types';
 import styles from './DictionariesPage.module.css';
 
 type TabKey = 'cities' | 'clubs' | 'statuses' | 'types';
@@ -115,12 +115,10 @@ export default function DictionariesPage() {
   }, [isAuthenticated, user, navigate]);
 
   const [activeTab, setActiveTab] = useState<TabKey>('cities');
+  const [page, setPage] = useState(0);
   const [refreshKey, setRefreshKey] = useState(0);
 
-  const [cities, setCities] = useState<CityRecord[]>([]);
-  const [clubs, setClubs] = useState<ClubRecord[]>([]);
-  const [statuses, setStatuses] = useState<DictionaryItem[]>([]);
-  const [types, setTypes] = useState<DictionaryItem[]>([]);
+  const [pageData, setPageData] = useState<DictPage<AnyRecord> | null>(null);
 
   const [tabLoading, setTabLoading] = useState(false);
   const [tabErrorCode, setTabErrorCode] = useState<'forbidden' | 'error' | null>(null);
@@ -138,19 +136,16 @@ export default function DictionariesPage() {
     setTabLoading(true);
     setTabErrorCode(null);
 
-    const fetchers: Record<TabKey, () => Promise<{ data: AnyRecord[] }>> = {
-      cities: adminGetCities as () => Promise<{ data: AnyRecord[] }>,
-      clubs: adminGetClubs as () => Promise<{ data: AnyRecord[] }>,
-      statuses: adminGetStatuses as () => Promise<{ data: AnyRecord[] }>,
-      types: adminGetTypes as () => Promise<{ data: AnyRecord[] }>,
+    const fetchers: Record<TabKey, (p: number) => Promise<{ data: DictPage<AnyRecord> }>> = {
+      cities: (p) => adminGetCities(p) as Promise<{ data: DictPage<AnyRecord> }>,
+      clubs: (p) => adminGetClubs(p) as Promise<{ data: DictPage<AnyRecord> }>,
+      statuses: (p) => adminGetStatuses(p) as Promise<{ data: DictPage<AnyRecord> }>,
+      types: (p) => adminGetTypes(p) as Promise<{ data: DictPage<AnyRecord> }>,
     };
 
-    fetchers[activeTab]().then(({ data }) => {
+    fetchers[activeTab](page).then(({ data }) => {
       if (cancelled) return;
-      if (activeTab === 'cities') setCities(data as CityRecord[]);
-      else if (activeTab === 'clubs') setClubs(data as ClubRecord[]);
-      else if (activeTab === 'statuses') setStatuses(data as DictionaryItem[]);
-      else setTypes(data as DictionaryItem[]);
+      setPageData(data);
     }).catch((err: unknown) => {
       if (cancelled) return;
       const status = (err as { response?: { status?: number } })?.response?.status;
@@ -160,11 +155,13 @@ export default function DictionariesPage() {
     });
 
     return () => { cancelled = true; };
-  }, [activeTab, isAuthenticated, user?.isAdmin, refreshKey]);
+  }, [activeTab, page, isAuthenticated, user?.isAdmin, refreshKey]);
 
   useEffect(() => {
     setModal(null);
     setConfirm(null);
+    setPage(0);
+    setPageData(null);
   }, [activeTab]);
 
   const handleSave = async (data: { nameRu: string; nameKk: string; nameEn: string }) => {
@@ -249,14 +246,13 @@ export default function DictionariesPage() {
       );
     }
 
-    const items: AnyRecord[] =
-      activeTab === 'cities' ? cities :
-      activeTab === 'clubs' ? clubs :
-      activeTab === 'statuses' ? statuses : types;
+    const items = pageData?.content ?? [];
+    const totalPages = pageData?.totalPages ?? 0;
 
     if (items.length === 0) return <div className={styles.empty}>{t('dictionaries.empty')}</div>;
 
     return (
+      <>
       <div className={styles.tableWrap}>
         <table className={styles.table}>
           <thead>
@@ -298,6 +294,26 @@ export default function DictionariesPage() {
           </tbody>
         </table>
       </div>
+      {totalPages > 1 && (
+        <div className={styles.pagination}>
+          <button
+            className={styles.pageBtn}
+            disabled={page === 0}
+            onClick={() => setPage(p => p - 1)}
+          >
+            ← {t('dictionaries.prev')}
+          </button>
+          <span className={styles.pageInfo}>{page + 1} / {totalPages}</span>
+          <button
+            className={styles.pageBtn}
+            disabled={page >= totalPages - 1}
+            onClick={() => setPage(p => p + 1)}
+          >
+            {t('dictionaries.next')} →
+          </button>
+        </div>
+      )}
+      </>
     );
   };
 

@@ -432,6 +432,8 @@ const kk = {
     notFound: 'Жазба табылмады',
     loadError: 'Деректерді жүктеу мүмкін болмады',
     required: 'Міндетті өріс',
+    prev: 'Артқа',
+    next: 'Алға',
   },
 } as const;
 

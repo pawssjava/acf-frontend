@@ -26,8 +26,8 @@ export default function PersonalInfo({ user, onUpdate }: Props) {
   const [msg, setMsg] = useState<{ text: string; ok: boolean } | null>(null);
 
   useEffect(() => {
-    getCities().then(r => setCities(r.data)).catch(() => {});
-    getClubs().then(r => setClubs(r.data)).catch(() => {});
+    getCities().then(r => setCities(r.data.content)).catch(() => {});
+    getClubs().then(r => setClubs(r.data.content)).catch(() => {});
   }, []);
 
   const set = (key: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement>) =>

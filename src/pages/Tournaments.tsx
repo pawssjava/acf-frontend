@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { getTournaments } from '../api/tournaments';
-import { getTournamentTypes } from '../api/dictionary';
+import { getTournamentTypes, getTournamentStatuses } from '../api/dictionary';
 import type { Tournament, DictionaryItem } from '../types';
 import { useAuth } from '../context/AuthContext';
 import TournamentCard from '../components/tournament/TournamentCard';
@@ -14,33 +14,23 @@ export default function TournamentsPage() {
   const { user } = useAuth();
   const { t, i18n } = useTranslation();
   const [types, setTypes] = useState<DictionaryItem[]>([]);
+  const [statuses, setStatuses] = useState<DictionaryItem[]>([]);
   const [tournaments, setTournaments] = useState<Tournament[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const STATUS_OPTIONS = [
-    t('tournaments.all'),
-    t('tournaments.active'),
-    t('tournaments.upcoming'),
-    t('tournaments.finished'),
-  ];
-
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
   const [appliedTypeId, setAppliedTypeId] = useState<number | null>(null);
-  const [appliedStatus, setAppliedStatus] = useState(0);
+  const [appliedStatusId, setAppliedStatusId] = useState<number | null>(null);
 
   const [pendingTypeId, setPendingTypeId] = useState<number | null>(null);
-  const [pendingStatusIdx, setPendingStatusIdx] = useState(0);
+  const [pendingStatusId, setPendingStatusId] = useState<number | null>(null);
 
   const [filterOpen, setFilterOpen] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
 
-  // Raw status values for API filtering (matches Russian backend values)
-  const STATUS_VALUES = ['Все', 'Активные', 'Будущие', 'Завершенные'];
-
   useEffect(() => {
-    getTournamentTypes()
-      .then(r => setTypes(r.data))
-      .catch(() => {});
+    getTournamentTypes().then(r => setTypes(r.data.content)).catch(() => {});
+    getTournamentStatuses().then(r => setStatuses(r.data.content)).catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -64,20 +54,19 @@ export default function TournamentsPage() {
 
   const handleApply = () => {
     setAppliedTypeId(pendingTypeId);
-    setAppliedStatus(pendingStatusIdx);
+    setAppliedStatusId(pendingStatusId);
     setFilterOpen(false);
   };
 
   const openFilter = () => {
     setPendingTypeId(appliedTypeId);
-    setPendingStatusIdx(appliedStatus);
+    setPendingStatusId(appliedStatusId);
     setFilterOpen(true);
   };
 
-  const appliedStatusValue = STATUS_VALUES[appliedStatus];
-  const filtered = appliedStatusValue === 'Все'
+  const filtered = appliedStatusId === null
     ? tournaments
-    : tournaments.filter(tour => tour.tournamentStatusNameRu === appliedStatusValue);
+    : tournaments.filter(tour => tour.tournamentStatusId === appliedStatusId);
 
   return (
     <div className={styles.page}>
@@ -133,12 +122,19 @@ export default function TournamentsPage() {
 
               <div className={styles.filterGroup}>
                 <p className={styles.filterGroupLabel}>{t('tournaments.filterStatus')}</p>
-                {STATUS_OPTIONS.map((s, idx) => (
-                  <label key={s} className={styles.radioItem}>
-                    <span>{s}</span>
-                    <input type="radio" name="status" checked={pendingStatusIdx === idx} onChange={() => setPendingStatusIdx(idx)} />
-                  </label>
-                ))}
+                <label className={styles.radioItem}>
+                  <span>{t('tournaments.all')}</span>
+                  <input type="radio" name="status" checked={pendingStatusId === null} onChange={() => setPendingStatusId(null)} />
+                </label>
+                {statuses.map(st => {
+                  const stName = i18n.language === 'kk' ? (st.nameKk || st.nameRu) : i18n.language === 'en' ? (st.nameEn || st.nameRu) : st.nameRu;
+                  return (
+                    <label key={st.id} className={styles.radioItem}>
+                      <span>{stName}</span>
+                      <input type="radio" name="status" checked={pendingStatusId === st.id} onChange={() => setPendingStatusId(st.id)} />
+                    </label>
+                  );
+                })}
               </div>
 
               <button className={styles.applyBtn} onClick={handleApply}>

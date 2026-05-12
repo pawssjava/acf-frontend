@@ -432,6 +432,8 @@ const en = {
     notFound: 'Record not found',
     loadError: 'Failed to load data',
     required: 'Required field',
+    prev: 'Previous',
+    next: 'Next',
   },
 } as const;
 

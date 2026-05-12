@@ -209,6 +209,14 @@ export interface DictionaryItem {
   updatedDate: string;
 }
 
+export interface DictPage<T> {
+  content: T[];
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
+}
+
 export interface ApiError {
   status: number;
   error: string;
