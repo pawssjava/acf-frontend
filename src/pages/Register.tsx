@@ -1,5 +1,6 @@
 import { useRef, useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { sendSms, verifySms, register, checkPhone, checkUsername } from '../api/auth';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
@@ -9,20 +10,11 @@ import styles from './Auth.module.css';
 type Step = 'phone' | 'code' | 'details';
 type FieldStatus = 'idle' | 'checking' | 'valid' | 'taken';
 
-function validateUsername(val: string): string | undefined {
-  if (val.length < 3)  return 'Минимум 3 символа';
-  if (val.length > 20) return 'Максимум 20 символов';
-  if (!/^[a-zA-Z0-9_]+$/.test(val)) return 'Только латинские буквы, цифры и _';
-  if (val.startsWith('_') || val.endsWith('_')) return 'Не может начинаться или заканчиваться на _';
-  if (val.includes('__')) return 'Нельзя использовать два _ подряд';
-  return undefined;
-}
-
 const STEPS: Step[] = ['phone', 'code', 'details'];
-const STEP_LABELS = ['Телефон', 'Код', 'Данные'];
 
 export default function Register() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [step, setStep] = useState<Step>('phone');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -44,6 +36,17 @@ export default function Register() {
     if (phoneTimer.current) clearTimeout(phoneTimer.current);
     if (usernameTimer.current) clearTimeout(usernameTimer.current);
   }, []);
+
+  function validateUsername(val: string): string | undefined {
+    if (val.length < 3)  return t('register.usernameMin');
+    if (val.length > 20) return t('register.usernameMax');
+    if (!/^[a-zA-Z0-9_]+$/.test(val)) return t('register.usernameChars');
+    if (val.startsWith('_') || val.endsWith('_')) return t('register.usernameNoEdge');
+    if (val.includes('__')) return t('register.usernameNoDouble');
+    return undefined;
+  }
+
+  const STEP_LABELS = [t('register.stepPhone'), t('register.stepCode'), t('register.stepDetails')];
 
   const fullPhone = `7${phone.replace(/\D/g, '')}`;
   const stepIdx = STEPS.indexOf(step);
@@ -100,17 +103,16 @@ export default function Register() {
 
   const handleSendSms = async () => {
     if (phone.replace(/\D/g, '').length < 10) {
-      setError('Введите полный номер телефона (10 цифр)');
+      setError(t('register.errPhoneLength'));
       return;
     }
     if (phoneStatus === 'taken') {
-      setError('Этот номер телефона уже зарегистрирован');
+      setError(t('register.errPhoneTaken'));
       return;
     }
     setLoading(true);
     setError('');
     try {
-      // Re-check if not yet validated (covers the case where user submits before debounce fires)
       if (phoneStatus !== 'valid') {
         setPhoneStatus('checking');
         try {
@@ -120,17 +122,16 @@ export default function Register() {
           const status = (err as { response?: { status?: number } })?.response?.status;
           if (status === 409) {
             setPhoneStatus('taken');
-            setError('Этот номер телефона уже зарегистрирован');
+            setError(t('register.errPhoneTaken'));
             setLoading(false);
             return;
           }
-          // Network error — proceed; backend will reject if needed
         }
       }
       await sendSms(fullPhone);
       setStep('code');
     } catch {
-      setError('Не удалось отправить SMS. Проверьте номер телефона.');
+      setError(t('register.errSmsFail'));
     } finally {
       setLoading(false);
     }
@@ -143,7 +144,7 @@ export default function Register() {
       setStep('details');
     } catch {
       setOtpError(true);
-      setError('Неверный код. Попробуйте снова.');
+      setError(t('register.errOtp'));
     } finally {
       setLoading(false);
     }
@@ -151,15 +152,15 @@ export default function Register() {
 
   const handleRegister = async () => {
     if (!username || !password || !firstName || !lastName || !birthDate) {
-      setError('Заполните все поля');
+      setError(t('register.errRequired'));
       return;
     }
     if (password.length < 6) {
-      setError('Пароль должен содержать минимум 6 символов');
+      setError(t('register.errPasswordLength'));
       return;
     }
     if (birthDate > new Date().toISOString().slice(0, 10)) {
-      setError('Дата рождения не может быть в будущем');
+      setError(t('register.errBirthFuture'));
       return;
     }
     const usernameFormatErr = validateUsername(username);
@@ -168,13 +169,12 @@ export default function Register() {
       return;
     }
     if (usernameStatus === 'taken') {
-      setError('Имя пользователя уже занято');
+      setError(t('register.errUsernameTaken'));
       return;
     }
     setLoading(true);
     setError('');
     try {
-      // Re-check username if not confirmed yet
       if (usernameStatus !== 'valid') {
         setUsernameStatus('checking');
         try {
@@ -184,7 +184,7 @@ export default function Register() {
           const status = (err as { response?: { status?: number } })?.response?.status;
           if (status === 409) {
             setUsernameStatus('taken');
-            setError('Имя пользователя уже занято');
+            setError(t('register.errUsernameTaken'));
             setLoading(false);
             return;
           }
@@ -196,19 +196,19 @@ export default function Register() {
       const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? '';
       if (msg.toLowerCase().includes('not verified') || msg.toLowerCase().includes('не верифицир')) {
         setStep('phone');
-        setError('Сессия верификации истекла. Начните сначала.');
+        setError(t('register.errSessionExpired'));
       } else {
-        setError('Ошибка регистрации. Попробуйте снова.');
+        setError(t('register.errRegistration'));
       }
     } finally {
       setLoading(false);
     }
   };
 
-  const phoneError = phoneStatus === 'taken' ? 'Этот номер телефона уже зарегистрирован' : undefined;
+  const phoneError = phoneStatus === 'taken' ? t('register.errPhoneTaken') : undefined;
 
   const usernameFormatError = username.length > 0 ? validateUsername(username) : undefined;
-  const usernameError = usernameFormatError ?? (usernameStatus === 'taken' ? 'Имя пользователя уже занято' : undefined);
+  const usernameError = usernameFormatError ?? (usernameStatus === 'taken' ? t('register.errUsernameTaken') : undefined);
 
   const phoneSuffix =
     phoneStatus === 'checking' ? <span className={styles.inlineSpinner} /> :
@@ -237,14 +237,14 @@ export default function Register() {
             ))}
           </div>
 
-          <h1 className={styles.titleDark}>Регистрация!</h1>
+          <h1 className={styles.titleDark}>{t('register.title')}</h1>
 
           {error && <div className={styles.errorBox}>{error}</div>}
 
           {step === 'phone' && (
             <div className={styles.fields}>
               <Input
-                label="Номер телефона"
+                label={t('register.phone')}
                 prefix="+7"
                 type="tel"
                 placeholder="747 777-77-77"
@@ -260,19 +260,16 @@ export default function Register() {
                 loading={loading}
                 disabled={phoneStatus === 'taken' || loading}
               >
-                Отправить код
+                {t('register.sendCode')}
               </Button>
-              <Link to="/login" className={styles.switchLink}>У меня уже есть учетная запись</Link>
-              <p className={styles.legalDark}>
-                Регистрируясь, я принимаю правила пользовательского соглашения
-                и условия политики сбора и обработки персональных данных
-              </p>
+              <Link to="/login" className={styles.switchLink}>{t('register.alreadyHaveAccount')}</Link>
+              <p className={styles.legalDark}>{t('register.legal')}</p>
             </div>
           )}
 
           {step === 'code' && (
             <div className={styles.fields}>
-              <p className={styles.smsSent}>Код отправлен на +7 {phone}</p>
+              <p className={styles.smsSent}>{t('register.smsSent', { phone })}</p>
               <OtpInput
                 onComplete={handleVerifyOtp}
                 error={otpError}
@@ -284,7 +281,7 @@ export default function Register() {
                 onClick={handleSendSms}
                 disabled={loading}
               >
-                Отправить код повторно
+                {t('register.resendCode')}
               </button>
             </div>
           )}
@@ -292,9 +289,9 @@ export default function Register() {
           {step === 'details' && (
             <div className={styles.fields}>
               <Input
-                label="Имя пользователя"
+                label={t('auth.username')}
                 type="text"
-                placeholder="john_doe"
+                placeholder={t('register.usernamePlaceholder')}
                 value={username}
                 onChange={handleUsernameChange}
                 autoComplete="username"
@@ -303,29 +300,29 @@ export default function Register() {
                 error={usernameError}
               />
               <Input
-                label="Пароль"
+                label={t('auth.password')}
                 type="password"
-                placeholder="Минимум 6 символов"
+                placeholder={t('register.passwordPlaceholder')}
                 value={password}
                 onChange={e => { setPassword(e.target.value); setError(''); }}
                 autoComplete="new-password"
               />
               <Input
-                label="Имя"
+                label={t('personalInfo.firstName')}
                 type="text"
-                placeholder="Иван"
+                placeholder={t('register.firstNamePlaceholder')}
                 value={firstName}
                 onChange={e => { setFirstName(e.target.value); setError(''); }}
               />
               <Input
-                label="Фамилия"
+                label={t('personalInfo.lastName')}
                 type="text"
-                placeholder="Иванов"
+                placeholder={t('register.lastNamePlaceholder')}
                 value={lastName}
                 onChange={e => { setLastName(e.target.value); setError(''); }}
               />
               <Input
-                label="Дата рождения"
+                label={t('register.birthDate')}
                 type="date"
                 value={birthDate}
                 max={new Date().toISOString().slice(0, 10)}
@@ -337,7 +334,7 @@ export default function Register() {
                 loading={loading}
                 disabled={usernameStatus === 'taken' || loading}
               >
-                Завершить регистрацию
+                {t('register.complete')}
               </Button>
             </div>
           )}

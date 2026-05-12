@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { getTournamentById, getParticipants, getResults, getRegistrationLog, registerParticipant, unregisterParticipant, startTournament } from '../api/tournaments';
 import type { Tournament, Participant, TournamentResult, RegistrationLogPage } from '../types';
 import { useAuth } from '../context/AuthContext';
@@ -10,27 +11,10 @@ import Input from '../components/ui/Input';
 import BracketView from '../components/tournament/BracketView';
 import styles from './TournamentDetail.module.css';
 
-function validatePsn(val: string): string | undefined {
-  if (val.length < 3)  return 'Минимум 3 символа';
-  if (val.length > 16) return 'Максимум 16 символов';
-  if (!/^[a-zA-Z0-9_-]+$/.test(val)) return 'Только латинские буквы, цифры, _ и -';
-  if (/^[_-]/.test(val)) return 'Не может начинаться с _ или -';
-  if (/[_-]$/.test(val)) return 'Не может заканчиваться на _ или -';
-  if (/[_-]{2}/.test(val)) return 'Нельзя использовать два спецсимвола подряд';
-  return undefined;
-}
-
 const FORMAT_LABEL: Record<string, string> = {
   SINGLE_ELIMINATION: 'Single Elimination',
   SWISS: 'Swiss System',
   EKPL: 'eKPL',
-};
-
-const PHASE_LABEL: Record<string, string> = {
-  PLAYOFF: 'Плей-офф',
-  SWISS: 'Швейцарская система',
-  REGULAR_SEASON: 'Регулярный сезон',
-  COMPLETED: 'Завершён',
 };
 
 type Tab = 'info' | 'participants' | 'results' | 'bracket' | 'activity';
@@ -45,6 +29,7 @@ export default function TournamentDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { isAuthenticated, user } = useAuth();
+  const { t, i18n } = useTranslation();
   const [tab, setTab] = useState<Tab>('info');
   const [tournament, setTournament] = useState<Tournament | null>(null);
   const [participants, setParticipants] = useState<Participant[]>([]);
@@ -60,6 +45,25 @@ export default function TournamentDetail() {
   const [psnError, setPsnError] = useState('');
   const [verificationRequired, setVerificationRequired] = useState(false);
 
+  const locale = i18n.language === 'kk' ? 'kk-KZ' : i18n.language === 'en' ? 'en-US' : 'ru-RU';
+
+  function validatePsn(val: string): string | undefined {
+    if (val.length < 3)  return t('tournamentDetail.psnMin');
+    if (val.length > 16) return t('tournamentDetail.psnMax');
+    if (!/^[a-zA-Z0-9_-]+$/.test(val)) return t('tournamentDetail.psnChars');
+    if (/^[_-]/.test(val)) return t('tournamentDetail.psnNoStart');
+    if (/[_-]$/.test(val)) return t('tournamentDetail.psnNoEnd');
+    if (/[_-]{2}/.test(val)) return t('tournamentDetail.psnNoDouble');
+    return undefined;
+  }
+
+  const PHASE_LABEL: Record<string, string> = {
+    PLAYOFF: t('tournamentDetail.phasePlayoff'),
+    SWISS: t('tournamentDetail.phaseSwiss'),
+    REGULAR_SEASON: t('tournamentDetail.phaseRegular'),
+    COMPLETED: t('tournamentDetail.phaseCompleted'),
+  };
+
   const numId = Number(id);
 
   useEffect(() => {
@@ -67,8 +71,8 @@ export default function TournamentDetail() {
     Promise.all([
       getTournamentById(numId),
       getParticipants(numId),
-    ]).then(([t, p]) => {
-      setTournament(t.data);
+    ]).then(([tp, p]) => {
+      setTournament(tp.data);
       setParticipants(p.data);
     }).catch(() => {}).finally(() => setLoading(false));
   }, [numId]);
@@ -80,7 +84,6 @@ export default function TournamentDetail() {
       setTournament(data);
     } catch { /* ignore */ }
   }, [numId]);
-
 
   const handleStart = async () => {
     setStartLoading(true);
@@ -108,7 +111,7 @@ export default function TournamentDetail() {
       setJoinMsg('');
     } catch (err: unknown) {
       const status = (err as { response?: { status?: number } })?.response?.status;
-      setUnregisterMsg(status === 404 ? 'Регистрация не найдена' : 'Ошибка при отмене регистрации');
+      setUnregisterMsg(status === 404 ? t('tournamentDetail.regNotFound') : t('tournamentDetail.unregisterError'));
     } finally {
       setUnregistering(false);
     }
@@ -136,7 +139,7 @@ export default function TournamentDetail() {
     e.preventDefault();
     const trimmed = psn.trim();
     if (!trimmed) {
-      setPsnError('PSN обязателен');
+      setPsnError(t('tournamentDetail.psnRequired'));
       return;
     }
     const psnFormatErr = validatePsn(trimmed);
@@ -151,21 +154,21 @@ export default function TournamentDetail() {
     try {
       const p = await registerParticipant(numId, user.id, psn.trim());
       setParticipants(prev => [...prev, p.data]);
-      setJoinMsg('Вы успешно зарегистрированы!');
+      setJoinMsg(t('tournamentDetail.joinSuccess'));
       setPsnModalOpen(false);
     } catch (err: unknown) {
       const status = (err as { response?: { status?: number } })?.response?.status;
       const message = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? '';
       if (status === 400 && message.toLowerCase().includes('psn')) {
-        setPsnError('PSN обязателен');
+        setPsnError(t('tournamentDetail.psnRequired'));
       } else if (status === 400) {
-        setJoinMsg('Турнир заполнен');
+        setJoinMsg(t('tournamentDetail.tournamentFull'));
         setPsnModalOpen(false);
       } else if (status === 403) {
         setVerificationRequired(true);
         setPsnModalOpen(false);
       } else {
-        setJoinMsg('Ошибка при регистрации');
+        setJoinMsg(t('tournamentDetail.joinError'));
         setPsnModalOpen(false);
       }
     } finally {
@@ -173,15 +176,15 @@ export default function TournamentDetail() {
     }
   };
 
-  if (loading) return <div className={styles.loading}>Загружаем...</div>;
-  if (!tournament) return <div className={styles.loading}>Турнир не найден</div>;
+  if (loading) return <div className={styles.loading}>{t('tournamentDetail.loading')}</div>;
+  if (!tournament) return <div className={styles.loading}>{t('tournamentDetail.notFound')}</div>;
 
   const TAB_LABELS: Record<Tab, string> = {
-    info: 'Информация',
-    participants: 'Участники',
-    results: 'Результаты',
-    bracket: 'Сетка',
-    activity: 'Активность регистрации',
+    info: t('tournamentDetail.tabInfo'),
+    participants: t('tournamentDetail.tabParticipants'),
+    results: t('tournamentDetail.tabResults'),
+    bracket: t('tournamentDetail.tabBracket'),
+    activity: t('tournamentDetail.tabActivity'),
   };
 
   const visibleTabs: Tab[] = [
@@ -192,7 +195,6 @@ export default function TournamentDetail() {
     ...(user?.isAdmin ? ['activity' as Tab] : []),
   ];
 
-  // If the active tab was hidden (e.g. phase changed), fall back to info
   const activeTab = visibleTabs.includes(tab) ? tab : 'info';
 
   return (
@@ -219,11 +221,11 @@ export default function TournamentDetail() {
                   {PHASE_LABEL[tournament.phase] ?? tournament.phase}
                 </Badge>
               )
-              : <Badge variant="gray">Не начат</Badge>
+              : <Badge variant="gray">{t('tournamentDetail.notStarted')}</Badge>
             }
             {tournament.format === 'SWISS' && tournament.phase === 'SWISS' && swissCurrentRound !== null && (
               <Badge variant="gray">
-                {`Раунд ${swissCurrentRound}${tournament.totalRounds ? ` / ${tournament.totalRounds}` : ''}`}
+                {`${t('tournamentDetail.round', { current: swissCurrentRound })}${tournament.totalRounds ? ` / ${tournament.totalRounds}` : ''}`}
               </Badge>
             )}
             {user?.isAdmin && isEditable(tournament) && (
@@ -231,7 +233,7 @@ export default function TournamentDetail() {
                 onClick={() => navigate(`/admin/tournaments/${id}/edit`)}
                 style={{ background: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.3)', color: '#fff', padding: '3px 12px', borderRadius: '20px', fontSize: '12px', cursor: 'pointer' }}
               >
-                Редактировать
+                {t('tournamentDetail.edit')}
               </button>
             )}
             {user?.isAdmin && tournament.phase === null && tournament.tournamentStatusId === 2 && (
@@ -240,7 +242,7 @@ export default function TournamentDetail() {
                 disabled={startLoading}
                 style={{ background: 'rgba(26,159,216,0.35)', border: '1px solid rgba(26,159,216,0.7)', color: '#fff', padding: '3px 12px', borderRadius: '20px', fontSize: '12px', cursor: startLoading ? 'not-allowed' : 'pointer', opacity: startLoading ? 0.7 : 1, fontWeight: 600 }}
               >
-                {startLoading ? 'Запуск...' : 'Начать турнир'}
+                {startLoading ? t('tournamentDetail.starting') : t('tournamentDetail.start')}
               </button>
             )}
           </div>
@@ -251,14 +253,14 @@ export default function TournamentDetail() {
       <div className={styles.container}>
         {/* Tabs */}
         <div className={styles.tabs}>
-          {visibleTabs.map(t => (
+          {visibleTabs.map(tp => (
             <button
-              key={t}
-              className={[styles.tab, activeTab === t ? styles.tabActive : ''].join(' ')}
-              onClick={() => setTab(t)}
+              key={tp}
+              className={[styles.tab, activeTab === tp ? styles.tabActive : ''].join(' ')}
+              onClick={() => setTab(tp)}
             >
-              {TAB_LABELS[t]}
-              {t === 'participants' && <span className={styles.tabCount}>{participants.length}</span>}
+              {TAB_LABELS[tp]}
+              {tp === 'participants' && <span className={styles.tabCount}>{participants.length}</span>}
             </button>
           ))}
         </div>
@@ -267,72 +269,72 @@ export default function TournamentDetail() {
         {activeTab === 'info' && (
           <div className={styles.infoGrid}>
             <div className={styles.infoCard}>
-              <InfoRow label="Дата начала" value={new Date(tournament.startDate).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' })} />
-              <InfoRow label="Дата окончания" value={new Date(tournament.endDate).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' })} />
-              <InfoRow label="Формат" value={FORMAT_LABEL[tournament.format] ?? tournament.format} />
-              <InfoRow label="Фаза" value={tournament.phase ? (PHASE_LABEL[tournament.phase] ?? tournament.phase) : 'Не начат'} />
+              <InfoRow label={t('tournamentDetail.labelStartDate')} value={new Date(tournament.startDate).toLocaleDateString(locale, { day: 'numeric', month: 'long', year: 'numeric' })} />
+              <InfoRow label={t('tournamentDetail.labelEndDate')} value={new Date(tournament.endDate).toLocaleDateString(locale, { day: 'numeric', month: 'long', year: 'numeric' })} />
+              <InfoRow label={t('tournamentDetail.labelFormat')} value={FORMAT_LABEL[tournament.format] ?? tournament.format} />
+              <InfoRow label={t('tournamentDetail.labelPhase')} value={tournament.phase ? (PHASE_LABEL[tournament.phase] ?? tournament.phase) : t('tournamentDetail.notStarted')} />
               {tournament.format === 'SWISS' && tournament.totalRounds && (
-                <InfoRow label="Раундов" value={String(tournament.totalRounds)} />
+                <InfoRow label={t('tournamentDetail.labelRounds')} value={String(tournament.totalRounds)} />
               )}
-              <InfoRow label="Вместимость" value={`${participants.length} / ${tournament.capacity} игроков`} />
-              <InfoRow label="Призовой фонд" value={`${tournament.prizeMoney.toLocaleString('ru-RU')} ₸`} />
-              <InfoRow label="Тип" value={tournament.tournamentTypeName} />
-              <InfoRow label="Статус" value={tournament.tournamentStatusName} />
+              <InfoRow label={t('tournamentDetail.labelCapacity')} value={t('tournamentDetail.labelCapacityValue', { current: participants.length, total: tournament.capacity })} />
+              <InfoRow label={t('tournamentDetail.labelPrize')} value={`${tournament.prizeMoney.toLocaleString(locale)} ₸`} />
+              <InfoRow label={t('tournamentDetail.labelType')} value={tournament.tournamentTypeName} />
+              <InfoRow label={t('tournamentDetail.labelStatus')} value={tournament.tournamentStatusName} />
             </div>
 
             {isAuthenticated ? (
               <div className={styles.joinCard}>
                 {isUpcoming && isParticipant && (
                   <>
-                    <p className={styles.alreadyJoined}>Вы уже участвуете в этом турнире</p>
+                    <p className={styles.alreadyJoined}>{t('tournamentDetail.alreadyParticipant')}</p>
                     <Button variant="danger" onClick={handleUnregister} loading={unregistering} fullWidth>
-                      Отменить регистрацию
+                      {t('tournamentDetail.cancelRegistration')}
                     </Button>
                     {unregisterMsg && <p className={styles.errorMsg}>{unregisterMsg}</p>}
                   </>
                 )}
                 {isUpcoming && !isParticipant && isRegistrationOpen && (
                   <>
-                    <h3>Участвовать</h3>
-                    <p>{isFull ? 'Турнир заполнен' : 'Зарегистрируйтесь для участия в турнире'}</p>
+                    <h3>{t('tournamentDetail.joinTitle')}</h3>
+                    <p>{isFull ? t('tournamentDetail.full') : t('tournamentDetail.registerPrompt')}</p>
                     {verificationRequired ? (
                       <div className={styles.verifBanner}>
                         <div className={styles.verifBannerIcon}>
                           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
                         </div>
                         <div className={styles.verifBannerText}>
-                          <span className={styles.verifBannerTitle}>Требуется верификация документа</span>
-                          <span className={styles.verifBannerSub}>Загрузите удостоверение личности в профиле, чтобы участвовать в турнирах.</span>
+                          <span className={styles.verifBannerTitle}>{t('tournamentDetail.verificationRequiredTitle')}</span>
+                          <span className={styles.verifBannerSub}>{t('tournamentDetail.verificationRequiredSub')}</span>
                         </div>
                         <Link to="/profile?tab=verification" className={styles.verifBannerLink}>
-                          Верифицировать →
+                          {t('tournamentDetail.verifyLink')}
                         </Link>
                       </div>
                     ) : (
                       <>
                         <Button onClick={openPsnModal} fullWidth size="lg" disabled={isFull}>
-                          Зарегистрироваться
+                          {t('tournamentDetail.registerBtn')}
                         </Button>
-                        {joinMsg && <p className={joinMsg.includes('успешно') ? styles.successMsg : styles.errorMsg}>{joinMsg}</p>}
+                        {joinMsg && <p className={joinMsg === t('tournamentDetail.joinSuccess') ? styles.successMsg : styles.errorMsg}>{joinMsg}</p>}
                       </>
                     )}
                   </>
                 )}
                 {isUpcoming && !isParticipant && !isRegistrationOpen && (
-                  <p style={{ color: 'var(--text-secondary)', fontSize: '13px' }}>Регистрация закрыта</p>
+                  <p style={{ color: 'var(--text-secondary)', fontSize: '13px' }}>{t('tournamentDetail.registrationClosed')}</p>
                 )}
                 {!isUpcoming && isParticipant && (
-                  <p className={styles.alreadyJoined}>Вы участвуете в этом турнире</p>
+                  <p className={styles.alreadyJoined}>{t('tournamentDetail.participating')}</p>
                 )}
                 {!isUpcoming && !isParticipant && (
-                  <p style={{ color: 'var(--text-secondary)', fontSize: '13px' }}>Регистрация завершена</p>
+                  <p style={{ color: 'var(--text-secondary)', fontSize: '13px' }}>{t('tournamentDetail.registrationEnded')}</p>
                 )}
               </div>
             ) : (
               <div className={styles.joinCard}>
-                <h3>Хотите участвовать?</h3>
-                <p>Войдите или зарегистрируйтесь для участия в турнирах</p>
-                <Link to="/login"><Button fullWidth size="lg">Войти</Button></Link>
+                <h3>{t('tournamentDetail.wantToJoin')}</h3>
+                <p>{t('tournamentDetail.loginToJoin')}</p>
+                <Link to="/login"><Button fullWidth size="lg">{t('nav.login')}</Button></Link>
               </div>
             )}
           </div>
@@ -342,11 +344,11 @@ export default function TournamentDetail() {
         {activeTab === 'participants' && (
           <div className={styles.tableWrap}>
             {participants.length === 0 ? (
-              <p className={styles.empty}>Пока нет участников</p>
+              <p className={styles.empty}>{t('tournamentDetail.noParticipants')}</p>
             ) : (
               <table className={styles.table}>
                 <thead>
-                  <tr><th>#</th><th>Игрок</th><th>PSN</th><th>Дата регистрации</th><th /></tr>
+                  <tr><th>#</th><th>{t('tournamentDetail.colPlayer')}</th><th>{t('tournamentDetail.colPsn')}</th><th>{t('tournamentDetail.colRegDate')}</th><th /></tr>
                 </thead>
                 <tbody>
                   {participants.map((p, i) => {
@@ -360,10 +362,11 @@ export default function TournamentDetail() {
                           <span className={styles.username}>@{p.username}</span>
                         </td>
                         <td>{p.psn}</td>
-                        <td>{new Date(p.registeredDate).toLocaleDateString('ru-RU')}</td>
+                        <td>{new Date(p.registeredDate).toLocaleDateString(locale)}</td>
                         <td>
                           {canRemove && (
                             <UnregisterBtn
+                              label={t('tournamentDetail.cancelRegistration')}
                               disabled={isOwn && unregistering}
                               onClick={async () => {
                                 if (isOwn) {
@@ -373,7 +376,7 @@ export default function TournamentDetail() {
                                     await unregisterParticipant(numId, p.userId);
                                     setParticipants(prev => prev.filter(x => x.userId !== p.userId));
                                   } catch {
-                                    setUnregisterMsg('Ошибка при отмене регистрации');
+                                    setUnregisterMsg(t('tournamentDetail.unregisterError'));
                                   }
                                 }
                               }}
@@ -389,12 +392,10 @@ export default function TournamentDetail() {
           </div>
         )}
 
-        {/* Results tab — self-contained, re-fetches on every mount */}
         {activeTab === 'results' && (
           <ResultsTab tournamentId={numId} />
         )}
 
-        {/* Bracket tab — key on phase so mounting/unmounting re-fetches when tournament starts */}
         {activeTab === 'bracket' && (
           <BracketView
             key={tournament.phase ?? 'null'}
@@ -408,7 +409,6 @@ export default function TournamentDetail() {
           />
         )}
 
-        {/* Activity tab — admin only */}
         {activeTab === 'activity' && (
           <RegistrationActivityTab tournamentId={numId} />
         )}
@@ -417,12 +417,12 @@ export default function TournamentDetail() {
       {psnModalOpen && (
         <div className={styles.modalOverlay} onClick={closePsnModal}>
           <div className={styles.modal} onClick={e => e.stopPropagation()}>
-            <h3 className={styles.modalTitle}>Регистрация на турнир</h3>
+            <h3 className={styles.modalTitle}>{t('tournamentDetail.registrationModalTitle')}</h3>
             <form onSubmit={handleJoin}>
               <div className={styles.modalBody}>
                 <Input
                   label="PSN"
-                  placeholder="Введите ваш PSN"
+                  placeholder={t('tournamentDetail.psnPlaceholder')}
                   value={psn}
                   onChange={e => {
                     const val = e.target.value;
@@ -436,10 +436,10 @@ export default function TournamentDetail() {
               </div>
               <div className={styles.modalActions}>
                 <Button type="button" variant="outline" onClick={closePsnModal} disabled={joining}>
-                  Отмена
+                  {t('tournamentDetail.cancel')}
                 </Button>
                 <Button type="submit" loading={joining}>
-                  Зарегистрироваться
+                  {t('tournamentDetail.registerBtn')}
                 </Button>
               </div>
             </form>
@@ -460,6 +460,8 @@ function InfoRow({ label, value }: { label: string; value: string }) {
 }
 
 function ResultsTab({ tournamentId }: { tournamentId: number }) {
+  const { t, i18n } = useTranslation();
+  const locale = i18n.language === 'kk' ? 'kk-KZ' : i18n.language === 'en' ? 'en-US' : 'ru-RU';
   const [results, setResults] = useState<TournamentResult[]>([]);
   const [fetching, setFetching] = useState(true);
 
@@ -479,21 +481,21 @@ function ResultsTab({ tournamentId }: { tournamentId: number }) {
     borderBottom: '1px solid var(--border)',
   };
 
-  if (fetching) return <p style={{ textAlign: 'center', padding: '40px', color: 'var(--text-secondary)', fontSize: '14px' }}>Загружаем...</p>;
+  if (fetching) return <p style={{ textAlign: 'center', padding: '40px', color: 'var(--text-secondary)', fontSize: '14px' }}>{t('tournamentDetail.resultLoading')}</p>;
 
   return (
     <div style={{ overflowX: 'auto' }}>
       {results.length === 0 ? (
         <p style={{ textAlign: 'center', padding: '40px', color: 'var(--text-secondary)', fontSize: '14px' }}>
-          Результаты ещё не опубликованы
+          {t('tournamentDetail.resultsEmpty')}
         </p>
       ) : (
         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
           <thead>
             <tr>
-              <th style={thStyle}>Место</th>
-              <th style={thStyle}>Игрок</th>
-              <th style={thStyle}>Очки</th>
+              <th style={thStyle}>{t('tournamentDetail.colPlace')}</th>
+              <th style={thStyle}>{t('tournamentDetail.colPlayer')}</th>
+              <th style={thStyle}>{t('tournamentDetail.colPoints')}</th>
             </tr>
           </thead>
           <tbody>
@@ -507,7 +509,7 @@ function ResultsTab({ tournamentId }: { tournamentId: number }) {
                   <span style={{ display: 'block', fontSize: '11px', color: 'var(--text-muted)' }}>@{r.username}</span>
                 </td>
                 <td style={{ padding: '12px', borderBottom: '1px solid var(--border)', fontWeight: 700, color: 'var(--accent-teal)' }}>
-                  {(r.score ?? 0).toLocaleString('ru-RU')}
+                  {(r.score ?? 0).toLocaleString(locale)}
                 </td>
               </tr>
             ))}
@@ -531,6 +533,8 @@ function buildPages(current: number, total: number): (number | '…')[] {
 }
 
 function RegistrationActivityTab({ tournamentId }: { tournamentId: number }) {
+  const { t, i18n } = useTranslation();
+  const locale = i18n.language === 'kk' ? 'kk-KZ' : i18n.language === 'en' ? 'en-US' : 'ru-RU';
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [page, setPage] = useState(0);
@@ -560,7 +564,7 @@ function RegistrationActivityTab({ tournamentId }: { tournamentId: number }) {
     <div>
       <div className={styles.activitySearch}>
         <Input
-          placeholder="Поиск по PSN, имени или нику..."
+          placeholder={t('tournamentDetail.searchActivity')}
           value={search}
           onChange={handleSearchChange}
         />
@@ -570,7 +574,7 @@ function RegistrationActivityTab({ tournamentId }: { tournamentId: number }) {
         <div className={styles.tableWrap}>
           <table className={styles.table}>
             <thead>
-              <tr><th>Дата и время</th><th>Игрок</th><th>Действие</th><th>PSN</th></tr>
+              <tr><th>{t('tournamentDetail.colDatetime')}</th><th>{t('tournamentDetail.colPlayer')}</th><th>{t('tournamentDetail.colAction')}</th><th>{t('tournamentDetail.colPsn')}</th></tr>
             </thead>
             <tbody>
               {Array.from({ length: 5 }).map((_, i) => (
@@ -586,20 +590,20 @@ function RegistrationActivityTab({ tournamentId }: { tournamentId: number }) {
         </div>
       ) : !data || data.totalElements === 0 ? (
         <p className={styles.empty}>
-          {debouncedSearch ? 'Ничего не найдено' : 'Активности пока нет'}
+          {debouncedSearch ? t('tournamentDetail.activityNoResults') : t('tournamentDetail.activityEmpty')}
         </p>
       ) : (
         <>
           <div className={styles.tableWrap}>
             <table className={styles.table}>
               <thead>
-                <tr><th>Дата и время</th><th>Игрок</th><th>Действие</th><th>PSN</th></tr>
+                <tr><th>{t('tournamentDetail.colDatetime')}</th><th>{t('tournamentDetail.colPlayer')}</th><th>{t('tournamentDetail.colAction')}</th><th>{t('tournamentDetail.colPsn')}</th></tr>
               </thead>
               <tbody>
                 {data.content.map(entry => (
                   <tr key={entry.id}>
                     <td style={{ whiteSpace: 'nowrap', color: 'var(--text-secondary)', fontSize: '13px' }}>
-                      {new Date(entry.createdDate).toLocaleString('ru-RU', {
+                      {new Date(entry.createdDate).toLocaleString(locale, {
                         day: '2-digit', month: '2-digit', year: 'numeric',
                         hour: '2-digit', minute: '2-digit',
                       })}
@@ -627,7 +631,7 @@ function RegistrationActivityTab({ tournamentId }: { tournamentId: number }) {
                 disabled={page === 0}
                 onClick={() => setPage(p => p - 1)}
               >
-                ← Назад
+                {t('matches.prev')}
               </button>
               <div className={styles.pageNumbers}>
                 {buildPages(page, data.totalPages).map((item, i) =>
@@ -649,7 +653,7 @@ function RegistrationActivityTab({ tournamentId }: { tournamentId: number }) {
                 disabled={page === data.totalPages - 1}
                 onClick={() => setPage(p => p + 1)}
               >
-                Вперёд →
+                {t('matches.next')}
               </button>
             </div>
           )}
@@ -659,7 +663,7 @@ function RegistrationActivityTab({ tournamentId }: { tournamentId: number }) {
   );
 }
 
-function UnregisterBtn({ onClick, disabled }: { onClick: () => void; disabled: boolean }) {
+function UnregisterBtn({ onClick, disabled, label }: { onClick: () => void; disabled: boolean; label: string }) {
   return (
     <button
       onClick={onClick}
@@ -679,7 +683,7 @@ function UnregisterBtn({ onClick, disabled }: { onClick: () => void; disabled: b
       onMouseOver={e => { if (!disabled) (e.currentTarget as HTMLButtonElement).style.background = 'rgba(231,76,60,0.1)'; }}
       onMouseOut={e => { (e.currentTarget as HTMLButtonElement).style.background = 'transparent'; }}
     >
-      Отменить
+      {label}
     </button>
   );
 }

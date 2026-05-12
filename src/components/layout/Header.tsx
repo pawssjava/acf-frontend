@@ -1,10 +1,18 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
 import styles from './Header.module.css';
 
+const LANGS = [
+  { code: 'kk', label: 'KZ' },
+  { code: 'ru', label: 'RU' },
+  { code: 'en', label: 'EN' },
+];
+
 export default function Header() {
   const { isAuthenticated, user, logout } = useAuth();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -47,9 +55,9 @@ export default function Header() {
         <Link to="/news" className={styles.logo} onClick={closeAll}>ACF<span>.</span></Link>
 
         <nav className={[styles.nav, menuOpen ? styles.open : ''].join(' ')}>
-          <NavLink to="/tournaments" className={({ isActive }) => isActive ? styles.active : ''} onClick={closeAll}>Турниры</NavLink>
-          <NavLink to="/news" className={({ isActive }) => isActive ? styles.active : ''} onClick={closeAll}>Блог</NavLink>
-          <NavLink to="/partners" className={({ isActive }) => isActive ? styles.active : ''} onClick={closeAll}>Партнеры</NavLink>
+          <NavLink to="/tournaments" className={({ isActive }) => isActive ? styles.active : ''} onClick={closeAll}>{t('nav.tournaments')}</NavLink>
+          <NavLink to="/news" className={({ isActive }) => isActive ? styles.active : ''} onClick={closeAll}>{t('nav.blog')}</NavLink>
+          <NavLink to="/partners" className={({ isActive }) => isActive ? styles.active : ''} onClick={closeAll}>{t('nav.partners')}</NavLink>
 
           {user?.isAdmin && (
             <div className={styles.adminNavItem} ref={adminRef}>
@@ -58,7 +66,7 @@ export default function Header() {
                 onClick={() => setAdminOpen(o => !o)}
                 aria-expanded={adminOpen}
               >
-                Админ панель
+                {t('nav.adminPanel')}
                 <svg
                   className={[styles.adminChevron, adminOpen ? styles.adminChevronOpen : ''].join(' ')}
                   width="11" height="11" viewBox="0 0 11 11" fill="none"
@@ -78,7 +86,7 @@ export default function Header() {
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                       <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 1.27h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.91a16 16 0 0 0 6.06 6.06l.91-.91a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" />
                     </svg>
-                    SMS Log
+                    {t('nav.smsLog')}
                   </Link>
                 </div>
               )}
@@ -87,12 +95,24 @@ export default function Header() {
         </nav>
 
         <div className={styles.actions}>
+          <div className={styles.langSwitcher}>
+            {LANGS.map(l => (
+              <button
+                key={l.code}
+                className={[styles.langBtn, i18n.language === l.code ? styles.langBtnActive : ''].join(' ')}
+                onClick={() => i18n.changeLanguage(l.code)}
+              >
+                {l.label}
+              </button>
+            ))}
+          </div>
+
           {isAuthenticated ? (
             <div className={styles.userMenu} ref={dropdownRef}>
               <button
                 className={styles.avatarBtn}
                 onClick={() => { setMenuOpen(false); setDropdownOpen(o => !o); }}
-                aria-label="Профиль"
+                aria-label={t('nav.profile')}
                 aria-expanded={dropdownOpen}
               >
                 {user?.photo
@@ -120,24 +140,24 @@ export default function Header() {
                     onClick={() => { setDropdownOpen(false); setMenuOpen(false); }}
                   >
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
-                    Профиль
+                    {t('nav.profile')}
                   </Link>
                   <button className={[styles.dropdownItem, styles.dropdownLogout].join(' ')} onClick={handleLogout}>
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-                    Выйти
+                    {t('nav.logout')}
                   </button>
                 </div>
               )}
             </div>
           ) : (
-            <Link to="/login" className={styles.loginBtn}>Войти</Link>
+            <Link to="/login" className={styles.loginBtn}>{t('nav.login')}</Link>
           )}
         </div>
 
         <button
           className={styles.burger}
           onClick={() => setMenuOpen(o => !o)}
-          aria-label="Меню"
+          aria-label={t('nav.menu')}
           aria-expanded={menuOpen}
         >
           <span className={menuOpen ? styles.burgerOpen : ''} />

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { loginUser } from '../api/auth';
 import { getMe } from '../api/users';
 import { useAuth } from '../context/AuthContext';
@@ -12,6 +13,7 @@ export default function Login() {
   const navigate = useNavigate();
   const location = useLocation();
   const { login } = useAuth();
+  const { t } = useTranslation();
   const passwordResetSuccess = (location.state as { passwordReset?: boolean } | null)?.passwordReset;
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -21,7 +23,7 @@ export default function Login() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!username.trim() || !password) {
-      setError('Введите имя пользователя и пароль');
+      setError(t('auth.errRequired'));
       return;
     }
     setLoading(true);
@@ -46,9 +48,9 @@ export default function Login() {
     } catch (err: unknown) {
       const status = (err as { response?: { status?: number } })?.response?.status;
       if (status === 401) {
-        setError('Неверное имя пользователя или пароль');
+        setError(t('auth.errCredentials'));
       } else {
-        setError('Ошибка входа. Попробуйте снова.');
+        setError(t('auth.errGeneral'));
       }
     } finally {
       setLoading(false);
@@ -65,12 +67,12 @@ export default function Login() {
 
       <div className={styles.formSide}>
         <form className={styles.formCard} onSubmit={handleSubmit}>
-          <h1 className={styles.title}>Добро пожаловать!</h1>
-          <p className={styles.subtitle}>Войдите в свой аккаунт</p>
+          <h1 className={styles.title}>{t('auth.welcome')}</h1>
+          <p className={styles.subtitle}>{t('auth.loginSubtitle')}</p>
 
           {passwordResetSuccess && (
             <div style={{ background: 'rgba(39,174,96,0.1)', border: '1px solid rgba(39,174,96,0.3)', color: '#27ae60', padding: '10px 14px', borderRadius: '8px', fontSize: '13px' }}>
-              Пароль успешно изменён. Войдите с новым паролем.
+              {t('auth.passwordResetSuccess')}
             </div>
           )}
 
@@ -78,7 +80,7 @@ export default function Login() {
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', width: '100%' }}>
             <Input
-              label="Имя пользователя"
+              label={t('auth.username')}
               type="text"
               placeholder="john_doe"
               value={username}
@@ -86,7 +88,7 @@ export default function Login() {
               autoComplete="username"
             />
             <Input
-              label="Пароль"
+              label={t('auth.password')}
               type="password"
               placeholder="••••••••"
               value={password}
@@ -97,24 +99,21 @@ export default function Login() {
 
           <div style={{ textAlign: 'right', marginTop: '-4px' }}>
             <Link to="/forgot-password" style={{ fontSize: '13px', color: 'var(--accent-blue)' }}>
-              Забыли пароль?
+              {t('auth.forgotPassword')}
             </Link>
           </div>
 
           <Button fullWidth size="lg" loading={loading} type="submit">
-            Войти
+            {t('auth.loginBtn')}
           </Button>
 
-          <div className={styles.divider}><span>или</span></div>
+          <div className={styles.divider}><span>{t('auth.or')}</span></div>
 
           <Link to="/register" className={styles.secondaryBtn}>
-            Зарегистрироваться
+            {t('auth.registerBtn')}
           </Link>
 
-          <p className={styles.legal}>
-            Регистрируясь, я принимаю правила пользовательского соглашения
-            и условия политики сбора и обработки персональных данных
-          </p>
+          <p className={styles.legal}>{t('auth.legal')}</p>
         </form>
       </div>
     </div>

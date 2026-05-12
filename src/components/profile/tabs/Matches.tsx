@@ -1,15 +1,11 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { getUserMatches } from '../../../api/users';
 import type { User, MatchEntry, MatchesPage } from '../../../types';
 import styles from './Matches.module.css';
 
 interface Props { user: User; }
-
-function fmtDate(iso: string) {
-  const d = new Date(iso);
-  return `${d.toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric' })} в ${d.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}`;
-}
 
 function buildPages(cur: number, total: number): (number | '…')[] {
   if (total <= 7) return Array.from({ length: total }, (_, i) => i);
@@ -31,9 +27,19 @@ const Checkmark = () => (
 
 function MatchCard({ match, myUsername }: { match: MatchEntry; myUsername: string }) {
   const navigate = useNavigate();
-  const resultLabel = match.result === 'WIN' ? `Победа (${match.myScore}:${match.opponentScore})`
-    : match.result === 'LOSS' ? `Поражение (${match.myScore}:${match.opponentScore})`
-    : `Ничья (${match.myScore}:${match.opponentScore})`;
+  const { t, i18n } = useTranslation();
+  const locale = i18n.language === 'kk' ? 'kk-KZ' : i18n.language === 'en' ? 'en-US' : 'ru-RU';
+
+  function fmtDate(iso: string) {
+    const d = new Date(iso);
+    return `${d.toLocaleDateString(locale, { day: '2-digit', month: '2-digit', year: 'numeric' })} ${d.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' })}`;
+  }
+
+  const resultLabel =
+    match.result === 'WIN'  ? t('matches.win',  { my: match.myScore, opp: match.opponentScore }) :
+    match.result === 'LOSS' ? t('matches.loss', { my: match.myScore, opp: match.opponentScore }) :
+                              t('matches.draw', { my: match.myScore, opp: match.opponentScore });
+
   const resultCls = match.result === 'WIN' ? styles.win : match.result === 'LOSS' ? styles.loss : styles.draw;
   const cardCls = match.result === 'WIN' ? styles.cardWin : match.result === 'LOSS' ? styles.cardLoss : '';
 
@@ -55,15 +61,16 @@ function MatchCard({ match, myUsername }: { match: MatchEntry; myUsername: strin
         <svg className={styles.chevron} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
       </div>
       <div className={styles.meta}>
-        <div className={styles.row}><span className={styles.metaLabel}>Результат</span><span className={[styles.result, resultCls].join(' ')}>{resultLabel}</span></div>
-        <div className={styles.row}><span className={styles.metaLabel}>Турнир</span><span className={styles.metaVal}>{match.tournamentName}</span></div>
-        <div className={styles.row}><span className={styles.metaLabel}>Статус</span><span className={styles.metaVal}>Завершен {fmtDate(match.updatedDate)}</span></div>
+        <div className={styles.row}><span className={styles.metaLabel}>{t('matches.labelResult')}</span><span className={[styles.result, resultCls].join(' ')}>{resultLabel}</span></div>
+        <div className={styles.row}><span className={styles.metaLabel}>{t('matches.labelTournament')}</span><span className={styles.metaVal}>{match.tournamentName}</span></div>
+        <div className={styles.row}><span className={styles.metaLabel}>{t('matches.labelStatus')}</span><span className={styles.metaVal}>{t('matches.completed', { date: fmtDate(match.updatedDate) })}</span></div>
       </div>
     </div>
   );
 }
 
 export default function Matches({ user }: Props) {
+  const { t } = useTranslation();
   const [data, setData] = useState<MatchesPage | null>(null);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(0);
@@ -79,9 +86,9 @@ export default function Matches({ user }: Props) {
   return (
     <div className={styles.wrap}>
       {loading ? (
-        <div className={styles.loading}>Загружаем...</div>
+        <div className={styles.loading}>{t('matches.loading')}</div>
       ) : !data || data.content.length === 0 ? (
-        <div className={styles.empty}>Матчей пока нет</div>
+        <div className={styles.empty}>{t('matches.empty')}</div>
       ) : (
         <>
           <div className={styles.list}>
@@ -92,7 +99,7 @@ export default function Matches({ user }: Props) {
 
           {data.totalPages > 1 && (
             <div className={styles.pagination}>
-              <button className={styles.pageBtn} disabled={page === 0} onClick={() => setPage(p => p - 1)}>← Назад</button>
+              <button className={styles.pageBtn} disabled={page === 0} onClick={() => setPage(p => p - 1)}>{t('matches.prev')}</button>
               <div className={styles.pageNumbers}>
                 {buildPages(page, data.totalPages).map((item, i) =>
                   item === '…'
@@ -100,7 +107,7 @@ export default function Matches({ user }: Props) {
                     : <button key={item} className={[styles.pageNum, item === page ? styles.pageNumActive : ''].join(' ')} onClick={() => setPage(item)}>{item + 1}</button>
                 )}
               </div>
-              <button className={styles.pageBtn} disabled={page === data.totalPages - 1} onClick={() => setPage(p => p + 1)}>Вперёд →</button>
+              <button className={styles.pageBtn} disabled={page === data.totalPages - 1} onClick={() => setPage(p => p + 1)}>{t('matches.next')}</button>
             </div>
           )}
         </>

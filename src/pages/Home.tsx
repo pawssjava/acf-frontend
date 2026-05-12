@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { getNewsList } from '../api/news';
 import { getTournaments } from '../api/tournaments';
 import type { News, Tournament } from '../types';
@@ -11,17 +12,14 @@ import heroImg from '../assets/hero.png';
 
 const PARTNERS = ['AKF', 'AKF', 'AKF', 'AKF', 'AKF', 'AKF', 'AKF', 'AKF'];
 
-const FAQ_ITEMS = [
-  { q: 'Как зарегистрироваться на турнир?', a: 'Зарегистрируйтесь на платформе, затем перейдите на страницу турнира и нажмите "Участвовать".' },
-  { q: 'Как зарегистрироваться на платформе?', a: 'Нажмите "Регистрация" в шапке сайта и следуйте инструкциям — введите номер телефона и подтвердите код из SMS.' },
-  { q: 'Как проходят турниры?', a: 'Турниры проходят в онлайн-формате по расписанию. Все подробности можно найти на странице конкретного турнира.' },
-];
-
 export default function Home() {
   const { isAuthenticated } = useAuth();
+  const { t } = useTranslation();
   const [news, setNews] = useState<News[]>([]);
   const [tournaments, setTournaments] = useState<Tournament[]>([]);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
+
+  const faqItems = t('home.faqItems', { returnObjects: true }) as Array<{ q: string; a: string }>;
 
   useEffect(() => {
     getNewsList().then(r => setNews(r.data.slice(0, 3))).catch(() => {});
@@ -36,13 +34,13 @@ export default function Home() {
           <img src={heroImg} alt="ACF Hero" className={styles.heroImg} />
           <div className={styles.heroOverlay} />
           <div className={styles.heroText}>
-            <h1>Академия<br />Кибер Футбола</h1>
-            <p>Участвуй в турнирах, прокачивай навыки, побеждай</p>
+            <h1>{t('home.heroTitle').split('\n').map((line, i) => <span key={i}>{line}<br /></span>)}</h1>
+            <p>{t('home.heroSubtitle')}</p>
             <div className={styles.heroActions}>
-              <Link to="/tournaments" className={styles.heroBtnPrimary}>Турниры</Link>
+              <Link to="/tournaments" className={styles.heroBtnPrimary}>{t('nav.tournaments')}</Link>
               {isAuthenticated
-                ? <Link to="/profile" className={styles.heroBtnOutline}>Мой профиль</Link>
-                : <Link to="/register" className={styles.heroBtnOutline}>Регистрация</Link>
+                ? <Link to="/profile" className={styles.heroBtnOutline}>{t('home.myProfile')}</Link>
+                : <Link to="/register" className={styles.heroBtnOutline}>{t('home.register')}</Link>
               }
             </div>
           </div>
@@ -53,36 +51,36 @@ export default function Home() {
         {/* Tournaments */}
         <section className={styles.section}>
           <div className={styles.sectionHead}>
-            <h2>Турниры</h2>
-            <Link to="/tournaments" className={styles.seeAll}>Все турниры →</Link>
+            <h2>{t('home.tournaments')}</h2>
+            <Link to="/tournaments" className={styles.seeAll}>{t('home.allTournaments')}</Link>
           </div>
           {tournaments.length > 0 ? (
             <div className={styles.grid3}>
-              {tournaments.map(t => <TournamentCard key={t.id} tournament={t} />)}
+              {tournaments.map(tour => <TournamentCard key={tour.id} tournament={tour} />)}
             </div>
           ) : (
-            <p className={styles.empty}>Турниры загружаются...</p>
+            <p className={styles.empty}>{t('home.tournamentsLoading')}</p>
           )}
         </section>
 
         {/* News */}
         <section className={styles.section}>
           <div className={styles.sectionHead}>
-            <h2>Блог</h2>
-            <Link to="/news" className={styles.seeAll}>Все новости →</Link>
+            <h2>{t('home.blog')}</h2>
+            <Link to="/news" className={styles.seeAll}>{t('home.allNews')}</Link>
           </div>
           {news.length > 0 ? (
             <div className={styles.grid3}>
               {news.map(n => <NewsCard key={n.id} news={n} />)}
             </div>
           ) : (
-            <p className={styles.empty}>Новости загружаются...</p>
+            <p className={styles.empty}>{t('home.newsLoading')}</p>
           )}
         </section>
 
         {/* Partners */}
         <section className={styles.section} id="partners">
-          <h2>Партнеры</h2>
+          <h2>{t('home.partners')}</h2>
           <div className={styles.partnersGrid}>
             {PARTNERS.map((p, i) => (
               <div key={i} className={styles.partnerLogo}>{p}</div>
@@ -92,9 +90,9 @@ export default function Home() {
 
         {/* FAQ */}
         <section className={styles.section}>
-          <h2>Часто задаваемые вопросы</h2>
+          <h2>{t('home.faq')}</h2>
           <div className={styles.faqList}>
-            {FAQ_ITEMS.map((item, i) => (
+            {faqItems.map((item, i) => (
               <div key={i} className={styles.faqItem}>
                 <button className={styles.faqQ} onClick={() => setOpenFaq(openFaq === i ? null : i)}>
                   <span>{item.q}</span>

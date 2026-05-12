@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { getCities, getClubs } from '../../../api/dictionary';
 import { updateUser } from '../../../api/users';
 import type { User, City, Club } from '../../../types';
@@ -11,6 +12,7 @@ interface Props {
 }
 
 export default function PersonalInfo({ user, onUpdate }: Props) {
+  const { t } = useTranslation();
   const [form, setForm] = useState({
     firstName: user.firstName ?? '',
     lastName: user.lastName ?? '',
@@ -52,9 +54,9 @@ export default function PersonalInfo({ user, onUpdate }: Props) {
         clubId: form.clubId,
       });
       onUpdate(data);
-      setMsg({ text: 'Изменения сохранены', ok: true });
+      setMsg({ text: t('personalInfo.saved'), ok: true });
     } catch {
-      setMsg({ text: 'Ошибка при сохранении', ok: false });
+      setMsg({ text: t('personalInfo.error'), ok: false });
     } finally {
       setSaving(false);
     }
@@ -62,52 +64,52 @@ export default function PersonalInfo({ user, onUpdate }: Props) {
 
   return (
     <div className={styles.card}>
-      <h2 className={styles.title}>Личная информация</h2>
+      <h2 className={styles.title}>{t('personalInfo.title')}</h2>
 
       <div className={styles.grid}>
         <div className={styles.field}>
-          <label className={styles.label}>Имя</label>
-          <input className={styles.input} value={form.firstName} onChange={set('firstName')} placeholder="Имя" />
+          <label className={styles.label}>{t('personalInfo.firstName')}</label>
+          <input className={styles.input} value={form.firstName} onChange={set('firstName')} placeholder={t('personalInfo.firstName')} />
         </div>
 
         <div className={styles.field}>
-          <label className={styles.label}>Номер телефона</label>
+          <label className={styles.label}>{t('personalInfo.phone')}</label>
           <input className={styles.input} value={`+${user.phoneNumber}`} readOnly disabled />
         </div>
 
         <div className={styles.field}>
-          <label className={styles.label}>Фамилия</label>
-          <input className={styles.input} value={form.lastName} onChange={set('lastName')} placeholder="Фамилия" />
+          <label className={styles.label}>{t('personalInfo.lastName')}</label>
+          <input className={styles.input} value={form.lastName} onChange={set('lastName')} placeholder={t('personalInfo.lastName')} />
         </div>
 
         <div className={styles.field}>
-          <label className={styles.label}>Город</label>
+          <label className={styles.label}>{t('personalInfo.city')}</label>
           <div className={styles.selectWrap}>
             <select
               className={styles.select}
               value={form.cityId ?? ''}
               onChange={e => setForm(f => ({ ...f, cityId: e.target.value ? Number(e.target.value) : null }))}
             >
-              <option value="">— Не указан —</option>
+              <option value="">{t('personalInfo.notSpecified')}</option>
               {cities.map(c => <option key={c.id} value={c.id}>{c.nameRu}</option>)}
             </select>
           </div>
         </div>
 
         <div className={styles.field}>
-          <label className={styles.label}>Никнейм</label>
+          <label className={styles.label}>{t('personalInfo.username')}</label>
           <input className={styles.input} value={user.username} readOnly disabled />
         </div>
 
         <div className={styles.field}>
-          <label className={styles.label}>Клуб</label>
+          <label className={styles.label}>{t('personalInfo.club')}</label>
           <div className={styles.selectWrap}>
             <select
               className={styles.select}
               value={form.clubId ?? ''}
               onChange={e => setForm(f => ({ ...f, clubId: e.target.value ? Number(e.target.value) : null }))}
             >
-              <option value="">— Не указан —</option>
+              <option value="">{t('personalInfo.notSpecified')}</option>
               {clubs.map(c => <option key={c.id} value={c.id}>{c.nameRu}</option>)}
             </select>
           </div>
@@ -116,8 +118,8 @@ export default function PersonalInfo({ user, onUpdate }: Props) {
 
       <div className={styles.actions}>
         {msg && <span className={msg.ok ? styles.ok : styles.err}>{msg.text}</span>}
-        <Button variant="outline" onClick={handleCancel} disabled={saving}>Отменить</Button>
-        <Button onClick={handleSave} loading={saving}>Сохранить изменения</Button>
+        <Button variant="outline" onClick={handleCancel} disabled={saving}>{t('personalInfo.cancel')}</Button>
+        <Button onClick={handleSave} loading={saving}>{t('personalInfo.save')}</Button>
       </div>
     </div>
   );

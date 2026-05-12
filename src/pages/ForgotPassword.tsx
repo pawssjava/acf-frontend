@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { forgotPasswordSendSms, forgotPasswordVerifySms, forgotPasswordReset } from '../api/auth';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
@@ -8,10 +9,10 @@ import styles from './Auth.module.css';
 
 type Step = 'phone' | 'code' | 'reset';
 const STEPS: Step[] = ['phone', 'code', 'reset'];
-const STEP_LABELS = ['Телефон', 'Код', 'Пароль'];
 
 export default function ForgotPassword() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [step, setStep] = useState<Step>('phone');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -20,6 +21,8 @@ export default function ForgotPassword() {
   const [phone, setPhone] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+
+  const STEP_LABELS = [t('forgot.stepPhone'), t('forgot.stepCode'), t('forgot.stepPassword')];
 
   const fullPhone = `7${phone.replace(/\D/g, '')}`;
   const stepIdx = STEPS.indexOf(step);
@@ -36,7 +39,7 @@ export default function ForgotPassword() {
 
   const handleSendSms = async () => {
     if (phone.replace(/\D/g, '').length < 10) {
-      setError('Введите полный номер телефона (10 цифр)');
+      setError(t('forgot.errPhoneLength'));
       return;
     }
     setLoading(true);
@@ -46,9 +49,7 @@ export default function ForgotPassword() {
       setStep('code');
     } catch (err: unknown) {
       const status = (err as { response?: { status?: number } })?.response?.status;
-      setError(status === 404
-        ? 'Аккаунт с таким номером не найден'
-        : 'Не удалось отправить SMS. Попробуйте снова.');
+      setError(status === 404 ? t('forgot.errNotFound') : t('forgot.errSmsFail'));
     } finally {
       setLoading(false);
     }
@@ -61,16 +62,16 @@ export default function ForgotPassword() {
       setStep('reset');
     } catch {
       setOtpError(true);
-      setError('Неверный код. Попробуйте снова.');
+      setError(t('forgot.errOtp'));
     } finally {
       setLoading(false);
     }
   };
 
   const handleReset = async () => {
-    if (!newPassword) { setError('Введите новый пароль'); return; }
-    if (newPassword.length < 6) { setError('Пароль должен содержать минимум 6 символов'); return; }
-    if (newPassword !== confirmPassword) { setError('Пароли не совпадают'); return; }
+    if (!newPassword) { setError(t('forgot.errNewPassword')); return; }
+    if (newPassword.length < 6) { setError(t('forgot.errPasswordLength')); return; }
+    if (newPassword !== confirmPassword) { setError(t('forgot.errPasswordsMatch')); return; }
     setLoading(true);
     setError('');
     try {
@@ -80,11 +81,11 @@ export default function ForgotPassword() {
       const status = (err as { response?: { status?: number } })?.response?.status;
       if (status === 400) {
         setStep('phone');
-        setError('Сессия верификации истекла. Начните сначала.');
+        setError(t('forgot.errSessionExpired'));
       } else if (status === 404) {
-        setError('Пользователь не найден');
+        setError(t('forgot.errUserNotFound'));
       } else {
-        setError('Ошибка сброса пароля. Попробуйте снова.');
+        setError(t('forgot.errReset'));
       }
     } finally {
       setLoading(false);
@@ -108,14 +109,14 @@ export default function ForgotPassword() {
             ))}
           </div>
 
-          <h1 className={styles.titleDark}>Забыли пароль?</h1>
+          <h1 className={styles.titleDark}>{t('forgot.title')}</h1>
 
           {error && <div className={styles.errorBox}>{error}</div>}
 
           {step === 'phone' && (
             <div className={styles.fields}>
               <Input
-                label="Номер телефона"
+                label={t('forgot.phone')}
                 prefix="+7"
                 type="tel"
                 placeholder="747 777-77-77"
@@ -124,15 +125,15 @@ export default function ForgotPassword() {
                 inputMode="numeric"
               />
               <Button fullWidth size="lg" onClick={handleSendSms} loading={loading}>
-                Отправить код
+                {t('forgot.sendCode')}
               </Button>
-              <Link to="/login" className={styles.switchLink}>Вернуться к входу</Link>
+              <Link to="/login" className={styles.switchLink}>{t('forgot.backToLogin')}</Link>
             </div>
           )}
 
           {step === 'code' && (
             <div className={styles.fields}>
-              <p className={styles.smsSent}>Код отправлен на +7 {phone}</p>
+              <p className={styles.smsSent}>{t('forgot.smsSent', { phone })}</p>
               <OtpInput
                 onComplete={handleVerifyOtp}
                 error={otpError}
@@ -144,7 +145,7 @@ export default function ForgotPassword() {
                 onClick={handleSendSms}
                 disabled={loading}
               >
-                Отправить код повторно
+                {t('forgot.resendCode')}
               </button>
             </div>
           )}
@@ -152,23 +153,23 @@ export default function ForgotPassword() {
           {step === 'reset' && (
             <div className={styles.fields}>
               <Input
-                label="Новый пароль"
+                label={t('forgot.newPassword')}
                 type="password"
-                placeholder="Минимум 6 символов"
+                placeholder={t('forgot.passwordPlaceholder')}
                 value={newPassword}
                 onChange={e => { setNewPassword(e.target.value); setError(''); }}
                 autoComplete="new-password"
               />
               <Input
-                label="Подтвердите пароль"
+                label={t('forgot.confirmPassword')}
                 type="password"
-                placeholder="Повторите пароль"
+                placeholder={t('forgot.repeatPassword')}
                 value={confirmPassword}
                 onChange={e => { setConfirmPassword(e.target.value); setError(''); }}
                 autoComplete="new-password"
               />
               <Button fullWidth size="lg" onClick={handleReset} loading={loading}>
-                Сохранить пароль
+                {t('forgot.savePassword')}
               </Button>
             </div>
           )}

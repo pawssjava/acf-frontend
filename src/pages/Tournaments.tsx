@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { getTournaments } from '../api/tournaments';
 import { getTournamentTypes } from '../api/dictionary';
 import type { Tournament, DictionaryItem } from '../types';
@@ -8,22 +9,31 @@ import TournamentCard from '../components/tournament/TournamentCard';
 import Button from '../components/ui/Button';
 import styles from './ListPage.module.css';
 
-const STATUS_OPTIONS = ['Все', 'Активные', 'Будущие', 'Завершенные'];
-
 export default function TournamentsPage() {
   const { user } = useAuth();
+  const { t } = useTranslation();
   const [types, setTypes] = useState<DictionaryItem[]>([]);
   const [tournaments, setTournaments] = useState<Tournament[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const STATUS_OPTIONS = [
+    t('tournaments.all'),
+    t('tournaments.active'),
+    t('tournaments.upcoming'),
+    t('tournaments.finished'),
+  ];
+
   const [appliedTypeId, setAppliedTypeId] = useState<number | null>(null);
-  const [appliedStatus, setAppliedStatus] = useState('Все');
+  const [appliedStatus, setAppliedStatus] = useState(0);
 
   const [pendingTypeId, setPendingTypeId] = useState<number | null>(null);
-  const [pendingStatus, setPendingStatus] = useState('Все');
+  const [pendingStatusIdx, setPendingStatusIdx] = useState(0);
 
   const [filterOpen, setFilterOpen] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
+
+  // Raw status values for API filtering (matches Russian backend values)
+  const STATUS_VALUES = ['Все', 'Активные', 'Будущие', 'Завершенные'];
 
   useEffect(() => {
     getTournamentTypes()
@@ -52,28 +62,29 @@ export default function TournamentsPage() {
 
   const handleApply = () => {
     setAppliedTypeId(pendingTypeId);
-    setAppliedStatus(pendingStatus);
+    setAppliedStatus(pendingStatusIdx);
     setFilterOpen(false);
   };
 
   const openFilter = () => {
     setPendingTypeId(appliedTypeId);
-    setPendingStatus(appliedStatus);
+    setPendingStatusIdx(appliedStatus);
     setFilterOpen(true);
   };
 
-  const filtered = appliedStatus === 'Все'
+  const appliedStatusValue = STATUS_VALUES[appliedStatus];
+  const filtered = appliedStatusValue === 'Все'
     ? tournaments
-    : tournaments.filter(t => t.tournamentStatusName === appliedStatus);
+    : tournaments.filter(tour => tour.tournamentStatusName === appliedStatusValue);
 
   return (
     <div className={styles.page}>
       <div className={styles.container}>
         <div className={styles.pageHeader}>
-          <h1 className={styles.pageTitle}>Турниры</h1>
+          <h1 className={styles.pageTitle}>{t('tournaments.title')}</h1>
           {user?.isAdmin && (
             <Link to="/admin/tournaments/new">
-              <Button size="sm">+ Новый турнир</Button>
+              <Button size="sm">{t('tournaments.newTournament')}</Button>
             </Link>
           )}
         </div>
@@ -86,7 +97,7 @@ export default function TournamentsPage() {
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <line x1="4" y1="6" x2="20" y2="6" /><line x1="8" y1="12" x2="16" y2="12" /><line x1="11" y1="18" x2="13" y2="18" />
             </svg>
-            Фильтры
+            {t('tournaments.filters')}
             <svg
               width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"
               strokeLinecap="round" strokeLinejoin="round"
@@ -98,46 +109,46 @@ export default function TournamentsPage() {
 
           {filterOpen && (
             <div className={styles.filterPanel}>
-              <p className={styles.filterPanelTitle}>Фильтры</p>
+              <p className={styles.filterPanelTitle}>{t('tournaments.filters')}</p>
 
               <div className={styles.filterGroup}>
-                <p className={styles.filterGroupLabel}>Тип турнира</p>
+                <p className={styles.filterGroupLabel}>{t('tournaments.filterType')}</p>
                 <label className={styles.radioItem}>
-                  <span>Все</span>
+                  <span>{t('tournaments.all')}</span>
                   <input type="radio" name="type" checked={pendingTypeId === null} onChange={() => setPendingTypeId(null)} />
                 </label>
-                {types.map(t => (
-                  <label key={t.id} className={styles.radioItem}>
-                    <span>{t.name}</span>
-                    <input type="radio" name="type" checked={pendingTypeId === t.id} onChange={() => setPendingTypeId(t.id)} />
+                {types.map(tp => (
+                  <label key={tp.id} className={styles.radioItem}>
+                    <span>{tp.name}</span>
+                    <input type="radio" name="type" checked={pendingTypeId === tp.id} onChange={() => setPendingTypeId(tp.id)} />
                   </label>
                 ))}
               </div>
 
               <div className={styles.filterGroup}>
-                <p className={styles.filterGroupLabel}>Статус</p>
-                {STATUS_OPTIONS.map(s => (
+                <p className={styles.filterGroupLabel}>{t('tournaments.filterStatus')}</p>
+                {STATUS_OPTIONS.map((s, idx) => (
                   <label key={s} className={styles.radioItem}>
                     <span>{s}</span>
-                    <input type="radio" name="status" checked={pendingStatus === s} onChange={() => setPendingStatus(s)} />
+                    <input type="radio" name="status" checked={pendingStatusIdx === idx} onChange={() => setPendingStatusIdx(idx)} />
                   </label>
                 ))}
               </div>
 
               <button className={styles.applyBtn} onClick={handleApply}>
-                Применить
+                {t('tournaments.apply')}
               </button>
             </div>
           )}
         </div>
 
         {loading ? (
-          <div className={styles.loading}>Загружаем...</div>
+          <div className={styles.loading}>{t('tournaments.loading')}</div>
         ) : filtered.length === 0 ? (
-          <div className={styles.empty}>Турниров не найдено</div>
+          <div className={styles.empty}>{t('tournaments.empty')}</div>
         ) : (
           <div className={styles.grid3}>
-            {filtered.map(t => <TournamentCard key={t.id} tournament={t} />)}
+            {filtered.map(tour => <TournamentCard key={tour.id} tournament={tour} />)}
           </div>
         )}
       </div>

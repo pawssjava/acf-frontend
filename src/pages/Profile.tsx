@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { getMe } from '../api/users';
 import { uploadUserPhoto } from '../api/users';
 import type { User } from '../types';
@@ -15,17 +16,18 @@ import UserTournaments from '../components/profile/tabs/UserTournaments';
 import styles from './Profile.module.css';
 
 function VerifAlert({ onGoToVerification }: { onGoToVerification: () => void }) {
+  const { t } = useTranslation();
   return (
     <div className={styles.verifAlert}>
       <div className={styles.verifAlertIcon}>
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
       </div>
       <div className={styles.verifAlertText}>
-        <span className={styles.verifAlertTitle}>Аккаунт не верифицирован</span>
-        <span className={styles.verifAlertSub}>Загрузите удостоверение личности, чтобы участвовать в турнирах.</span>
+        <span className={styles.verifAlertTitle}>{t('profile.notVerifiedTitle')}</span>
+        <span className={styles.verifAlertSub}>{t('profile.notVerifiedSub')}</span>
       </div>
       <button className={styles.verifAlertBtn} onClick={onGoToVerification}>
-        Верифицировать
+        {t('profile.verifyBtn')}
       </button>
     </div>
   );
@@ -45,6 +47,7 @@ function useIsMobile() {
 
 export default function Profile() {
   const { isAuthenticated, updateUser: updateAuthUser } = useAuth();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const isMobile = useIsMobile();
@@ -80,14 +83,13 @@ export default function Profile() {
       const { data } = await uploadUserPhoto(user.id, file);
       handleUserUpdate(data);
     } catch {
-      setToast({ message: 'Не удалось загрузить фото. Попробуйте снова.', type: 'error' });
+      setToast({ message: t('profile.photoError'), type: 'error' });
     }
   };
 
-  if (loading) return <div className={styles.loading}>Загружаем...</div>;
-  if (!user) return <div className={styles.loading}>Профиль не найден</div>;
+  if (loading) return <div className={styles.loading}>{t('profile.loading')}</div>;
+  if (!user) return <div className={styles.loading}>{t('profile.notFound')}</div>;
 
-  // Mobile: no tab selected → show nav menu
   if (isMobile && activeTab === null) {
     return (
       <div className={styles.mobilePage}>
@@ -120,11 +122,10 @@ export default function Profile() {
       {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
       <div className={styles.container}>
         {isMobile ? (
-          // Mobile: back button + header + content
           <div className={styles.mobileContent}>
             <button className={styles.backBtn} onClick={() => setSearchParams({}, { replace: false })}>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
-              Назад
+              {t('profile.back')}
             </button>
             <ProfileHeader user={user} onPhotoUpload={handlePhotoUpload} />
             {!user.isVerified && activeTab !== 'verification' && (
@@ -133,7 +134,6 @@ export default function Profile() {
             {renderContent()}
           </div>
         ) : (
-          // Desktop: sidebar + content
           <div className={styles.layout}>
             <ProfileSidebar user={user} activeTab={activeTab} onTabChange={setTab} />
             <div className={styles.content}>
@@ -151,9 +151,10 @@ export default function Profile() {
 }
 
 function SupportPlaceholder() {
+  const { t } = useTranslation();
   return (
     <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 'var(--radius-xl)', padding: '48px 28px', textAlign: 'center', color: 'var(--text-secondary)' }}>
-      Раздел поддержки в разработке
+      {t('profile.supportWip')}
     </div>
   );
 }
