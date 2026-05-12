@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback, useRef } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { getTournamentById, getParticipants, getResults, getRegistrationLog, registerParticipant, unregisterParticipant, startTournament } from '../api/tournaments';
+import { getApiError } from '../utils/apiError';
 import type { Tournament, Participant, TournamentResult, RegistrationLogPage } from '../types';
 import { useAuth } from '../context/AuthContext';
 import { isEditable } from '../utils/tournament';
@@ -95,8 +96,7 @@ export default function TournamentDetail() {
       await reloadTournament();
       setTab('bracket');
     } catch (err: unknown) {
-      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
-      setToast({ message: msg || t('tournamentDetail.startError'), type: 'error' });
+      setToast({ message: getApiError(err), type: 'error' });
     } finally { setStartLoading(false); }
   };
 
@@ -115,8 +115,7 @@ export default function TournamentDetail() {
       setParticipants(prev => prev.filter(p => p.userId !== user.id));
       setJoinMsg('');
     } catch (err: unknown) {
-      const status = (err as { response?: { status?: number } })?.response?.status;
-      setUnregisterMsg(status === 404 ? t('tournamentDetail.regNotFound') : t('tournamentDetail.unregisterError'));
+      setUnregisterMsg(getApiError(err));
     } finally {
       setUnregistering(false);
     }
@@ -164,16 +163,13 @@ export default function TournamentDetail() {
     } catch (err: unknown) {
       const status = (err as { response?: { status?: number } })?.response?.status;
       const message = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? '';
-      if (status === 400 && message.toLowerCase().includes('psn')) {
-        setPsnError(t('tournamentDetail.psnRequired'));
-      } else if (status === 400) {
-        setJoinMsg(t('tournamentDetail.tournamentFull'));
-        setPsnModalOpen(false);
-      } else if (status === 403) {
+      if (status === 403) {
         setVerificationRequired(true);
         setPsnModalOpen(false);
+      } else if (status === 400 && message.toLowerCase().includes('psn')) {
+        setPsnError(getApiError(err));
       } else {
-        setJoinMsg(t('tournamentDetail.joinError'));
+        setJoinMsg(getApiError(err));
         setPsnModalOpen(false);
       }
     } finally {
@@ -380,8 +376,8 @@ export default function TournamentDetail() {
                                   try {
                                     await unregisterParticipant(numId, p.userId);
                                     setParticipants(prev => prev.filter(x => x.userId !== p.userId));
-                                  } catch {
-                                    setUnregisterMsg(t('tournamentDetail.unregisterError'));
+                                  } catch (err: unknown) {
+                                    setUnregisterMsg(getApiError(err));
                                   }
                                 }
                               }}

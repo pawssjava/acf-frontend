@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { createNews, getNewsById, updateNews, uploadNewsImage } from '../../api/news';
 import type { News } from '../../types';
 import { useAuth } from '../../context/AuthContext';
+import { getApiError } from '../../utils/apiError';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
 import ImageUpload from '../../components/ui/ImageUpload';
@@ -42,8 +43,8 @@ export default function NewsForm() {
         const { data } = await uploadNewsImage(news.id, file);
         setNews(data);
         setImageUrl(data.image);
-      } catch {
-        setToast({ message: 'Не удалось загрузить изображение', type: 'error' });
+      } catch (err: unknown) {
+        setToast({ message: getApiError(err), type: 'error' });
         throw new Error('upload failed');
       }
     } else {
@@ -75,8 +76,8 @@ export default function NewsForm() {
       }
       setToast({ message: isEdit ? 'Статья сохранена' : 'Статья опубликована', type: 'success' });
       setTimeout(() => navigate(`/news/${saved.id}`), 1000);
-    } catch {
-      setToast({ message: 'Ошибка при сохранении', type: 'error' });
+    } catch (err: unknown) {
+      setToast({ message: getApiError(err), type: 'error' });
     } finally {
       setSaving(false);
     }

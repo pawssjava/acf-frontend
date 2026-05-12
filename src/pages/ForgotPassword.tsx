@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { forgotPasswordSendSms, forgotPasswordVerifySms, forgotPasswordReset } from '../api/auth';
+import { getApiError } from '../utils/apiError';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
 import OtpInput from '../components/ui/OtpInput';
@@ -48,8 +49,7 @@ export default function ForgotPassword() {
       await forgotPasswordSendSms(fullPhone);
       setStep('code');
     } catch (err: unknown) {
-      const status = (err as { response?: { status?: number } })?.response?.status;
-      setError(status === 404 ? t('forgot.errNotFound') : t('forgot.errSmsFail'));
+      setError(getApiError(err));
     } finally {
       setLoading(false);
     }
@@ -60,9 +60,9 @@ export default function ForgotPassword() {
     try {
       await forgotPasswordVerifySms(fullPhone, code);
       setStep('reset');
-    } catch {
+    } catch (err: unknown) {
       setOtpError(true);
-      setError(t('forgot.errOtp'));
+      setError(getApiError(err));
     } finally {
       setLoading(false);
     }
@@ -79,14 +79,8 @@ export default function ForgotPassword() {
       navigate('/login', { state: { passwordReset: true } });
     } catch (err: unknown) {
       const status = (err as { response?: { status?: number } })?.response?.status;
-      if (status === 400) {
-        setStep('phone');
-        setError(t('forgot.errSessionExpired'));
-      } else if (status === 404) {
-        setError(t('forgot.errUserNotFound'));
-      } else {
-        setError(t('forgot.errReset'));
-      }
+      if (status === 400) setStep('phone');
+      setError(getApiError(err));
     } finally {
       setLoading(false);
     }

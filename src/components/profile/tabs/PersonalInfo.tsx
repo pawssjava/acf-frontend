@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { getCities, getClubs } from '../../../api/dictionary';
 import { updateUser } from '../../../api/users';
+import { getApiError } from '../../../utils/apiError';
 import type { User, City, Club } from '../../../types';
 import Button from '../../ui/Button';
 import styles from './PersonalInfo.module.css';
@@ -55,8 +56,8 @@ export default function PersonalInfo({ user, onUpdate }: Props) {
       });
       onUpdate(data);
       setMsg({ text: t('personalInfo.saved'), ok: true });
-    } catch {
-      setMsg({ text: t('personalInfo.error'), ok: false });
+    } catch (err: unknown) {
+      setMsg({ text: getApiError(err), ok: false });
     } finally {
       setSaving(false);
     }

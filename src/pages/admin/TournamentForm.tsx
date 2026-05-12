@@ -5,6 +5,7 @@ import { getTournamentTypes } from '../../api/dictionary';
 import type { Tournament, DictionaryItem, TournamentFormat } from '../../types';
 import { useAuth } from '../../context/AuthContext';
 import { isEditable } from '../../utils/tournament';
+import { getApiError } from '../../utils/apiError';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
 import ImageUpload from '../../components/ui/ImageUpload';
@@ -122,13 +123,9 @@ export default function TournamentForm() {
         setTournament(data);
         setLogoUrl(data.logo);
       } catch (err: unknown) {
-        const resp = (err as { response?: { status?: number } })?.response;
-        if (resp?.status === 400) {
-          setToast({ message: 'Этот турнир больше нельзя редактировать.', type: 'error' });
-          await reloadTournament();
-        } else {
-          setToast({ message: 'Не удалось загрузить логотип', type: 'error' });
-        }
+        const status = (err as { response?: { status?: number } })?.response?.status;
+        if (status === 400) await reloadTournament();
+        setToast({ message: getApiError(err), type: 'error' });
         throw new Error('upload failed');
       }
     } else {
@@ -177,13 +174,9 @@ export default function TournamentForm() {
       setToast({ message: isEdit ? 'Турнир сохранён' : 'Турнир создан', type: 'success' });
       setTimeout(() => navigate(`/tournaments/${saved.id}`), 1000);
     } catch (err: unknown) {
-      const resp = (err as { response?: { status?: number } })?.response;
-      if (resp?.status === 400) {
-        setToast({ message: 'Этот турнир больше нельзя редактировать.', type: 'error' });
-        await reloadTournament();
-      } else {
-        setToast({ message: 'Ошибка при сохранении', type: 'error' });
-      }
+      const status = (err as { response?: { status?: number } })?.response?.status;
+      if (status === 400) await reloadTournament();
+      setToast({ message: getApiError(err), type: 'error' });
     } finally {
       setSaving(false);
     }

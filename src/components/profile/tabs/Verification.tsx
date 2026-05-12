@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { verifyUser } from '../../../api/users';
+import { getApiError } from '../../../utils/apiError';
 import type { User } from '../../../types';
 import Button from '../../ui/Button';
 import styles from './Verification.module.css';
@@ -24,8 +25,7 @@ export default function Verification({ user, onUpdate }: Props) {
       const { data } = await verifyUser(user.id, file);
       onUpdate(data);
     } catch (e: unknown) {
-      const msg = (e as { response?: { data?: { message?: string } } })?.response?.data?.message;
-      setError(msg || t('verification.uploadError'));
+      setError(getApiError(e));
     } finally {
       setUploading(false);
       if (fileRef.current) fileRef.current.value = '';

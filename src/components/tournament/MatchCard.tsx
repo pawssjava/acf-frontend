@@ -3,6 +3,7 @@ import type { TournamentMatch, TournamentFormat } from '../../types';
 import Badge from '../ui/Badge';
 import Button from '../ui/Button';
 import { setMatchScore, completeMatch } from '../../api/tournaments';
+import { getApiError } from '../../utils/apiError';
 import styles from './MatchCard.module.css';
 
 function statusBadge(status: string) {
@@ -54,9 +55,7 @@ export default function MatchCard({ match, tournamentId, isAdmin, onUpdate }: Pr
       const { data } = await completeMatch(tournamentId, match.id);
       onUpdate(data);
     } catch (err: unknown) {
-      const apiMsg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? '';
-      const isTied = apiMsg.toLowerCase().includes('tied') || apiMsg.toLowerCase().includes('ничья');
-      setMsg(isTied ? 'Ничья — введите другой счёт' : (apiMsg || 'Ошибка'));
+      setMsg(getApiError(err));
     } finally {
       setSaving(false);
     }

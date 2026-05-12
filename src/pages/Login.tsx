@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { loginUser } from '../api/auth';
 import { getMe } from '../api/users';
 import { useAuth } from '../context/AuthContext';
+import { getApiError } from '../utils/apiError';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
 import styles from './Auth.module.css';
@@ -46,12 +47,7 @@ export default function Login() {
 
       navigate('/');
     } catch (err: unknown) {
-      const status = (err as { response?: { status?: number } })?.response?.status;
-      if (status === 401) {
-        setError(t('auth.errCredentials'));
-      } else {
-        setError(t('auth.errGeneral'));
-      }
+      setError(getApiError(err));
     } finally {
       setLoading(false);
     }

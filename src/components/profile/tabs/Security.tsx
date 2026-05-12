@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { changePassword } from '../../../api/users';
+import { getApiError } from '../../../utils/apiError';
 import type { User } from '../../../types';
 import Button from '../../ui/Button';
 import styles from './Security.module.css';
@@ -56,13 +57,7 @@ export default function Security({ user }: Props) {
       setMsg({ text: t('security.success'), ok: true });
       setCurrent(''); setNext(''); setConfirm('');
     } catch (e: unknown) {
-      const status = (e as { response?: { status?: number } })?.response?.status;
-      const serverMsg = (e as { response?: { data?: { message?: string } } })?.response?.data?.message;
-      if (status === 401) {
-        setMsg({ text: serverMsg || t('security.errWrong'), ok: false });
-      } else {
-        setMsg({ text: t('security.errGeneral'), ok: false });
-      }
+      setMsg({ text: getApiError(e), ok: false });
     } finally {
       setSaving(false);
     }

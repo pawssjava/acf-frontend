@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { createPartner, getPartnerById, updatePartner, uploadPartnerLogo } from '../../api/partners';
 import type { Partner } from '../../types';
 import { useAuth } from '../../context/AuthContext';
+import { getApiError } from '../../utils/apiError';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
 import ImageUpload from '../../components/ui/ImageUpload';
@@ -44,8 +45,8 @@ export default function PartnerForm() {
         const { data } = await uploadPartnerLogo(partner.id, file);
         setPartner(data);
         setLogoUrl(data.logo);
-      } catch {
-        setToast({ message: 'Не удалось загрузить логотип', type: 'error' });
+      } catch (err: unknown) {
+        setToast({ message: getApiError(err), type: 'error' });
         throw new Error('upload failed');
       }
     } else {
@@ -76,8 +77,8 @@ export default function PartnerForm() {
       }
       setToast({ message: isEdit ? 'Партнёр сохранён' : 'Партнёр добавлен', type: 'success' });
       setTimeout(() => navigate(`/partners/${saved.id}`), 1000);
-    } catch {
-      setToast({ message: 'Ошибка при сохранении', type: 'error' });
+    } catch (err: unknown) {
+      setToast({ message: getApiError(err), type: 'error' });
     } finally {
       setSaving(false);
     }

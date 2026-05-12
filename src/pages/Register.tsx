@@ -2,6 +2,7 @@ import { useRef, useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { sendSms, verifySms, register, checkPhone, checkUsername } from '../api/auth';
+import { getApiError } from '../utils/apiError';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
 import OtpInput from '../components/ui/OtpInput';
@@ -130,8 +131,8 @@ export default function Register() {
       }
       await sendSms(fullPhone);
       setStep('code');
-    } catch {
-      setError(t('register.errSmsFail'));
+    } catch (err: unknown) {
+      setError(getApiError(err));
     } finally {
       setLoading(false);
     }
@@ -142,9 +143,9 @@ export default function Register() {
     try {
       await verifySms(fullPhone, code);
       setStep('details');
-    } catch {
+    } catch (err: unknown) {
       setOtpError(true);
-      setError(t('register.errOtp'));
+      setError(getApiError(err));
     } finally {
       setLoading(false);
     }
@@ -193,13 +194,9 @@ export default function Register() {
       await register({ phone: fullPhone, username, password, firstName, lastName, birthDate });
       navigate('/login');
     } catch (err: unknown) {
-      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? '';
-      if (msg.toLowerCase().includes('not verified') || msg.toLowerCase().includes('не верифицир')) {
-        setStep('phone');
-        setError(t('register.errSessionExpired'));
-      } else {
-        setError(t('register.errRegistration'));
-      }
+      const status = (err as { response?: { status?: number } })?.response?.status;
+      if (status === 400) setStep('phone');
+      setError(getApiError(err));
     } finally {
       setLoading(false);
     }

@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { getMe } from '../api/users';
 import { uploadUserPhoto } from '../api/users';
+import { getApiError } from '../utils/apiError';
 import type { User } from '../types';
 import { useAuth } from '../context/AuthContext';
 import Toast from '../components/ui/Toast';
@@ -82,8 +83,8 @@ export default function Profile() {
     try {
       const { data } = await uploadUserPhoto(user.id, file);
       handleUserUpdate(data);
-    } catch {
-      setToast({ message: t('profile.photoError'), type: 'error' });
+    } catch (err: unknown) {
+      setToast({ message: getApiError(err), type: 'error' });
     }
   };
 

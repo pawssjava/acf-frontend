@@ -7,6 +7,7 @@ import {
   nextRound as apiNextRound,
   advanceRegularSeason,
 } from '../../api/tournaments';
+import { getApiError } from '../../utils/apiError';
 import MatchCard from './MatchCard';
 import Button from '../ui/Button';
 import Badge from '../ui/Badge';
@@ -88,8 +89,7 @@ export default function BracketView({
       await load();
       onTournamentUpdate();
     } catch (err: unknown) {
-      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Ошибка';
-      setActionMsg(msg);
+      setActionMsg(getApiError(err));
     }
     finally { setActionLoading(false); }
   };
