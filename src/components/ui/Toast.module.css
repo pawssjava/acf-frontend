@@ -1,31 +1,33 @@
 .toast {
   position: fixed;
-  top: 24px;
+  top: 35vh;
   left: 50%;
   transform: translateX(-50%);
   z-index: 9999;
-  padding: 13px 18px;
+  padding: 15px 20px;
   border-radius: var(--radius-md);
   font-size: 14px;
+  font-weight: 500;
   display: flex;
   align-items: center;
   gap: 14px;
-  box-shadow: var(--shadow);
-  min-width: 240px;
-  max-width: 420px;
+  min-width: 280px;
+  max-width: 440px;
   animation: slideDown 0.2s ease;
 }
 
 .success {
-  background: rgba(0, 201, 167, 0.12);
-  border: 1px solid rgba(0, 201, 167, 0.35);
-  color: var(--accent-teal);
+  background: rgb(0, 180, 150);
+  border: 1px solid rgb(0, 201, 167);
+  color: #fff;
+  box-shadow: 0 4px 20px rgba(0, 201, 167, 0.4);
 }
 
 .error {
-  background: rgba(231, 76, 60, 0.12);
-  border: 1px solid rgba(231, 76, 60, 0.35);
-  color: var(--danger);
+  background: rgb(210, 50, 35);
+  border: 1px solid rgb(231, 76, 60);
+  color: #fff;
+  box-shadow: 0 4px 20px rgba(231, 76, 60, 0.4);
 }
 
 .msg { flex: 1; line-height: 1.4; }
@@ -49,7 +51,7 @@
 }
 
 @media (max-width: 500px) {
-  .toast { left: 16px; right: 16px; top: 16px; transform: none; min-width: 0; animation: slideDownMobile 0.2s ease; }
+  .toast { left: 16px; right: 16px; top: 30vh; transform: none; min-width: 0; animation: slideDownMobile 0.2s ease; }
 }
 
 @keyframes slideDownMobile {
