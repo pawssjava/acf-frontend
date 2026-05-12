@@ -376,9 +376,12 @@
 }
 
 .langFlag {
-  font-size: 16px;
-  line-height: 1;
-  display: flex;
+  width: 20px;
+  height: 15px;
+  object-fit: cover;
+  border-radius: 2px;
+  display: block;
+  flex-shrink: 0;
 }
 
 .langCode {

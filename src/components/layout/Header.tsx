@@ -3,12 +3,15 @@ import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
+import flagKz from '../../assets/flags/kz.svg';
+import flagRu from '../../assets/flags/ru.svg';
+import flagGb from '../../assets/flags/gb.svg';
 import styles from './Header.module.css';
 
 const LANGS = [
-  { code: 'kk', label: 'KZ', flag: '🇰🇿' },
-  { code: 'ru', label: 'RU', flag: '🇷🇺' },
-  { code: 'en', label: 'EN', flag: '🇬🇧' },
+  { code: 'kk', label: 'KZ', flag: flagKz },
+  { code: 'ru', label: 'RU', flag: flagRu },
+  { code: 'en', label: 'EN', flag: flagGb },
 ];
 
 export default function Header() {
@@ -128,7 +131,7 @@ export default function Header() {
               onClick={() => setLangOpen(o => !o)}
               aria-expanded={langOpen}
             >
-              <span className={styles.langFlag}>{LANGS.find(l => l.code === i18n.language)?.flag}</span>
+              <img className={styles.langFlag} src={LANGS.find(l => l.code === i18n.language)?.flag} alt="" />
               <span className={styles.langCode}>{LANGS.find(l => l.code === i18n.language)?.label}</span>
               <svg className={[styles.langChevron, langOpen ? styles.langChevronOpen : ''].join(' ')} width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true">
                 <path d="M1.5 3.5l3.5 3.5 3.5-3.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
@@ -142,7 +145,7 @@ export default function Header() {
                     className={[styles.langOption, i18n.language === l.code ? styles.langOptionActive : ''].join(' ')}
                     onClick={() => { i18n.changeLanguage(l.code); setLangOpen(false); }}
                   >
-                    <span className={styles.langFlag}>{l.flag}</span>
+                    <img className={styles.langFlag} src={l.flag} alt={l.label} />
                     <span>{l.label}</span>
                   </button>
                 ))}
