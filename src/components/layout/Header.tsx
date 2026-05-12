@@ -6,9 +6,9 @@ import { useTheme } from '../../context/ThemeContext';
 import styles from './Header.module.css';
 
 const LANGS = [
-  { code: 'kk', label: 'KZ' },
-  { code: 'ru', label: 'RU' },
-  { code: 'en', label: 'EN' },
+  { code: 'kk', label: 'KZ', flag: '🇰🇿' },
+  { code: 'ru', label: 'RU', flag: '🇷🇺' },
+  { code: 'en', label: 'EN', flag: '🇬🇧' },
 ];
 
 export default function Header() {
@@ -20,8 +20,10 @@ export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [adminOpen, setAdminOpen] = useState(false);
+  const [langOpen, setLangOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const adminRef = useRef<HTMLDivElement>(null);
+  const langRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setMenuOpen(false);
@@ -35,6 +37,9 @@ export default function Header() {
       }
       if (adminRef.current && !adminRef.current.contains(e.target as Node)) {
         setAdminOpen(false);
+      }
+      if (langRef.current && !langRef.current.contains(e.target as Node)) {
+        setLangOpen(false);
       }
     };
     document.addEventListener('mousedown', handler);
@@ -117,16 +122,32 @@ export default function Header() {
             )}
           </button>
 
-          <div className={styles.langSwitcher}>
-            {LANGS.map(l => (
-              <button
-                key={l.code}
-                className={[styles.langBtn, i18n.language === l.code ? styles.langBtnActive : ''].join(' ')}
-                onClick={() => i18n.changeLanguage(l.code)}
-              >
-                {l.label}
-              </button>
-            ))}
+          <div className={styles.langSwitcher} ref={langRef}>
+            <button
+              className={styles.langToggle}
+              onClick={() => setLangOpen(o => !o)}
+              aria-expanded={langOpen}
+            >
+              <span className={styles.langFlag}>{LANGS.find(l => l.code === i18n.language)?.flag}</span>
+              <span className={styles.langCode}>{LANGS.find(l => l.code === i18n.language)?.label}</span>
+              <svg className={[styles.langChevron, langOpen ? styles.langChevronOpen : ''].join(' ')} width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true">
+                <path d="M1.5 3.5l3.5 3.5 3.5-3.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </button>
+            {langOpen && (
+              <div className={styles.langDropdown}>
+                {LANGS.map(l => (
+                  <button
+                    key={l.code}
+                    className={[styles.langOption, i18n.language === l.code ? styles.langOptionActive : ''].join(' ')}
+                    onClick={() => { i18n.changeLanguage(l.code); setLangOpen(false); }}
+                  >
+                    <span className={styles.langFlag}>{l.flag}</span>
+                    <span>{l.label}</span>
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           {isAuthenticated ? (
