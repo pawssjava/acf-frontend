@@ -19,6 +19,8 @@ import DictionariesPage from './pages/admin/DictionariesPage';
 import PartnersPage from './pages/Partners';
 import PartnerDetail from './pages/PartnerDetail';
 import EducationPage from './pages/Education';
+import About from './pages/About';
+import Contacts from './pages/Contacts';
 import NotFound from './pages/NotFound';
 
 export default function App() {
@@ -47,6 +49,8 @@ export default function App() {
             <Route path="admin/partners/new" element={<PartnerForm />} />
             <Route path="admin/partners/:id/edit" element={<PartnerForm />} />
             <Route path="education" element={<EducationPage />} />
+            <Route path="about" element={<About />} />
+            <Route path="contacts" element={<Contacts />} />
             <Route path="admin/sms-log" element={<SmsLogPage />} />
             <Route path="admin/dictionaries" element={<DictionariesPage />} />
             <Route path="*" element={<NotFound />} />

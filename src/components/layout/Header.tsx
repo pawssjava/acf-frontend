@@ -73,6 +73,8 @@ export default function Header() {
           <NavLink to="/news" className={({ isActive }) => isActive ? styles.active : ''} onClick={closeAll}>{t('nav.blog')}</NavLink>
           <NavLink to="/education" className={({ isActive }) => isActive ? styles.active : ''} onClick={closeAll}>{t('nav.education')}</NavLink>
           <NavLink to="/partners" className={({ isActive }) => isActive ? styles.active : ''} onClick={closeAll}>{t('nav.partners')}</NavLink>
+          <NavLink to="/about" className={({ isActive }) => isActive ? styles.active : ''} onClick={closeAll}>{t('nav.about')}</NavLink>
+          <NavLink to="/contacts" className={({ isActive }) => isActive ? styles.active : ''} onClick={closeAll}>{t('nav.contacts')}</NavLink>
 
           {user?.isAdmin && (
             <div className={styles.adminNavItem} ref={adminRef}>
