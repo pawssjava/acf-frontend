@@ -2,14 +2,16 @@ import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
+import { downloadDocument, toDocumentLang } from '../../api/documents';
 import logoWhite from '../../assets/LogoWhiteTheme.svg';
 import logoBlack from '../../assets/LogoBlackTheme.svg';
 import styles from './Footer.module.css';
 
 export default function Footer() {
   const { isAuthenticated } = useAuth();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { theme } = useTheme();
+  const lang = toDocumentLang(i18n.language);
 
   return (
     <footer className={styles.footer}>
@@ -45,9 +47,15 @@ export default function Footer() {
             <p><span>{t('footer.phone')}</span> {t('footer.phoneValue')}</p>
           </div>
           <div className={styles.policies}>
-            <span>{t('footer.privacyPolicy')}</span>
-            <span>{t('footer.termsOfUse')}</span>
-            <span>{t('footer.dataConsent')}</span>
+            <button type="button" onClick={() => downloadDocument('privacy', lang)}>
+              {t('footer.privacyPolicy')}
+            </button>
+            <button type="button" onClick={() => downloadDocument('useragreement', lang)}>
+              {t('footer.termsOfUse')}
+            </button>
+            <button type="button" onClick={() => downloadDocument('consent', lang)}>
+              {t('footer.dataConsent')}
+            </button>
           </div>
         </div>
 
