@@ -7,6 +7,7 @@ import { useAuth } from '../context/AuthContext';
 import { getApiError } from '../utils/apiError';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
+import AuthLegalText from '../components/auth/AuthLegalText';
 import styles from './Auth.module.css';
 import heroImg from '../assets/hero.png';
 
@@ -109,7 +110,7 @@ export default function Login() {
             {t('auth.registerBtn')}
           </Link>
 
-          <p className={styles.legal}>{t('auth.legal')}</p>
+          <AuthLegalText className={styles.legal} linkClassName={styles.legalLink} translationKey="auth" />
         </form>
       </div>
     </div>

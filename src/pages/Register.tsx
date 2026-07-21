@@ -6,6 +6,7 @@ import { getApiError } from '../utils/apiError';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
 import OtpInput from '../components/ui/OtpInput';
+import AuthLegalText from '../components/auth/AuthLegalText';
 import styles from './Auth.module.css';
 
 type Step = 'phone' | 'code' | 'details';
@@ -260,7 +261,7 @@ export default function Register() {
                 {t('register.sendCode')}
               </Button>
               <Link to="/login" className={styles.switchLink}>{t('register.alreadyHaveAccount')}</Link>
-              <p className={styles.legalDark}>{t('register.legal')}</p>
+              <AuthLegalText className={styles.legalDark} linkClassName={styles.legalLink} translationKey="register" />
             </div>
           )}
 
