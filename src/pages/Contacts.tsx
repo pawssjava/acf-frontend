@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import heroImg from '../assets/hero.png';
+import heroImg from '../assets/contactsHero.png';
 import styles from './Contacts.module.css';
 
 export default function Contacts() {
