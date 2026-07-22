@@ -26,6 +26,7 @@ export default function TournamentCard({ tournament }: Props) {
   const lang = i18n.language;
   const statusName = localName(tournament.tournamentStatusNameRu, tournament.tournamentStatusNameKk, tournament.tournamentStatusNameEn, lang);
   const typeName = localName(tournament.tournamentTypeNameRu, tournament.tournamentTypeNameKk, tournament.tournamentTypeNameEn, lang);
+  const disciplineName = localName(tournament.disciplineNameRu, tournament.disciplineNameKk, tournament.disciplineNameEn, lang);
   return (
     <Card hoverable onClick={() => navigate(`/tournaments/${tournament.id}`)}>
       <div className={styles.imgWrap}>
@@ -37,6 +38,9 @@ export default function TournamentCard({ tournament }: Props) {
           <Badge variant={statusVariant(tournament.tournamentStatusId)}>
             {statusName}
           </Badge>
+        </div>
+        <div className={styles.disciplineBadge}>
+          <Badge variant="yellow">{disciplineName}</Badge>
         </div>
       </div>
       <div className={styles.body}>

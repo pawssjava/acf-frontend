@@ -7,6 +7,9 @@ export const getTournamentTypes = () =>
 export const getTournamentStatuses = () =>
   publicClient.get<DictPage<DictionaryItem>>('/api/dictionary/tournament-statuses', { params: { size: 1000 } });
 
+export const getDisciplines = () =>
+  publicClient.get<DictPage<DictionaryItem>>('/api/dictionary/disciplines', { params: { size: 1000 } });
+
 export const getCities = () =>
   publicClient.get<DictPage<City>>('/api/dictionary/cities', { params: { size: 1000 } });
 
@@ -38,3 +41,9 @@ export const adminGetTypes = (page = 0, size = 20) =>
 export const adminCreateType = (body: MultilingualBody) => apiClient.post<DictionaryItem>('/api/dictionary/tournament-types', body);
 export const adminUpdateType = (id: number, body: MultilingualBody) => apiClient.put<DictionaryItem>(`/api/dictionary/tournament-types/${id}`, body);
 export const adminDeleteType = (id: number) => apiClient.delete(`/api/dictionary/tournament-types/${id}`);
+
+export const adminGetDisciplines = (page = 0, size = 20) =>
+  apiClient.get<DictPage<DictionaryItem>>('/api/dictionary/disciplines', { params: { page, size } });
+export const adminCreateDiscipline = (body: MultilingualBody) => apiClient.post<DictionaryItem>('/api/dictionary/disciplines', body);
+export const adminUpdateDiscipline = (id: number, body: MultilingualBody) => apiClient.put<DictionaryItem>(`/api/dictionary/disciplines/${id}`, body);
+export const adminDeleteDiscipline = (id: number) => apiClient.delete(`/api/dictionary/disciplines/${id}`);

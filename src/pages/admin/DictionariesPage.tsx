@@ -10,11 +10,12 @@ import {
   adminGetClubs, adminCreateClub, adminUpdateClub, adminDeleteClub,
   adminGetStatuses, adminCreateStatus, adminUpdateStatus, adminDeleteStatus,
   adminGetTypes, adminCreateType, adminUpdateType, adminDeleteType,
+  adminGetDisciplines, adminCreateDiscipline, adminUpdateDiscipline, adminDeleteDiscipline,
 } from '../../api/dictionary';
 import type { CityRecord, ClubRecord, DictionaryItem, DictPage } from '../../types';
 import styles from './DictionariesPage.module.css';
 
-type TabKey = 'cities' | 'clubs' | 'statuses' | 'types';
+type TabKey = 'cities' | 'clubs' | 'statuses' | 'types' | 'disciplines';
 type AnyRecord = CityRecord | ClubRecord | DictionaryItem;
 
 interface ModalState {
@@ -141,6 +142,7 @@ export default function DictionariesPage() {
       clubs: (p) => adminGetClubs(p) as Promise<{ data: DictPage<AnyRecord> }>,
       statuses: (p) => adminGetStatuses(p) as Promise<{ data: DictPage<AnyRecord> }>,
       types: (p) => adminGetTypes(p) as Promise<{ data: DictPage<AnyRecord> }>,
+      disciplines: (p) => adminGetDisciplines(p) as Promise<{ data: DictPage<AnyRecord> }>,
     };
 
     fetchers[activeTab](page).then(({ data }) => {
@@ -177,9 +179,12 @@ export default function DictionariesPage() {
       } else if (modal.tab === 'statuses') {
         if (modal.mode === 'create') await adminCreateStatus(data);
         else await adminUpdateStatus(modal.item!.id, data);
-      } else {
+      } else if (modal.tab === 'types') {
         if (modal.mode === 'create') await adminCreateType(data);
         else await adminUpdateType(modal.item!.id, data);
+      } else {
+        if (modal.mode === 'create') await adminCreateDiscipline(data);
+        else await adminUpdateDiscipline(modal.item!.id, data);
       }
       setToast({
         message: modal.mode === 'create' ? t('dictionaries.createSuccess') : t('dictionaries.updateSuccess'),
@@ -204,7 +209,8 @@ export default function DictionariesPage() {
       if (confirm.tab === 'cities') await adminDeleteCity(confirm.id);
       else if (confirm.tab === 'clubs') await adminDeleteClub(confirm.id);
       else if (confirm.tab === 'statuses') await adminDeleteStatus(confirm.id);
-      else await adminDeleteType(confirm.id);
+      else if (confirm.tab === 'types') await adminDeleteType(confirm.id);
+      else await adminDeleteDiscipline(confirm.id);
       setToast({ message: t('dictionaries.deleteSuccess'), type: 'success' });
       setConfirm(null);
       setRefreshKey(k => k + 1);
@@ -223,6 +229,7 @@ export default function DictionariesPage() {
     { key: 'clubs', label: t('dictionaries.tabClubs') },
     { key: 'statuses', label: t('dictionaries.tabStatuses') },
     { key: 'types', label: t('dictionaries.tabTypes') },
+    { key: 'disciplines', label: t('dictionaries.tabDisciplines') },
   ];
 
   const renderTabContent = () => {

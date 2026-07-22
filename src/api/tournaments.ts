@@ -1,8 +1,10 @@
 import { publicClient, apiClient } from './client';
 import type { Tournament, Participant, TournamentResult, TournamentFormat, TournamentMatch, GroupStanding, BracketDto, RegistrationLogPage } from '../types';
 
-export const getTournaments = (tournamentTypeId?: number | null) => {
-  const params = tournamentTypeId ? { tournamentTypeId } : {};
+export const getTournaments = (tournamentTypeId?: number | null, disciplineIds?: number[] | null) => {
+  const params: Record<string, number | string> = {};
+  if (tournamentTypeId) params.tournamentTypeId = tournamentTypeId;
+  if (disciplineIds && disciplineIds.length > 0) params.disciplineIds = disciplineIds.join(',');
   return publicClient.get<Tournament[]>('/api/tournaments', { params });
 };
 
@@ -19,6 +21,7 @@ export interface TournamentPayload {
   prizeMoney: number;
   tournamentStatusId: number;
   tournamentTypeId: number;
+  disciplineId: number;
 }
 
 export const createTournament = (data: TournamentPayload) =>

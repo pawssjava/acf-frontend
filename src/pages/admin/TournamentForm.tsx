@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { createTournament, getTournamentById, updateTournament, uploadTournamentLogo } from '../../api/tournaments';
-import { getTournamentTypes } from '../../api/dictionary';
+import { getTournamentTypes, getDisciplines } from '../../api/dictionary';
 import type { Tournament, DictionaryItem, TournamentFormat } from '../../types';
 import { useAuth } from '../../context/AuthContext';
 import { isEditable } from '../../utils/tournament';
@@ -21,6 +21,7 @@ interface FormState {
   capacity: string;
   prizeMoney: string;
   tournamentTypeId: string;
+  disciplineId: string;
 }
 
 const EKPL_TYPE_ID = '5';
@@ -33,9 +34,10 @@ export default function TournamentForm() {
 
   const [tournament, setTournament] = useState<Tournament | null>(null);
   const [types, setTypes] = useState<DictionaryItem[]>([]);
+  const [disciplines, setDisciplines] = useState<DictionaryItem[]>([]);
   const [form, setForm] = useState<FormState>({
     name: '', startDate: '', endDate: '', format: '', totalRounds: '',
-    capacity: '', prizeMoney: '', tournamentTypeId: '',
+    capacity: '', prizeMoney: '', tournamentTypeId: '', disciplineId: '',
   });
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const [pendingFile, setPendingFile] = useState<File | null>(null);
@@ -50,6 +52,15 @@ export default function TournamentForm() {
         setTypes(t.data.content);
         if (!isEdit) {
           setForm(f => ({ ...f, tournamentTypeId: String(t.data.content[0]?.id ?? '') }));
+        }
+      })
+      .catch(() => {});
+
+    getDisciplines()
+      .then(r => {
+        setDisciplines(r.data.content);
+        if (!isEdit) {
+          setForm(f => ({ ...f, disciplineId: String(r.data.content[0]?.id ?? '') }));
         }
       })
       .catch(() => {});
@@ -69,6 +80,7 @@ export default function TournamentForm() {
           capacity: String(t.capacity),
           prizeMoney: String(t.prizeMoney),
           tournamentTypeId: String(t.tournamentTypeId),
+          disciplineId: String(t.disciplineId),
         });
       })
       .catch(() => navigate('/tournaments'));
@@ -136,7 +148,7 @@ export default function TournamentForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.name.trim() || !form.startDate || !form.endDate || !form.format || !form.capacity || !form.prizeMoney) {
+    if (!form.name.trim() || !form.startDate || !form.endDate || !form.format || !form.capacity || !form.prizeMoney || !form.disciplineId) {
       setToast({ message: 'Заполните все обязательные поля', type: 'error' });
       return;
     }
@@ -155,6 +167,7 @@ export default function TournamentForm() {
         capacity: Number(form.capacity),
         prizeMoney: Number(form.prizeMoney),
         tournamentTypeId: Number(form.tournamentTypeId),
+        disciplineId: Number(form.disciplineId),
         tournamentStatusId: tournament?.tournamentStatusId ?? 2,
       };
 
@@ -307,15 +320,30 @@ export default function TournamentForm() {
                     ))}
                   </select>
                 </div>
-                {isEdit && tournament && (
+                <div className={styles.field}>
+                  <label className={styles.label}>Дисциплина</label>
+                  <select
+                    className={styles.select}
+                    value={form.disciplineId}
+                    onChange={set('disciplineId')}
+                    disabled={readOnly}
+                  >
+                    {disciplines.map(d => (
+                      <option key={d.id} value={d.id}>{d.nameRu}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+              {isEdit && tournament && (
+                <div className={styles.row}>
                   <div className={styles.field}>
                     <label className={styles.label}>Статус</label>
                     <div style={{ padding: '9px 12px', background: 'var(--bg-secondary)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', fontSize: '14px', color: 'var(--text-secondary)' }}>
                       {tournament.tournamentStatusNameRu}
                     </div>
                   </div>
-                )}
-              </div>
+                </div>
+              )}
             </div>
           </div>
 

@@ -219,6 +219,7 @@ export default function TournamentDetail() {
               {localName(tournament.tournamentStatusNameRu, tournament.tournamentStatusNameKk, tournament.tournamentStatusNameEn, i18n.language)}
             </Badge>
             <Badge variant="gray">{localName(tournament.tournamentTypeNameRu, tournament.tournamentTypeNameKk, tournament.tournamentTypeNameEn, i18n.language)}</Badge>
+            <Badge variant="yellow">{localName(tournament.disciplineNameRu, tournament.disciplineNameKk, tournament.disciplineNameEn, i18n.language)}</Badge>
             {tournament.format && (
               <Badge variant="blue">{FORMAT_LABEL[tournament.format] ?? tournament.format}</Badge>
             )}
@@ -286,6 +287,7 @@ export default function TournamentDetail() {
               <InfoRow label={t('tournamentDetail.labelCapacity')} value={t('tournamentDetail.labelCapacityValue', { current: participants.length, total: tournament.capacity })} />
               <InfoRow label={t('tournamentDetail.labelPrize')} value={`${tournament.prizeMoney.toLocaleString(locale)} ₸`} />
               <InfoRow label={t('tournamentDetail.labelType')} value={localName(tournament.tournamentTypeNameRu, tournament.tournamentTypeNameKk, tournament.tournamentTypeNameEn, i18n.language)} />
+              <InfoRow label={t('tournamentDetail.labelDiscipline')} value={localName(tournament.disciplineNameRu, tournament.disciplineNameKk, tournament.disciplineNameEn, i18n.language)} />
               <InfoRow label={t('tournamentDetail.labelStatus')} value={localName(tournament.tournamentStatusNameRu, tournament.tournamentStatusNameKk, tournament.tournamentStatusNameEn, i18n.language)} />
             </div>
 

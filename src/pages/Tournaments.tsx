@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { getTournaments } from '../api/tournaments';
-import { getTournamentTypes, getTournamentStatuses } from '../api/dictionary';
+import { getTournamentTypes, getTournamentStatuses, getDisciplines } from '../api/dictionary';
 import type { Tournament, DictionaryItem } from '../types';
 import { useAuth } from '../context/AuthContext';
 import TournamentCard from '../components/tournament/TournamentCard';
@@ -15,15 +15,18 @@ export default function TournamentsPage() {
   const { t, i18n } = useTranslation();
   const [types, setTypes] = useState<DictionaryItem[]>([]);
   const [statuses, setStatuses] = useState<DictionaryItem[]>([]);
+  const [disciplines, setDisciplines] = useState<DictionaryItem[]>([]);
   const [tournaments, setTournaments] = useState<Tournament[]>([]);
   const [loading, setLoading] = useState(true);
 
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
   const [appliedTypeId, setAppliedTypeId] = useState<number | null>(null);
   const [appliedStatusId, setAppliedStatusId] = useState<number | null>(null);
+  const [appliedDisciplineIds, setAppliedDisciplineIds] = useState<number[]>([]);
 
   const [pendingTypeId, setPendingTypeId] = useState<number | null>(null);
   const [pendingStatusId, setPendingStatusId] = useState<number | null>(null);
+  const [pendingDisciplineIds, setPendingDisciplineIds] = useState<number[]>([]);
 
   const [filterOpen, setFilterOpen] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
@@ -31,15 +34,18 @@ export default function TournamentsPage() {
   useEffect(() => {
     getTournamentTypes().then(r => setTypes(r.data.content)).catch(() => {});
     getTournamentStatuses().then(r => setStatuses(r.data.content)).catch(() => {});
+    getDisciplines().then(r => setDisciplines(r.data.content)).catch(() => {});
   }, []);
+
+  const appliedDisciplineIdsKey = appliedDisciplineIds.join(',');
 
   useEffect(() => {
     setLoading(true);
-    getTournaments(appliedTypeId)
+    getTournaments(appliedTypeId, appliedDisciplineIds)
       .then(r => setTournaments(r.data))
       .catch(() => setToast({ message: t('tournaments.loadError'), type: 'error' }))
       .finally(() => setLoading(false));
-  }, [appliedTypeId]);
+  }, [appliedTypeId, appliedDisciplineIdsKey]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (!filterOpen) return;
@@ -55,13 +61,19 @@ export default function TournamentsPage() {
   const handleApply = () => {
     setAppliedTypeId(pendingTypeId);
     setAppliedStatusId(pendingStatusId);
+    setAppliedDisciplineIds(pendingDisciplineIds);
     setFilterOpen(false);
   };
 
   const openFilter = () => {
     setPendingTypeId(appliedTypeId);
     setPendingStatusId(appliedStatusId);
+    setPendingDisciplineIds(appliedDisciplineIds);
     setFilterOpen(true);
+  };
+
+  const toggleDiscipline = (id: number) => {
+    setPendingDisciplineIds(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
   };
 
   const filtered = appliedStatusId === null
@@ -132,6 +144,23 @@ export default function TournamentsPage() {
                     <label key={st.id} className={styles.radioItem}>
                       <span>{stName}</span>
                       <input type="radio" name="status" checked={pendingStatusId === st.id} onChange={() => setPendingStatusId(st.id)} />
+                    </label>
+                  );
+                })}
+              </div>
+
+              <div className={styles.filterGroup}>
+                <p className={styles.filterGroupLabel}>{t('tournaments.filterDiscipline')}</p>
+                <label className={styles.radioItem}>
+                  <span>{t('tournaments.all')}</span>
+                  <input type="checkbox" checked={pendingDisciplineIds.length === 0} onChange={() => setPendingDisciplineIds([])} />
+                </label>
+                {disciplines.map(d => {
+                  const dName = i18n.language === 'kk' ? (d.nameKk || d.nameRu) : i18n.language === 'en' ? (d.nameEn || d.nameRu) : d.nameRu;
+                  return (
+                    <label key={d.id} className={styles.radioItem}>
+                      <span>{dName}</span>
+                      <input type="checkbox" checked={pendingDisciplineIds.includes(d.id)} onChange={() => toggleDiscipline(d.id)} />
                     </label>
                   );
                 })}

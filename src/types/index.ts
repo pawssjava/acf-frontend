@@ -106,6 +106,10 @@ export interface Tournament {
   tournamentTypeNameRu: string;
   tournamentTypeNameKk: string;
   tournamentTypeNameEn: string;
+  disciplineId: number;
+  disciplineNameRu: string;
+  disciplineNameKk: string;
+  disciplineNameEn: string;
   createdDate: string;
   updatedDate: string;
 }
@@ -258,6 +262,10 @@ export interface UserTournamentEntry {
   tournamentTypeNameRu: string;
   tournamentTypeNameKk: string;
   tournamentTypeNameEn: string;
+  disciplineId: number;
+  disciplineNameRu: string;
+  disciplineNameKk: string;
+  disciplineNameEn: string;
   format: string;
   place: number | null;
   score: number | null;
