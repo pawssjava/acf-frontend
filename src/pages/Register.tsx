@@ -5,8 +5,10 @@ import { sendSms, verifySms, register, checkPhone, checkUsername } from '../api/
 import { getApiError } from '../utils/apiError';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
+import PasswordInput from '../components/ui/PasswordInput';
 import OtpInput from '../components/ui/OtpInput';
 import AuthLegalText from '../components/auth/AuthLegalText';
+import { getPasswordIssue } from '../utils/password';
 import styles from './Auth.module.css';
 
 type Step = 'phone' | 'code' | 'details';
@@ -27,6 +29,7 @@ export default function Register() {
   const [username, setUsername] = useState('');
   const [usernameStatus, setUsernameStatus] = useState<FieldStatus>('idle');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [birthDate, setBirthDate] = useState('');
@@ -153,12 +156,17 @@ export default function Register() {
   };
 
   const handleRegister = async () => {
-    if (!username || !password || !firstName || !lastName || !birthDate) {
+    if (!username || !password || !confirmPassword || !firstName || !lastName || !birthDate) {
       setError(t('register.errRequired'));
       return;
     }
-    if (password.length < 6) {
-      setError(t('register.errPasswordLength'));
+    const passwordIssue = getPasswordIssue(password);
+    if (passwordIssue) {
+      setError(t(`validation.${passwordIssue}`));
+      return;
+    }
+    if (password !== confirmPassword) {
+      setError(t('register.errPasswordsMatch'));
       return;
     }
     if (birthDate > new Date().toISOString().slice(0, 10)) {
@@ -297,12 +305,18 @@ export default function Register() {
                 suffix={usernameSuffix}
                 error={usernameError}
               />
-              <Input
+              <PasswordInput
                 label={t('auth.password')}
-                type="password"
                 placeholder={t('register.passwordPlaceholder')}
                 value={password}
                 onChange={e => { setPassword(e.target.value); setError(''); }}
+                autoComplete="new-password"
+              />
+              <PasswordInput
+                label={t('register.confirmPassword')}
+                placeholder={t('register.confirmPasswordPlaceholder')}
+                value={confirmPassword}
+                onChange={e => { setConfirmPassword(e.target.value); setError(''); }}
                 autoComplete="new-password"
               />
               <Input

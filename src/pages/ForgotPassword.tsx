@@ -5,7 +5,9 @@ import { forgotPasswordSendSms, forgotPasswordVerifySms, forgotPasswordReset } f
 import { getApiError } from '../utils/apiError';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
+import PasswordInput from '../components/ui/PasswordInput';
 import OtpInput from '../components/ui/OtpInput';
+import { getPasswordIssue } from '../utils/password';
 import styles from './Auth.module.css';
 
 type Step = 'phone' | 'code' | 'reset';
@@ -70,7 +72,8 @@ export default function ForgotPassword() {
 
   const handleReset = async () => {
     if (!newPassword) { setError(t('forgot.errNewPassword')); return; }
-    if (newPassword.length < 6) { setError(t('forgot.errPasswordLength')); return; }
+    const passwordIssue = getPasswordIssue(newPassword);
+    if (passwordIssue) { setError(t(`validation.${passwordIssue}`)); return; }
     if (newPassword !== confirmPassword) { setError(t('forgot.errPasswordsMatch')); return; }
     setLoading(true);
     setError('');
@@ -146,17 +149,15 @@ export default function ForgotPassword() {
 
           {step === 'reset' && (
             <div className={styles.fields}>
-              <Input
+              <PasswordInput
                 label={t('forgot.newPassword')}
-                type="password"
                 placeholder={t('forgot.passwordPlaceholder')}
                 value={newPassword}
                 onChange={e => { setNewPassword(e.target.value); setError(''); }}
                 autoComplete="new-password"
               />
-              <Input
+              <PasswordInput
                 label={t('forgot.confirmPassword')}
-                type="password"
                 placeholder={t('forgot.repeatPassword')}
                 value={confirmPassword}
                 onChange={e => { setConfirmPassword(e.target.value); setError(''); }}
