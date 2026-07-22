@@ -17,7 +17,7 @@ const LANGS = [
 ];
 
 export default function Header() {
-  const { isAuthenticated, user, logout } = useAuth();
+  const { isAuthenticated, isLoading, user, logout } = useAuth();
   const { t, i18n } = useTranslation();
   const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
@@ -171,7 +171,7 @@ export default function Header() {
             )}
           </div>
 
-          {isAuthenticated ? (
+          {isLoading ? null : isAuthenticated ? (
             <div className={styles.userMenu} ref={dropdownRef}>
               <button
                 className={styles.avatarBtn}

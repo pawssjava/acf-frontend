@@ -47,7 +47,7 @@ function useIsMobile() {
 }
 
 export default function Profile() {
-  const { isAuthenticated, updateUser: updateAuthUser } = useAuth();
+  const { isAuthenticated, isLoading: authLoading, updateUser: updateAuthUser } = useAuth();
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -61,6 +61,7 @@ export default function Profile() {
   const activeTab: ProfileTab | null = rawTab ?? (isMobile ? null : DESKTOP_DEFAULT);
 
   useEffect(() => {
+    if (authLoading) return;
     if (!isAuthenticated) { navigate('/login'); return; }
     getMe()
       .then(r => {
@@ -69,7 +70,7 @@ export default function Profile() {
       })
       .catch(() => {})
       .finally(() => setLoading(false));
-  }, [isAuthenticated, navigate]);
+  }, [authLoading, isAuthenticated, navigate]);
 
   const setTab = (tab: ProfileTab) => setSearchParams({ tab }, { replace: false });
 
