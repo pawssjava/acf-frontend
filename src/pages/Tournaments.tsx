@@ -1,13 +1,15 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { getTournaments } from '../api/tournaments';
+import { getTournaments, archiveTournament, restoreTournament, deleteTournament } from '../api/tournaments';
 import { getTournamentTypes, getTournamentStatuses, getDisciplines } from '../api/dictionary';
 import type { Tournament, DictionaryItem } from '../types';
 import { useAuth } from '../context/AuthContext';
+import { getApiError } from '../utils/apiError';
 import TournamentCard from '../components/tournament/TournamentCard';
 import Button from '../components/ui/Button';
 import Toast from '../components/ui/Toast';
+import ConfirmDialog from '../components/ui/ConfirmDialog';
 import styles from './ListPage.module.css';
 
 export default function TournamentsPage() {
@@ -31,21 +33,67 @@ export default function TournamentsPage() {
   const [filterOpen, setFilterOpen] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
 
+  const [archivedView, setArchivedView] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState<Tournament | null>(null);
+  const [deleting, setDeleting] = useState(false);
+
   useEffect(() => {
     getTournamentTypes().then(r => setTypes(r.data.content)).catch(() => {});
     getTournamentStatuses().then(r => setStatuses(r.data.content)).catch(() => {});
     getDisciplines().then(r => setDisciplines(r.data.content)).catch(() => {});
   }, []);
 
+  useEffect(() => {
+    if (!user?.isAdmin) setArchivedView(false);
+  }, [user]);
+
   const appliedDisciplineIdsKey = appliedDisciplineIds.join(',');
 
   useEffect(() => {
     setLoading(true);
-    getTournaments(appliedTypeId, appliedDisciplineIds)
+    getTournaments(appliedTypeId, appliedDisciplineIds, archivedView)
       .then(r => setTournaments(r.data))
       .catch(() => setToast({ message: t('tournaments.loadError'), type: 'error' }))
       .finally(() => setLoading(false));
-  }, [appliedTypeId, appliedDisciplineIdsKey]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [appliedTypeId, appliedDisciplineIdsKey, archivedView]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const handleArchive = async (tour: Tournament) => {
+    try {
+      await archiveTournament(tour.id);
+      setTournaments(prev => prev.filter(x => x.id !== tour.id));
+      setToast({ message: t('adminActions.archiveSuccess'), type: 'success' });
+    } catch (err: unknown) {
+      const status = (err as { response?: { status?: number } })?.response?.status;
+      setToast({ message: status === 403 ? t('adminActions.forbidden') : getApiError(err), type: 'error' });
+    }
+  };
+
+  const handleRestore = async (tour: Tournament) => {
+    try {
+      await restoreTournament(tour.id);
+      setTournaments(prev => prev.filter(x => x.id !== tour.id));
+      setToast({ message: t('adminActions.restoreSuccess'), type: 'success' });
+    } catch (err: unknown) {
+      const status = (err as { response?: { status?: number } })?.response?.status;
+      setToast({ message: status === 403 ? t('adminActions.forbidden') : getApiError(err), type: 'error' });
+    }
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!confirmDelete) return;
+    setDeleting(true);
+    try {
+      await deleteTournament(confirmDelete.id);
+      setTournaments(prev => prev.filter(x => x.id !== confirmDelete.id));
+      setToast({ message: t('adminActions.deleteSuccess'), type: 'success' });
+      setConfirmDelete(null);
+    } catch (err: unknown) {
+      const status = (err as { response?: { status?: number } })?.response?.status;
+      setToast({ message: status === 403 ? t('adminActions.forbidden') : getApiError(err), type: 'error' });
+    } finally {
+      setDeleting(false);
+    }
+  };
 
   useEffect(() => {
     if (!filterOpen) return;
@@ -92,6 +140,23 @@ export default function TournamentsPage() {
             </Link>
           )}
         </div>
+
+        {user?.isAdmin && (
+          <div className={styles.viewTabs}>
+            <button
+              className={[styles.viewTab, !archivedView ? styles.viewTabActive : ''].join(' ')}
+              onClick={() => setArchivedView(false)}
+            >
+              {t('adminActions.tabActive')}
+            </button>
+            <button
+              className={[styles.viewTab, archivedView ? styles.viewTabActive : ''].join(' ')}
+              onClick={() => setArchivedView(true)}
+            >
+              {t('adminActions.tabArchive')}
+            </button>
+          </div>
+        )}
 
         <div className={styles.filterRow} ref={panelRef}>
           <button
@@ -179,10 +244,29 @@ export default function TournamentsPage() {
           <div className={styles.empty}>{t('tournaments.empty')}</div>
         ) : (
           <div className={styles.grid3}>
-            {filtered.map(tour => <TournamentCard key={tour.id} tournament={tour} />)}
+            {filtered.map(tour => (
+              <TournamentCard
+                key={tour.id}
+                tournament={tour}
+                onArchive={handleArchive}
+                onRestore={handleRestore}
+                onDeleteRequest={setConfirmDelete}
+              />
+            ))}
           </div>
         )}
       </div>
+
+      {confirmDelete && (
+        <ConfirmDialog
+          title={t('adminActions.deleteConfirmTitle')}
+          confirmLabel={t('adminActions.delete')}
+          cancelLabel={t('adminActions.cancel')}
+          loading={deleting}
+          onConfirm={handleDeleteConfirm}
+          onCancel={() => setConfirmDelete(null)}
+        />
+      )}
     </div>
   );
 }

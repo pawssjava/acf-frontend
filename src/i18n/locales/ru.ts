@@ -504,6 +504,24 @@ const ru = {
     prev: 'Назад',
     next: 'Вперёд',
   },
+  adminActions: {
+    tabActive: 'Активные',
+    tabArchive: 'Архив',
+    edit: 'Редактировать',
+    archive: 'Архивировать',
+    restore: 'Восстановить',
+    delete: 'Удалить',
+    cancel: 'Отмена',
+    deleteConfirmTitle: 'Вы уверены, что хотите удалить материал? Это действие нельзя отменить.',
+    updateSuccess: 'Материал успешно обновлён',
+    archiveSuccess: 'Материал перемещён в архив',
+    restoreSuccess: 'Материал восстановлен',
+    deleteSuccess: 'Материал удалён',
+    archiveError: 'Не удалось архивировать материал',
+    restoreError: 'Не удалось восстановить материал',
+    deleteError: 'Не удалось удалить материал',
+    forbidden: 'У вас нет прав администратора для этого действия',
+  },
 } as const;
 
 export default ru;

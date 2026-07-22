@@ -79,6 +79,8 @@ export interface News {
   title: string;
   description: string;
   image: string | null;
+  archived: boolean;
+  archivedDate: string | null;
   createdDate: string;
   updatedDate: string;
 }
@@ -110,6 +112,8 @@ export interface Tournament {
   disciplineNameRu: string;
   disciplineNameKk: string;
   disciplineNameEn: string;
+  archived: boolean;
+  archivedDate: string | null;
   createdDate: string;
   updatedDate: string;
 }

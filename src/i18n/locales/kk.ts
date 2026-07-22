@@ -504,6 +504,24 @@ const kk = {
     prev: 'Артқа',
     next: 'Алға',
   },
+  adminActions: {
+    tabActive: 'Белсенді',
+    tabArchive: 'Архив',
+    edit: 'Өңдеу',
+    archive: 'Архивтеу',
+    restore: 'Қалпына келтіру',
+    delete: 'Жою',
+    cancel: 'Болдырмау',
+    deleteConfirmTitle: 'Материалды жою керек пе? Бұл әрекетті болдырмау мүмкін емес.',
+    updateSuccess: 'Материал сәтті жаңартылды',
+    archiveSuccess: 'Материал архивке жылжытылды',
+    restoreSuccess: 'Материал қалпына келтірілді',
+    deleteSuccess: 'Материал жойылды',
+    archiveError: 'Материалды архивтеу мүмкін болмады',
+    restoreError: 'Материалды қалпына келтіру мүмкін болмады',
+    deleteError: 'Материалды жою мүмкін болмады',
+    forbidden: 'Бұл әрекет үшін әкімші құқығы жоқ',
+  },
 } as const;
 
 export default kk;

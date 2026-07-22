@@ -85,3 +85,41 @@
   font-weight: 700;
   color: var(--accent-teal);
 }
+
+.adminBar {
+  display: flex;
+  gap: 6px;
+  padding: 10px 12px;
+  border-top: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+
+.adminBtn {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 4px 10px;
+  cursor: pointer;
+  transition: all 0.15s;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+}
+
+.adminBtn:hover {
+  border-color: var(--border-light);
+  color: var(--text-primary);
+}
+
+.dangerBtn {
+  color: var(--danger);
+  border-color: rgba(231, 76, 60, 0.3);
+}
+
+.dangerBtn:hover {
+  background: rgba(231, 76, 60, 0.1);
+  border-color: var(--danger);
+}

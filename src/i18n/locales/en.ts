@@ -504,6 +504,24 @@ const en = {
     prev: 'Previous',
     next: 'Next',
   },
+  adminActions: {
+    tabActive: 'Active',
+    tabArchive: 'Archive',
+    edit: 'Edit',
+    archive: 'Archive',
+    restore: 'Restore',
+    delete: 'Delete',
+    cancel: 'Cancel',
+    deleteConfirmTitle: 'Are you sure you want to delete this item? This action cannot be undone.',
+    updateSuccess: 'Item successfully updated',
+    archiveSuccess: 'Item moved to archive',
+    restoreSuccess: 'Item restored',
+    deleteSuccess: 'Item deleted',
+    archiveError: 'Failed to archive item',
+    restoreError: 'Failed to restore item',
+    deleteError: 'Failed to delete item',
+    forbidden: 'You do not have admin rights for this action',
+  },
 } as const;
 
 export default en;

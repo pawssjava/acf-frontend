@@ -1,11 +1,13 @@
 import { publicClient, apiClient } from './client';
 import type { Tournament, Participant, TournamentResult, TournamentFormat, TournamentMatch, GroupStanding, BracketDto, RegistrationLogPage } from '../types';
 
-export const getTournaments = (tournamentTypeId?: number | null, disciplineIds?: number[] | null) => {
-  const params: Record<string, number | string> = {};
+export const getTournaments = (tournamentTypeId?: number | null, disciplineIds?: number[] | null, archived?: boolean) => {
+  const params: Record<string, number | string | boolean> = {};
   if (tournamentTypeId) params.tournamentTypeId = tournamentTypeId;
   if (disciplineIds && disciplineIds.length > 0) params.disciplineIds = disciplineIds.join(',');
-  return publicClient.get<Tournament[]>('/api/tournaments', { params });
+  if (archived) params.archived = true;
+  const client = archived ? apiClient : publicClient;
+  return client.get<Tournament[]>('/api/tournaments', { params });
 };
 
 export const getTournamentById = (id: number) =>
@@ -32,6 +34,12 @@ export const updateTournament = (id: number, data: TournamentPayload) =>
 
 export const deleteTournament = (id: number) =>
   apiClient.delete(`/api/tournaments/${id}`);
+
+export const archiveTournament = (id: number) =>
+  apiClient.patch<Tournament>(`/api/tournaments/${id}/archive`);
+
+export const restoreTournament = (id: number) =>
+  apiClient.patch<Tournament>(`/api/tournaments/${id}/restore`);
 
 export const uploadTournamentLogo = (id: number, file: File) => {
   const fd = new FormData();

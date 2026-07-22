@@ -64,7 +64,7 @@ export default function Header() {
   return (
     <header className={styles.header}>
       <div className={styles.inner}>
-        <Link to="/news" className={styles.logo} onClick={closeAll}>
+        <Link to="/tournaments" className={styles.logo} onClick={closeAll}>
           <img src={theme === 'dark' ? logoBlack : logoWhite} alt="ACF" className={styles.logoImg} />
         </Link>
 
