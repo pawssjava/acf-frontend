@@ -72,9 +72,9 @@ export default function ForgotPassword() {
 
   const handleReset = async () => {
     if (!newPassword) { setError(t('forgot.errNewPassword')); return; }
+    if (newPassword !== confirmPassword) { setError(t('forgot.errPasswordsMatch')); return; }
     const passwordIssue = getPasswordIssue(newPassword);
     if (passwordIssue) { setError(t(`validation.${passwordIssue}`)); return; }
-    if (newPassword !== confirmPassword) { setError(t('forgot.errPasswordsMatch')); return; }
     setLoading(true);
     setError('');
     try {

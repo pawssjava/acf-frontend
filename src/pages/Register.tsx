@@ -160,13 +160,13 @@ export default function Register() {
       setError(t('register.errRequired'));
       return;
     }
+    if (password !== confirmPassword) {
+      setError(t('register.errPasswordsMatch'));
+      return;
+    }
     const passwordIssue = getPasswordIssue(password);
     if (passwordIssue) {
       setError(t(`validation.${passwordIssue}`));
-      return;
-    }
-    if (password !== confirmPassword) {
-      setError(t('register.errPasswordsMatch'));
       return;
     }
     if (birthDate > new Date().toISOString().slice(0, 10)) {
