@@ -275,6 +275,21 @@
   color: var(--text-secondary);
 }
 
+/* About tab */
+.aboutCard {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+}
+
+.aboutText {
+  white-space: pre-wrap;
+  color: var(--text-primary);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
 /* PSN Registration Modal */
 .modalOverlay {
   position: fixed;

@@ -14,6 +14,7 @@ import styles from './Admin.module.css';
 
 interface FormState {
   name: string;
+  description: string;
   startDate: string;
   endDate: string;
   format: TournamentFormat | '';
@@ -36,7 +37,7 @@ export default function TournamentForm() {
   const [types, setTypes] = useState<DictionaryItem[]>([]);
   const [disciplines, setDisciplines] = useState<DictionaryItem[]>([]);
   const [form, setForm] = useState<FormState>({
-    name: '', startDate: '', endDate: '', format: '', totalRounds: '',
+    name: '', description: '', startDate: '', endDate: '', format: '', totalRounds: '',
     capacity: '', prizeMoney: '', tournamentTypeId: '', disciplineId: '',
   });
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
@@ -73,6 +74,7 @@ export default function TournamentForm() {
         setLogoUrl(t.logo);
         setForm({
           name: t.name,
+          description: t.description ?? '',
           startDate: t.startDate,
           endDate: t.endDate,
           format: t.format,
@@ -87,7 +89,7 @@ export default function TournamentForm() {
   }, [id, isAuthenticated, isEdit, navigate, user]);
 
   const set = (key: keyof FormState) =>
-    (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
+    (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>
       setForm(f => ({ ...f, [key]: e.target.value }));
 
   const handleFormatChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -160,6 +162,7 @@ export default function TournamentForm() {
     try {
       const payload = {
         name: form.name,
+        description: form.description.trim() || undefined,
         startDate: form.startDate,
         endDate: form.endDate,
         format: form.format as TournamentFormat,
@@ -200,8 +203,8 @@ export default function TournamentForm() {
 
   const readOnlyNotice = readOnly && tournament ? (
     tournament.tournamentStatusId === 1
-      ? 'Турнир уже начался и не может быть изменён.'
-      : 'Турнир завершён и не может быть изменён.'
+      ? 'Турнир уже начался. Изменить можно только описание турнира.'
+      : 'Турнир завершён. Изменить можно только описание турнира.'
   ) : null;
 
   return (
@@ -242,6 +245,16 @@ export default function TournamentForm() {
                 placeholder="Название турнира"
                 disabled={readOnly}
               />
+              <div className={styles.field}>
+                <label className={styles.label}>Описание турнира</label>
+                <textarea
+                  className={styles.textarea}
+                  value={form.description}
+                  onChange={set('description')}
+                  placeholder="Описание турнира..."
+                  rows={6}
+                />
+              </div>
               <div className={styles.row}>
                 <Input
                   label="Дата начала"
@@ -349,13 +362,11 @@ export default function TournamentForm() {
 
           <div className={styles.actions}>
             <Button type="button" variant="outline" onClick={() => navigate(-1)}>
-              {readOnly ? 'Назад' : 'Отмена'}
+              Отмена
             </Button>
-            {!readOnly && (
-              <Button type="submit" loading={saving}>
-                {isEdit ? 'Сохранить' : 'Создать турнир'}
-              </Button>
-            )}
+            <Button type="submit" loading={saving}>
+              {isEdit ? 'Сохранить' : 'Создать турнир'}
+            </Button>
           </div>
         </form>
       </div>

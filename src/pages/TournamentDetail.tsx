@@ -20,7 +20,7 @@ const FORMAT_LABEL: Record<string, string> = {
   EKPL: 'eKPL',
 };
 
-type Tab = 'info' | 'participants' | 'results' | 'bracket' | 'activity';
+type Tab = 'info' | 'about' | 'participants' | 'results' | 'bracket' | 'activity';
 
 function statusVariant(statusId: number): 'teal' | 'blue' | 'gray' {
   if (statusId === 1) return 'teal';
@@ -188,6 +188,7 @@ export default function TournamentDetail() {
 
   const TAB_LABELS: Record<Tab, string> = {
     info: t('tournamentDetail.tabInfo'),
+    about: t('tournamentDetail.tabAbout'),
     participants: t('tournamentDetail.tabParticipants'),
     results: t('tournamentDetail.tabResults'),
     bracket: t('tournamentDetail.tabBracket'),
@@ -196,6 +197,7 @@ export default function TournamentDetail() {
 
   const visibleTabs: Tab[] = [
     'info',
+    'about',
     'participants',
     ...(tournament.phase !== null ? ['bracket' as Tab] : []),
     ...(tournament.phase === 'COMPLETED' ? ['results' as Tab] : []),
@@ -345,6 +347,17 @@ export default function TournamentDetail() {
                 <p>{t('tournamentDetail.loginToJoin')}</p>
                 <Link to="/login"><Button fullWidth size="lg">{t('nav.login')}</Button></Link>
               </div>
+            )}
+          </div>
+        )}
+
+        {/* About tab */}
+        {activeTab === 'about' && (
+          <div className={styles.aboutCard}>
+            {tournament.description ? (
+              <p className={styles.aboutText}>{tournament.description}</p>
+            ) : (
+              <p className={styles.empty}>{t('tournamentDetail.descriptionEmpty')}</p>
             )}
           </div>
         )}

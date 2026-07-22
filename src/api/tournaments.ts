@@ -15,6 +15,7 @@ export const getTournamentById = (id: number) =>
 
 export interface TournamentPayload {
   name: string;
+  description?: string;
   startDate: string;
   endDate: string;
   format: TournamentFormat;

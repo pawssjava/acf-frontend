@@ -92,6 +92,7 @@ export type MatchStatus = 'PENDING' | 'IN_PROGRESS' | 'COMPLETED' | 'BYE';
 export interface Tournament {
   id: number;
   name: string;
+  description: string | null;
   logo: string | null;
   startDate: string;
   endDate: string;
